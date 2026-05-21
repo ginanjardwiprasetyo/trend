@@ -1,0 +1,1476 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+		<title>Dinas PUPESDM Daerah Istimewa Yogyakarta</title>
+		<style>
+			@import url('https://rsms.me/inter/inter.css');
+
+			:root {
+				--tblr-font-sans-serif: Inter, -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif !important;
+			}
+		</style>
+		<!-- CSS files -->
+		<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/6/65/Yogyakarta_Logo.svg">
+		<link href="https://stesy.beacontelemetry.com/assets/code/tabler.min.css" rel="stylesheet" />
+		<link href="https://stesy.beacontelemetry.com/assets/code/tabler-flags.min.css" rel="stylesheet" />
+		<link href="https://stesy.beacontelemetry.com/assets/code/tabler-payments.min.css" rel="stylesheet" />
+		<link href="https://stesy.beacontelemetry.com/assets/code/tabler-vendors.min.css" rel="stylesheet" />
+		<link href="https://stesy.beacontelemetry.com/assets/code/demo.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/loaders.css/0.1.2/loaders.min.css">
+
+
+		<link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+		<link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
+		<link
+			  rel="stylesheet"
+			  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+		<link
+			  rel="stylesheet"
+			  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
+		<link rel="stylesheet" href="https://dpupesdm.monitoring4system.com/plugin/datetimepicker/build/jquery.datetimepicker.min.css" />
+		<style>
+			.navbar {
+				--tblr-navbar-active-border-color: #058dc7;
+			}
+
+			/* Copilot thinking loader */
+			.copilot-thinking {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 14px 20px;
+				background: #ffffff;
+				border-radius: 20px;
+				border-bottom-left-radius: 4px;
+				border: 1px solid rgba(0,0,0,0.04);
+				box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+			}
+			.copilot-thinking-icon {
+				width: 24px;
+				height: 24px;
+				position: relative;
+				flex-shrink: 0;
+			}
+			.copilot-thinking-icon svg {
+				width: 24px;
+				height: 24px;
+				position: absolute;
+				top: 0; left: 0;
+				transition: all 0.35s cubic-bezier(.4,0,.2,1);
+				opacity: 0;
+				transform: scale(0.3) rotate(-90deg);
+				filter: drop-shadow(0 0 4px currentColor);
+			}
+			.copilot-thinking-icon svg.active {
+				opacity: 1;
+				transform: scale(1) rotate(0deg);
+			}
+			.copilot-thinking-icon svg.exit {
+				opacity: 0;
+				transform: scale(0.3) rotate(90deg);
+			}
+			.copilot-thinking-text {
+				font-size: 0.85rem;
+				color: #64748b;
+				font-weight: 500;
+				white-space: nowrap;
+			}
+
+			#btn-suggest:hover span {
+				text-decoration: underline;
+			}
+
+			.incoming {
+				align-items: flex-end;
+			}
+
+			.chatbot__button {
+				position: fixed;
+				bottom: 35px;
+				z-index: 999;
+				right: 35px;
+				min-width: 140px;
+				height: 56px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background: linear-gradient(135deg, #1A4D96 0%, #2A75DD 100%);
+				color: #fff;
+				border: none;
+				border-radius: 28px;
+				outline: none;
+				cursor: pointer;
+				box-shadow: 0 8px 24px rgba(26, 77, 150, 0.35);
+				transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+			}
+
+			.chatbot__button span {
+				position: absolute;
+				display: flex;
+				align-items: center;
+				font-size: 1.05rem;
+				font-weight: 600;
+				transition: opacity 0.2s ease, transform 0.2s ease;
+			}
+
+			.show-chatbot .chatbot__button span:first-child,
+			.chatbot__button span:last-child {
+				opacity: 0;
+				transform: scale(0.8);
+				pointer-events: none;
+			}
+
+			.show-chatbot .chatbot__button span:last-child {
+				opacity: 1;
+				transform: scale(1);
+				pointer-events: auto;
+			}
+
+			.chatbot__button:hover {
+				transform: translateY(-3px) scale(1.02);
+				box-shadow: 0 14px 30px rgba(26, 77, 150, 0.45);
+			}
+
+			.chatbot {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%) scale(0.9);
+				width: 850px;
+				height: 720px;
+				z-index: 999;
+				background-color: #f8fafc;
+				border-radius: 24px;
+				border: 1px solid rgba(255, 255, 255, 0.6);
+				box-shadow: 0 12px 48px rgba(15, 23, 42, 0.15), 0 4px 12px rgba(15, 23, 42, 0.08);
+				transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.1), opacity 0.3s ease;
+				overflow: hidden;
+				opacity: 0;
+				pointer-events: none;
+				display: flex;
+				flex-direction: column;
+				backdrop-filter: blur(10px);
+			}
+
+			.show-chatbot .chatbot {
+				opacity: 1;
+				pointer-events: auto;
+				transform: translate(-50%, -50%) scale(1);
+			}
+
+			.chatbot__header {
+				position: relative;
+				background-color: rgba(255, 255, 255, 0.95);
+				text-align: center;
+				border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+				padding: 18px 24px;
+				z-index: 2;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+				backdrop-filter: blur(8px);
+			}
+
+			.chatbot__header span {
+				position: absolute;
+				top: 50%;
+				right: 24px;
+				color: #94a3b8;
+				transform: translateY(-50%);
+				cursor: pointer;
+				transition: color 0.2s, transform 0.2s;
+				padding: 4px;
+			}
+
+			.chatbot__header span:hover {
+				color: #0f172a;
+				transform: translateY(-50%) scale(1.1);
+			}
+
+			.chatbox__title {
+				margin-bottom: 0px;
+				font-size: 1.25rem;
+				letter-spacing: -0.3px;
+			}
+
+			.chatbot__box {
+				flex: 1;
+				overflow-y: auto;
+				padding: 24px 24px 120px;
+			}
+
+			.chatbot__box::-webkit-scrollbar { width: 6px; }
+			.chatbot__box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+			.chatbot__box::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+			.chatbot__chat {
+				display: flex;
+				margin: 20px 0;
+				align-items: flex-end;
+				animation: fadeIn 0.3s ease;
+			}
+
+			@keyframes fadeIn {
+				from { opacity: 0; transform: translateY(10px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			#btn-suggest span { color: #256fd2; }
+
+			.chatbot__chat p {
+				max-width: 82%;
+				font-size: 0.98rem;
+				line-height: 1.55;
+				white-space: pre-wrap;
+				padding: 14px 20px;
+				border-radius: 20px;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+			}
+
+			#btn-suggest.active svg { transform: rotate(180deg); transition: transform 0.3s ease; }
+
+			.chatbot__chat p.error {
+				color: #b91c1c;
+				background: #fef2f2;
+				border: 1px solid #fca5a5;
+			}
+
+			.incoming p {
+				margin: 0;
+				color: #1e293b;
+				background: #ffffff;
+				border-bottom-left-radius: 4px;
+				border: 1px solid rgba(0,0,0,0.04);
+			}
+
+			.outgoing p {
+				color: #ffffff;
+				background: linear-gradient(135deg, #256fd2 0%, #1e5ab8 100%);
+				margin: 0;
+				border-bottom-right-radius: 4px;
+				box-shadow: 0 4px 12px rgba(37, 111, 210, 0.2);
+			}
+
+			.incoming span.material-symbols-outlined {
+				width: 38px;
+				height: 38px;
+				line-height: 38px;
+				color: #ffffff;
+				background: linear-gradient(135deg, #1A4D96 0%, #2A75DD 100%);
+				border-radius: 50%;
+				text-align: center;
+				margin: 0 14px 0 0;
+				font-size: 20px;
+				box-shadow: 0 4px 12px rgba(26, 77, 150, 0.25);
+				flex-shrink: 0;
+			}
+
+			.outgoing {
+				justify-content: flex-end;
+			}
+
+			.textarea-container {
+				position: relative;
+				width: 100%;
+				display: flex;
+				align-items: center;
+				background: #ffffff;
+				border-radius: 28px;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+				border: 1px solid rgba(0, 0, 0, 0.06);
+				padding: 8px 16px;
+				transition: box-shadow 0.3s ease;
+			}
+
+			.textarea-container:focus-within {
+				box-shadow: 0 10px 30px rgba(37, 111, 210, 0.15);
+				border-color: rgba(37, 111, 210, 0.3);
+			}
+
+			.chatbot__input-box {
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				background: linear-gradient(0deg, #f8fafc 80%, rgba(248, 250, 252, 0) 100%);
+				padding: 24px 24px 20px;
+				border-top: none;
+			}
+
+			.textarea-container span {
+				color: #94a3b8;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.2s ease;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				flex-shrink: 0;
+			}
+
+			.textarea-container span:hover {
+				color: #256fd2;
+				background: #f1f5f9;
+				transform: scale(1.05);
+			}
+
+			#mic-btn { margin-right: 4px; }
+
+			.chatbot__textarea {
+				flex: 1;
+				max-height: 100px;
+				margin: 0;
+				font-size: 1rem;
+				color: #1e293b;
+				border: none;
+				outline: none;
+				resize: none;
+				background: transparent;
+				padding: 10px 10px;
+				line-height: 1.5;
+				display: block;
+			}
+
+			.chatbot__textarea::placeholder {
+				font-family: inherit;
+				color: #94a3b8;
+			}
+
+			/* Copilot chart inside bubble */
+			.copilot-content-wrap {
+				display: flex;
+				flex-direction: column;
+				max-width: 82%;
+			}
+			.copilot-chart-wrap {
+				background: #ffffff;
+				border-radius: 16px;
+				padding: 12px;
+				margin-bottom: 8px;
+				border: 1px solid rgba(0,0,0,0.04);
+				box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+				width: 100%;
+			}
+			.copilot-chart-wrap canvas { height: 250px !important; }
+			.copilot-csv-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				padding: 8px 16px;
+				background: linear-gradient(135deg, #256fd2, #1e5ab8);
+				color: #fff !important;
+				border-radius: 12px;
+				font-size: .85rem;
+				font-weight: 600;
+				text-decoration: none;
+				margin-bottom: 8px;
+				box-shadow: 0 4px 12px rgba(37,111,210,.2);
+				transition: transform .2s;
+			}
+			.copilot-csv-link:hover { transform: translateY(-1px); }
+
+			/* Mic recording state */
+			#mic-btn.recording svg { stroke: #ef4444; }
+			#mic-btn.recording { animation: pulse-mic 1s infinite; }
+			#mic-btn.processing svg { stroke: #f59e0b; }
+			@keyframes pulse-mic { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+			@media (max-width: 992px) {
+				.chatbot { width: 90%; }
+			}
+
+			@media (max-width: 490px) {
+				.chatbot__button { bottom: 20px; right: 20px; }
+				.chatbot {
+					right: 0;
+					bottom: 0;
+					width: 100%;
+					height: 100%;
+					border-radius: 0;
+					transform: translateY(100%);
+				}
+				.show-chatbot .chatbot { transform: translateY(0); }
+				.chatbot__header span { display: inline; }
+			}
+		</style>
+		
+		<style type="text/css">
+			.highcharts-data-table table {
+				border-collapse: collapse;
+				border-spacing: 0;
+				background: white;
+				min-width: 100%;
+				margin-top: 10px;
+				font-family: sans-serif;
+				font-size: 0.9em;
+			}
+
+			.highcharts-data-table td,
+			.highcharts-data-table th,
+			.highcharts-data-table caption {
+				border: 1px solid silver;
+				padding: 0.5em;
+			}
+
+			.highcharts-data-table tr:nth-child(even),
+			.highcharts-data-table thead tr {
+				background: #f8f8f8;
+			}
+
+			.highcharts-data-table tr:hover {
+				background: #eff;
+			}
+
+			.highcharts-data-table caption {
+				border-bottom: none;
+				font-size: 1.1em;
+				font-weight: bold;
+				caption-side: top;
+			}
+		</style>
+		<script src="https://stesy.beacontelemetry.com/assets/code/tom-select.base.min.js" defer></script>
+		<script src="https://stesy.beacontelemetry.com/assets/code/tabler.min.js" defer></script>
+		<script src="https://stesy.beacontelemetry.com/assets/code/demo.min.js" defer></script>
+
+		<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+		<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+		<script src="https://dpupesdm.monitoring4system.com/plugin/datetimepicker/build/jquery.datetimepicker.full.min.js"></script>
+
+		<!-- mQtt -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+
+
+
+		<script>
+			$(function() {
+				$('#dptanggal').datetimepicker({
+					timepicker: false,
+					format: 'Y-m-d',
+				});
+			});
+		</script>
+		<script>
+			$(function() {
+				$("#dpbulan").datepicker({
+					changeMonth: true,
+					changeYear: true,
+					dateFormat: 'yy-mm',
+					onClose: function(dateText, inst) {
+						$(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+					}
+				});
+			});
+		</script>
+		<script>
+			$(function() {
+				$("#dptahun").datepicker({
+					changeYear: true,
+					dateFormat: 'yy',
+					onClose: function(dateText, inst) {
+						$(this).datepicker('setDate', new Date(inst.selectedYear, 1));
+					}
+				});
+			});
+		</script>
+		<script>
+			$(function() {
+				$("#dpdari").datetimepicker({
+					format: 'Y-m-d H:i'
+				});
+			});
+		</script>
+		<script>
+			$(function() {
+				$("#dpsampai").datetimepicker({
+					format: 'Y-m-d H:i'
+				});
+			});
+		</script>
+
+	</head>
+
+	<body class="layout-fluid" >
+		<div class="page">
+			<header class="navbar navbar-expand-md navbar-light d-print-none" style="background-color:#d4e4ff">
+				<div class="container-xl">
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+						<a href=".">
+							<div class="d-none d-lg-block">
+								<img src="https://dpupesdm.monitoring4system.com/image/pupesdm.svg" height="50" alt="PU SDA">
+							</div>
+							<div class="d-lg-none">
+								<img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Yogyakarta_Logo.svg" height="40" alt="PU SDA">
+							</div>
+						</a>
+					</h1>
+					<div class="navbar-nav flex-row order-md-last">
+						<div class="nav-item dropdown">
+							<div class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu" aria-expanded="false">
+
+																<span class="avatar avatar-sm ">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-users" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+										<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+										<circle cx="9" cy="7" r="4"></circle>
+										<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+										<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+										<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
+									</svg>
+								</span>
+								
+
+								<div class="d-none d-xl-block ps-2">
+									<div></div>
+
+																	</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
+			<div class="navbar-expand-md">
+				<div class="collapse navbar-collapse" id="navbar-menu">
+	<div class="navbar navbar-light">
+		<div class="container-xl">
+			<ul class="navbar-nav">
+				<li class="nav-item ">
+					<a href="https://dpupesdm.monitoring4system.com/beranda" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="5 12 3 12 12 3 21 12 19 12" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
+                    </span>
+                    <span class="nav-link-title">
+                      Beranda
+                    </span></a>
+				</li>
+
+				<li class="nav-item ">
+					<a href="https://dpupesdm.monitoring4system.com/analisa" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chart-dots" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                         <path d="M3 3v18h18"></path>
+                         <circle cx="9" cy="9" r="2"></circle>
+                         <circle cx="19" cy="7" r="2"></circle>
+                         <circle cx="14" cy="15" r="2"></circle>
+                         <line x1="10.16" y1="10.62" x2="12.5" y2="13.5"></line>
+                         <path d="M15.088 13.328l2.837 -4.586"></path>
+                      </svg>
+                    </span>
+                    <span class="nav-link-title">
+                      Analisa
+                    </span></a>
+				</li>
+
+								<li class="nav-item ">
+					<a href="https://dpupesdm.monitoring4system.com/komparasi" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+						 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chart-bar me-2" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+             <rect x="3" y="12" width="6" height="8" rx="1"></rect>
+             <rect x="9" y="8" width="6" height="12" rx="1"></rect>
+             <rect x="15" y="4" width="6" height="16" rx="1"></rect>
+             <line x1="4" y1="20" x2="18" y2="20"></line>
+          </svg>
+						</span>
+						<span class="nav-link-title">
+							Komparasi
+						</span></a>				</li>
+
+												<li class="nav-item ">
+					<a href="https://dpupesdm.monitoring4system.com/monitoring" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+						 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-file-text" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+   <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+   <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
+   <path d="M9 9l1 0"></path>
+   <path d="M9 13l6 0"></path>
+   <path d="M9 17l6 0"></path>
+</svg>
+						</span>
+						<span class="nav-link-title">
+							Monitoring
+						</span></a>				</li>
+										<li class="nav-item ">
+				<a href="https://dpupesdm.monitoring4system.com/rekap_data" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+					<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-report-analytics" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+					   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+					   <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"></path>
+					   <rect x="9" y="3" width="6" height="4" rx="2"></rect>
+					   <path d="M9 17v-5"></path>
+					   <path d="M12 17v-1"></path>
+					   <path d="M15 17v-3"></path>
+					</svg>
+				</span>
+				<span class="nav-link-title">
+					Rekap Data
+				</span></a>			</li>
+			<li class="nav-item ">
+					<a href="https://dpupesdm.monitoring4system.com/informasi" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-info-square-rounded" width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+   <path d="M12 9h.01"></path>
+   <path d="M11 12h1v4h1"></path>
+   <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+</svg>
+
+                    </span>
+                    <span class="nav-link-title">
+                        Informasi
+                    </span></a>
+
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#navbar-help" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
+						<span class="nav-link-icon d-md-none d-lg-inline-block">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+								<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+								<polyline points="7 11 12 16 17 11"></polyline>
+								<line x1="12" y1="4" x2="12" y2="16"></line>
+							</svg>
+						</span>
+						<span class="nav-link-title">
+							Unduh
+						</span>
+					</a>
+					<div class="dropdown-menu">
+						<a href="https://dpupesdm.monitoring4system.com/datapos"><div class="dropdown-item">Download Data</div></a>
+						<a href="https://dpupesdm.monitoring4system.com/unduh/go-hidro_1.3.3.apk" class="dropdown-item">Android App</a>						<a href="https://apps.apple.com/id/app/go-hidro/id6456266862" class="dropdown-item">IOS App</a>					</div>
+				</li>
+				
+
+				<li class="nav-item">
+					<a href="https://dpupesdm.monitoring4system.com/login/logout" class="nav-link"><span class="nav-link-icon d-md-none d-lg-inline-block">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                         <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
+                         <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
+                      </svg>
+
+                    </span>
+                    <span class="nav-link-title">
+                        Keluar
+                    </span></a>
+
+				</li>
+
+			</ul>
+		</div>
+	</div>
+</div>			</div>
+			<div class="page-wrapper">
+
+				<!-- Konten-->
+				<div class="container-xl">
+	<!-- Page title -->
+	<div class="page-header d-print-none">
+		<div class="row g-2 align-items-center">
+			<div class="col">
+				<h2 class="page-title">
+										Data Pos
+				</h2>
+			</div>
+		</div>
+	</div>
+</div>
+<a id="dlink" style="display:none;"></a>
+<div class="page-body">
+	<!-- Konten-->
+	<div class="container-xl">
+		<div class="row row-cards hide-scrollbar px-0 " >
+			<div class="card">
+
+				<div class="card-body pt-2 px-3">
+					<form id="fetchForm" >
+						<div class="col-12 col-xl-8 row align-items-end">
+							<div class="col-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label mt-2">Lokasi Pos</label>
+																		<select type="text" name="id_logger" class="form-select" placeholder="Cari Lokasi Pos"  id="select-pos" value="">
+										<option value="">Pilih Pos</option>
+																				<option value="10001|Pos AWR Kaliurang">Pos AWR Kaliurang</option>
+																				<option value="10034|Pos ARR Godean">Pos ARR Godean</option>
+																				<option value="10027|Pos ARR Singkung">Pos ARR Singkung</option>
+																				<option value="10028|Pos ARR Sapon">Pos ARR Sapon</option>
+																				<option value="10029|Pos ARR Hargorejo">Pos ARR Hargorejo</option>
+																				<option value="10030|Pos ARR Sanden">Pos ARR Sanden</option>
+																				<option value="10031|Pos ARR Ngawen">Pos ARR Ngawen</option>
+																				<option value="10112|Pos ARR Gembongan">Pos ARR Gembongan</option>
+																				<option value="10037|Pos ARR Borrowarea">Pos ARR Borrowarea</option>
+																				<option value="10038|Pos ARR Terong">Pos ARR Terong</option>
+																				<option value="10039|Pos ARR Kedungkeris">Pos ARR Kedungkeris</option>
+																				<option value="10040|Pos AWR Barongan">Pos AWR Barongan</option>
+																				<option value="10035|Pos ARR Prumpung">Pos ARR Prumpung</option>
+																				<option value="10033|Pos ARR Seyegan">Pos ARR Seyegan</option>
+																				<option value="10032|Pos ARR Angin-Angin">Pos ARR Angin-Angin</option>
+																				<option value="10002|Pos ARR Bronggang">Pos ARR Bronggang</option>
+																				<option value="10003|Pos ARR Kemput">Pos ARR Kemput</option>
+																				<option value="10013|Pos ARR Kali Bawang">Pos ARR Kali Bawang</option>
+																				<option value="10207|Pos ARR Gedhangan">Pos ARR Gedhangan</option>
+																				<option value="10036|Pos ARR Giriwungu">Pos ARR Giriwungu</option>
+																				<option value="10114|Pos ARR Plataran">Pos ARR Plataran</option>
+																				<option value="10113|Pos ARR Santan">Pos ARR Santan</option>
+																				<option value="10026|Pos ARR Gemawang">Pos ARR Gemawang</option>
+																				<option value="10206|Pos ARR Nyemengan">Pos ARR Nyemengan</option>
+																				<option value="10094|Pos AWR Tegal">Pos AWR Tegal</option>
+																				<option value="10111|Pos ARR Beran">Pos ARR Beran</option>
+																				<option value="10255|Pos AWR Beji">Pos AWR Beji</option>
+																				<option value="10114|Pos AWLR Plataran">Pos AWLR Plataran</option>
+																				<option value="10023|Pos AWLR Kedungmiri">Pos AWLR Kedungmiri</option>
+																				<option value="10311|Pos AWLR Gumuk">Pos AWLR Gumuk</option>
+																				<option value="10014|Pos AWLR Seturan">Pos AWLR Seturan</option>
+																				<option value="10016|Pos AWLR Pogung">Pos AWLR Pogung</option>
+																				<option value="10017|Pos AWLR Sinduadi">Pos AWLR Sinduadi</option>
+																				<option value="10015|Pos AWLR Papringan">Pos AWLR Papringan</option>
+																				<option value="10020|Pos AWLR Bendungan">Pos AWLR Bendungan</option>
+																				<option value="10021|Pos AWLR Opak Pulo">Pos AWLR Opak Pulo</option>
+																				<option value="10022|Pos AWLR Bantar">Pos AWLR Bantar</option>
+																				<option value="10090|Pos AWLR Sapon">Pos AWLR Sapon</option>
+																				<option value="10058|Pos AWLR Kali Bawang">Pos AWLR Kali Bawang</option>
+																				<option value="10057|Pos AWLR Pengasih">Pos AWLR Pengasih</option>
+																				<option value="10024|Pos AWLR Bunder">Pos AWLR Bunder</option>
+																				<option value="10089|Pos AWLR Wonokromo">Pos AWLR Wonokromo</option>
+																			</select>
+
+
+								</div>
+							</div>
+							<div class="col-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label mt-2">Dari</label>
+									<input class="form-control" name="awal" placeholder="Dari" id="awal_new" autocomplete="off" required/>
+								</div>
+							</div>
+							<div class="col-12 col-md-3">
+								<div class="form-group">
+									<label class="form-label mt-2">Sampai</label>
+									<input class="form-control" name="akhir" placeholder="Sampai" id="akhir_new"  autocomplete="off" required/>
+								</div>
+							</div>
+							<div class="col-6 col-md-auto d-flex align-items-end mt-3 mt-md-0">
+								<button type="submit" class="btn btn-primary">Submit</button>
+							</div>
+							<div class="col-6 col-md-auto d-flex align-items-end mt-3 mt-md-0">
+								<button type="button" id="btn-export" class="btn btn-success w-100" >Download<span class="spinner-border spinner-border-sm ms-2" style="display:none" role="status"></span></button> 
+
+							</div>
+
+						</div>
+					</form>
+				</div>
+			</div>
+			</form>			<div class="card">
+				<div class="card-header pb-2 pt-3"><h3 class="mb-0" id="head-title"></h3></div>
+				<div class="card-body px-3">
+					<div class="table-responsive">
+						<table class="table table-bordered" id="tabel">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<!-- end Konten-->
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-sm modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-body px-3 py-3">
+				<div class="mb-2 text-center">
+					<span class="badge badge-soft me-2">Status: <span id="statusText">idle</span></span>
+				</div>
+
+				<div class="progress mt-3" role="progressbar" aria-label="Progress minggu" style="height:30px">
+					<div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%">0%</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var tmp;
+	function strip(html) {
+		tmp = document.createElement("DIV");
+		tmp.innerHTML = html;
+		console.log(tmp.innerText);
+		console.log(tmp.textContent);
+
+		return tmp.textContent || tmp.innerText || "";
+	}
+	var tableToExcel = (function() {
+		var uri = 'data:application/vnd.ms-excel;base64,',
+			template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+			base64 = function(s) {
+				return window.btoa(unescape(encodeURIComponent(s)))
+			},
+			format = function(s, c) {
+				return s.replace(/{(\w+)}/g, function(m, p) {
+					return c[p];
+				})
+			}
+		return function(table, name, filename) {
+			if (!table.nodeType) 
+				table = $('#'+table).clone();
+
+			var hyperLinks = table.find('a');
+			for (i = 0; i < hyperLinks.length; i++) {
+
+				var sp1 = document.createElement("span");
+				var sp1_content = document.createTextNode($(hyperLinks[i]).text());
+				sp1.appendChild(sp1_content);
+				var sp2 = hyperLinks[i];
+				var parentDiv = sp2.parentNode;
+				parentDiv.replaceChild(sp1, sp2);
+			}
+
+			var ctx = {
+				worksheet: name || 'Worksheet',
+				table: table[0].innerHTML
+			}
+
+
+			document.getElementById("dlink").href = uri + base64(format(template, ctx));
+			document.getElementById("dlink").download = filename;
+			document.getElementById("dlink").click();
+
+		}
+	})()
+</script>
+<script>
+	// @formatter:off
+	document.addEventListener("DOMContentLoaded", function () {
+		var el;
+		window.TomSelect && (new TomSelect(el = document.getElementById('select-pos'), {
+			copyClassesToDropdown: false,
+			dropdownClass: 'dropdown-menu ts-dropdown',
+			optionClass:'dropdown-item',
+			controlInput: '<input>',
+			render:{
+				item: function(data,escape) {
+					if( data.customProperties ){
+						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+					}
+					return '<div>' + escape(data.text) + '</div>';
+				},
+				option: function(data,escape){
+					if( data.customProperties ){
+						return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+					}
+					return '<div>' + escape(data.text) + '</div>';
+				},
+			},
+		}));
+	});
+	$( function() {
+		$('#awal_new').datetimepicker(
+			{
+				timepicker:false,
+				format:'Y-m-d',
+			});
+		$('#akhir_new').datetimepicker(
+			{
+				timepicker:false,
+				format:'Y-m-d',
+			});
+	} );
+	// @formatter:on
+</script>
+<script>
+	(() => {
+
+		const WEEK_URL  = "https://dpupesdm.monitoring4system.com/datapos/fetch_week";
+		const $form     = $('#fetchForm');
+		const $status   = $('#statusText');
+		const $bar      = $('#progressBar');
+		const exportBtn = document.getElementById('btn-export');
+
+		let aborted          = false;
+		let lastRowsForExport = [];
+
+		// ── Helpers ────────────────────────────────────────────────────────
+		const setStatus = msg => $status.text(msg);
+		const setPct    = pct => $bar.css('width', pct + '%').text(Math.round(pct) + '%');
+
+		// ── Generate weekly date ranges (string YYYY-MM-DD) ────────────────
+		function generateWeeks(awal, akhir) {
+			const weeks  = [];
+			const endDt  = new Date(akhir + 'T00:00:00');
+			let   cursor = new Date(awal  + 'T00:00:00');
+			while (cursor <= endDt) {
+				const wStart = new Date(cursor);
+				const wEnd   = new Date(cursor);
+				wEnd.setDate(wEnd.getDate() + 6);
+				if (wEnd > endDt) wEnd.setTime(endDt.getTime());
+				const fmt = d => d.toISOString().slice(0, 10);
+				weeks.push({ start: fmt(wStart), end: fmt(wEnd) });
+				cursor.setDate(cursor.getDate() + 7);
+			}
+			return weeks;
+		}
+
+		// ── Render tabel ───────────────────────────────────────────────────
+		function renderTable(rows) {
+			const sel = '#tabel';
+			if (!rows || rows.length === 0) {
+				$(sel + ' thead').html('<tr><th>Tidak ada data</th></tr>');
+				$(sel + ' tbody').empty();
+				return;
+			}
+			let keys = Object.keys(rows[0]);
+			const wk = keys.find(k => k.toLowerCase() === 'waktu');
+			if (wk) keys = [wk, ...keys.filter(k => k !== wk)];
+
+			const esc      = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+			const isNum    = v => v !== null && v !== '' && Number.isFinite(Number(v));
+			const waktuSet = new Set(['waktu','Waktu']);
+
+			$(sel + ' thead').html('<tr>' + keys.map(k => `<th>${esc(k)}</th>`).join('') + '</tr>');
+			$(sel + ' tbody').html(rows.map(row =>
+				'<tr>' + keys.map(k => {
+					const v = row[k] ?? '';
+					return `<td>${!waktuSet.has(k) && isNum(v) ? Number(v).toFixed(3) : esc(v)}</td>`;
+				}).join('') + '</tr>'
+			).join(''));
+		}
+
+		// ── Fetch semua minggu secara berurutan ────────────────────────────
+		async function fetchAllWeeks(id_logger, awal, akhir) {
+			const weeks   = generateWeeks(awal, akhir);
+			const total   = weeks.length;
+			let   allRows = [];
+
+			console.log(`[fetchAllWeeks] ${total} minggu, id_logger=${id_logger}`);
+
+			for (let i = 0; i < total; i++) {
+				if (aborted) break;
+
+				const week   = weeks[i];
+				const pct    = Math.round((i / total) * 100);
+				setStatus(`Memuat minggu ${i + 1} dari ${total}...`);
+				setPct(pct);
+
+				const params = new URLSearchParams({
+					id_logger,
+					awal : week.start,
+					akhir: week.end
+				});
+				const url = WEEK_URL + '?' + params.toString();
+				console.log(`[Week ${i + 1}/${total}] ${week.start} → ${week.end}`);
+
+				try {
+					const resp = await fetch(url, { credentials: 'same-origin' });
+
+					if (!resp.ok) {
+						console.warn(`[Week ${i + 1}] HTTP ${resp.status} — skip`);
+						continue;
+					}
+
+					const data = await resp.json();
+
+					if (data.status === 'error') {
+						console.warn(`[Week ${i + 1}] server error: ${data.message} — skip`);
+						continue;
+					}
+
+					if (Array.isArray(data.rows)) {
+						allRows = allRows.concat(data.rows);
+						console.log(`[Week ${i + 1}] +${data.rows.length} rows (total: ${allRows.length})`);
+					}
+				} catch (err) {
+					console.warn(`[Week ${i + 1}] fetch error: ${err.message} — skip`);
+				}
+			}
+
+			return allRows;
+		}
+
+		// ── Export Excel ───────────────────────────────────────────────────
+		async function downloadExcel({ url, title, rows, parameter }) {
+			if (!Array.isArray(rows) || rows.length === 0) {
+				alert('Tidak ada data untuk diexport.');
+				return;
+			}
+			$('.spinner-border').show();
+			if (exportBtn) exportBtn.disabled = true;
+			try {
+				const fd = new FormData();
+				fd.append('title', title);
+				fd.append('data', JSON.stringify(rows));
+				if (parameter) fd.append('parameter', JSON.stringify(parameter));
+
+				const resp = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+				if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+				const blob     = await resp.blob();
+				const cd       = resp.headers.get('Content-Disposition') || '';
+				const m        = cd.match(/filename="?([^"]+)"?/i);
+				const filename = m ? m[1] : (title.replace(/[^\w\- ]/g, '_') + '.xlsx');
+				const href     = URL.createObjectURL(blob);
+				const a        = Object.assign(document.createElement('a'), { href, download: filename });
+				document.body.appendChild(a); a.click(); a.remove();
+				setTimeout(() => URL.revokeObjectURL(href), 2000);
+			} catch (err) {
+				console.error('Export error:', err);
+				alert('Gagal export Excel: ' + err.message);
+			} finally {
+				$('.spinner-border').hide();
+				if (exportBtn) exportBtn.disabled = false;
+			}
+		}
+
+		// ── Form submit ────────────────────────────────────────────────────
+		$form.on('submit', async function (e) {
+			e.preventDefault();
+
+			const fd        = new FormData(this);
+			const raw       = fd.get('id_logger') || '';
+			const id_logger = raw.split('|')[0].trim();
+			const namaPos   = (raw.split('|')[1] || '').trim();
+			const awal      = fd.get('awal')  || '';
+			const akhir     = fd.get('akhir') || '';
+
+			console.log('[submit] id_logger:', id_logger, '| awal:', awal, '| akhir:', akhir);
+
+			if (!id_logger || !awal || !akhir) {
+				alert('Pilih pos dan isi rentang tanggal terlebih dahulu.');
+				return;
+			}
+
+			aborted = false;
+			$('#exampleModal').modal('show');
+			setStatus('Memulai...');
+			setPct(0);
+
+			try {
+				const rows = await fetchAllWeeks(id_logger, awal, akhir);
+
+				if (aborted) {
+					setStatus('canceled');
+					return;
+				}
+
+				setPct(100);
+				setStatus('complete — ' + rows.length + ' baris');
+				lastRowsForExport = rows;
+
+				setTimeout(() => {
+					$('#exampleModal').modal('hide');
+					renderTable(rows);
+					$('#head-title').text('Data ' + namaPos + ' dari ' + awal + ' sampai ' + akhir);
+				}, 600);
+
+			} catch (err) {
+				setStatus('error: ' + err.message);
+				console.error('[submit] unexpected error:', err);
+			}
+		});
+
+		// ── Cancel ─────────────────────────────────────────────────────────
+		$(document).on('click', '#btnCancel', function () {
+			aborted = true;
+			setStatus('canceled');
+		});
+
+		// ── Export button ──────────────────────────────────────────────────
+		exportBtn?.addEventListener('click', () => {
+			const namaPos   = ($('#select-pos').val() || '').split('|')[1] || 'Data';
+			const awal      = $('input[name="awal"]').val();
+			const akhir     = $('input[name="akhir"]').val();
+			const keys      = lastRowsForExport.length
+				? Object.keys(lastRowsForExport[0]).filter(k => k.toLowerCase() !== 'waktu')
+				: [];
+			const parameter = keys.map(k => ({ alias_sensor: k, satuan: '', field_sensor: k }));
+			downloadExcel({
+				url      : 'https://dpupesdm.monitoring4system.com/datapos/excel_export',
+				title    : 'Data ' + namaPos + ' dari ' + awal + ' sampai ' + akhir,
+				rows     : lastRowsForExport,
+				parameter: parameter.length ? parameter : null,
+			});
+		});
+
+	})();
+</script>				<!-- end Konten-->
+				<footer class="footer footer-transparent d-print-none">
+					<div class="container-xl">
+						<div class="row text-center align-items-center flex-row-reverse">
+							<div class="col-12 mb-3">
+
+								<!-- Histats.com  (div with counter) -->
+								<div id="histats_counter"></div>
+								<!-- Histats.com  START  (aync)-->
+								<script type="text/javascript">
+									var _Hasync = _Hasync || [];
+									_Hasync.push(['Histats.start', '1,4787566,4,397,112,48,00011101']);
+									_Hasync.push(['Histats.fasi', '1']);
+									_Hasync.push(['Histats.track_hits', '']);
+									(function() {
+										var hs = document.createElement('script');
+										hs.type = 'text/javascript';
+										hs.async = true;
+										hs.src = ('//s10.histats.com/js15_as.js');
+										(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+									})();
+								</script>
+								<noscript><a href="/" target="_blank"><img src="//sstatic1.histats.com/0.gif?4787566&101" alt="free web site hit counter" border="0"></a></noscript>
+								<!-- Histats.com  END  -->
+							</div>
+							<div class="col-12 ">
+								<ul class="list-inline list-inline-dots mb-0">
+									<li class="list-inline-item">
+										&copy; PUPESDM DIY 2017 - 2023
+									</li>
+									<li class="list-inline-item">
+										<img src="https://dpupesdm.monitoring4system.com/image/logo_be.png" alt="Beacon Engineering" class="navbar-brand-image">
+									</li>
+									<li class="list-inline-item">
+										<img src="https://dpupesdm.monitoring4system.com/image/logostesy.png" alt="Beacon Engineering" class="navbar-brand-image">
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</footer>
+			</div>
+			
+			<div class="chatbot">
+				<div class="chatbot__header">
+					<div class="d-flex px-3 align-items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-sparkles" style="color: #256fd2;">
+						<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+						<path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z" />
+						</svg>
+						<h5 class="ms-2 chatbox__title text-dark fw-bold mb-0">Copilot</h5>
+						<div class="badge text-white ms-3 py-1 px-3 shadow-sm rounded-pill" style="font-size: 0.72rem; font-weight: 600; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">BETA</div>
+					</div>
+
+					<span class="material-symbols-outlined">close</span>
+				</div>
+				<ul class="chatbot__box">
+					<li class="chatbot__chat incoming">
+						<span class="material-symbols-outlined">smart_toy</span>
+						<p>Halo apakah ada yang bisa saya bantu ?</p>
+					</li>
+				</ul>
+
+				<div class="chatbot__input-box">
+					<div class="textarea-container">
+						<textarea
+								  class="chatbot__textarea"
+								  placeholder="Enter a message..."
+								  required></textarea>
+						<span id="mic-btn" title="Rekam suara (klik mulai/berhenti)">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+								<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+								<line x1="12" y1="19" x2="12" y2="22"></line>
+							</svg>
+						</span>
+						<span id="send-btn">
+							<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-send">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+								<path d="M10 14l11 -11" />
+								<path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+							</svg>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+
+	</body>
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+function generateRandomCode(length = 5) {
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) result += chars[Math.floor(Math.random() * chars.length)];
+	return result;
+}
+
+const chatbotToggle = document.querySelector('.chatbot__button');
+const sendChatBtn   = document.querySelector('#send-btn');
+const chatInput     = document.querySelector('.chatbot__textarea');
+const chatBox       = document.querySelector('.chatbot__box');
+const chatbotCloseBtn = document.querySelector('.chatbot__header span');
+const micBtn        = document.querySelector('#mic-btn');
+
+const formatResponse = (text) => {
+	text = text.replace(/\n{2,}/g, '\n');
+	text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+	text = text.replace(/^#### (.*)$/gm, '<b>$1</b>');
+	text = text.replace(/^### (.*)$/gm, '<b>$1</b>');
+	text = text.replace(/^## (.*)$/gm, '<b>$1</b>');
+	text = text.replace(/^# (.*)$/gm, '<b>$1</b>');
+	text = text.replace(/\n/g, '<br>');
+	return text;
+};
+
+let message_history = [];
+let userMessage;
+const inputInitHeight = chatInput.scrollHeight;
+
+const createChatLi = (message, className) => {
+	const chatLi = document.createElement('li');
+	chatLi.classList.add('chatbot__chat', className);
+	const chatContent = className === 'outgoing'
+		? `<p></p>`
+		: `<span class="material-symbols-outlined">smart_toy</span><p></p>`;
+	chatLi.innerHTML = chatContent;
+	chatLi.querySelector('p').textContent = message;
+	return chatLi;
+};
+
+const random_code = generateRandomCode();
+const BASE = 'https://dpupesdm.monitoring4system.com/';
+
+const generateResponse = (incomingChatLi) => {
+	const API_URL = BASE + 'copilot/chat';
+	message_history.push({ role: 'user', content: userMessage });
+
+	// Buat wrapper untuk chart + teks (belum ditampilkan, loading masih tampil)
+	const contentWrap = document.createElement('div');
+	contentWrap.className = 'copilot-content-wrap';
+	const textP = document.createElement('p');
+	contentWrap.appendChild(textP);
+
+	let fullText = '';
+	let loadingSwapped = false;
+
+	function swapLoading() {
+		if (loadingSwapped) return;
+		loadingSwapped = true;
+		incomingChatLi.innerHTML = '<span class="material-symbols-outlined">smart_toy</span>';
+		incomingChatLi.appendChild(contentWrap);
+	}
+
+	fetch(API_URL, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ uuid: random_code, messages: message_history })
+	}).then(response => {
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+
+		function processStream() {
+			return reader.read().then(({ done, value }) => {
+				if (done) {
+					if (fullText) {
+						message_history.push({ role: 'assistant', content: fullText });
+					}
+					chatBox.scrollTo(0, chatBox.scrollHeight);
+					return;
+				}
+
+				buffer += decoder.decode(value, { stream: true });
+				const lines = buffer.split('\n');
+				buffer = lines.pop();
+
+				for (const line of lines) {
+					const trimmed = line.trim();
+					if (!trimmed || !trimmed.startsWith('data: ')) continue;
+					const payload = trimmed.slice(6);
+					if (payload === '[DONE]') continue;
+
+					try {
+						const json = JSON.parse(payload);
+
+						// ── Meta events (chart / csv) ──
+						if (json.meta) {
+							swapLoading();
+							if (json.meta.type === 'chart' && json.meta.datasets) {
+								const chartWrap = document.createElement('div');
+								chartWrap.className = 'copilot-chart-wrap';
+								const canvas = document.createElement('canvas');
+								chartWrap.appendChild(canvas);
+								contentWrap.insertBefore(chartWrap, textP);
+								new Chart(canvas, {
+									type: json.meta.chart_type || 'line',
+									data: { labels: json.meta.labels, datasets: json.meta.datasets },
+									options: {
+										responsive: true,
+										maintainAspectRatio: false,
+										plugins: {
+											title: { display: true, text: json.meta.title || '', font: { size: 12 } },
+											legend: { labels: { font: { size: 11 } } }
+										},
+										scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 } } } }
+									}
+								});
+							}
+							if (json.meta.type === 'csv_download') {
+								const a = document.createElement('a');
+								a.href = BASE + 'copilot/export_csv?id_logger=' + encodeURIComponent(json.meta.id_logger)
+									+ '&awal=' + json.meta.awal + '&akhir=' + json.meta.akhir;
+								a.target = '_blank';
+								a.className = 'copilot-csv-link';
+								a.innerHTML = '⬇ Download CSV — ' + (json.meta.nama || json.meta.id_logger);
+								contentWrap.insertBefore(a, textP);
+							}
+							continue;
+						}
+
+						// ── Token ──
+						if (json.token) {
+							swapLoading();
+							fullText += json.token;
+							textP.innerHTML = formatResponse(fullText);
+							chatBox.scrollTo(0, chatBox.scrollHeight);
+						}
+
+						// ── Error ──
+						if (json.error) {
+							swapLoading();
+							textP.classList.add('error');
+							textP.textContent = 'Error: ' + (json.error.oai_msg || json.error.error || 'Unknown');
+						}
+					} catch (e) { /* skip parse errors */ }
+				}
+
+				return processStream();
+			});
+		}
+		return processStream();
+	}).catch(error => {
+		swapLoading();
+		textP.classList.add('error');
+		textP.textContent = 'Gagal terhubung ke server. Coba lagi.';
+		console.error(error);
+	});
+};
+
+const handleChat = () => {
+	userMessage = chatInput.value.trim();
+	if (!userMessage) return;
+	chatInput.value = '';
+	chatInput.style.height = `${inputInitHeight}px`;
+
+	chatBox.appendChild(createChatLi(userMessage, 'outgoing'));
+	chatBox.scrollTo(0, chatBox.scrollHeight);
+
+	setTimeout(() => {
+		const incomingChatLi = document.createElement('li');
+		incomingChatLi.classList.add('chatbot__chat', 'incoming');
+		incomingChatLi.innerHTML = `
+		<span class="material-symbols-outlined">smart_toy</span>
+		<div class="copilot-thinking">
+			<div class="copilot-thinking-icon">
+				<svg data-i="0" class="active" style="color:#256fd2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z"/></svg>
+				<svg data-i="1" style="color:#7c3aed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 13a3.5 3.5 0 0 0-3.5-3.5"/><path d="M19 13a7 7 0 0 0-7-7"/><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10h-4"/></svg>
+				<svg data-i="2" style="color:#06b6d4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+				<svg data-i="3" style="color:#f59e0b" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+			</div>
+			<span class="copilot-thinking-text">Sedang berpikir...</span>
+		</div>`;
+		chatBox.appendChild(incomingChatLi);
+		chatBox.scrollTo(0, chatBox.scrollHeight);
+
+		// Cycle icons
+		const iconWrap = incomingChatLi.querySelector('.copilot-thinking-icon');
+		const thinkText = incomingChatLi.querySelector('.copilot-thinking-text');
+		const labels = ['Sedang berpikir...', 'Menganalisis data...', 'Mencari informasi...', 'Menyusun jawaban...'];
+		let idx = 0;
+		const cycleTimer = setInterval(() => {
+			if (!iconWrap || !document.contains(iconWrap)) { clearInterval(cycleTimer); return; }
+			const svgs = iconWrap.querySelectorAll('svg');
+			const prev = svgs[idx];
+			idx = (idx + 1) % svgs.length;
+			const next = svgs[idx];
+			prev.classList.remove('active');
+			prev.classList.add('exit');
+			setTimeout(() => prev.classList.remove('exit'), 350);
+			next.classList.add('active');
+			if (thinkText) thinkText.textContent = labels[idx];
+		}, 1200);
+
+		generateResponse(incomingChatLi);
+	}, 300);
+};
+
+chatInput.addEventListener('input', () => {
+	chatInput.style.height = `${inputInitHeight}px`;
+	chatInput.style.height = `${chatInput.scrollHeight}px`;
+});
+
+chatInput.addEventListener('keydown', (e) => {
+	if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 800) {
+		e.preventDefault();
+		handleChat();
+	}
+});
+
+chatbotToggle.addEventListener('click', () => {
+	document.body.classList.toggle('show-chatbot');
+	if (document.body.classList.contains('show-chatbot')) {
+		setTimeout(() => chatInput.focus(), 300);
+	}
+});
+
+chatbotCloseBtn.addEventListener('click', () =>
+	document.body.classList.remove('show-chatbot')
+);
+
+sendChatBtn.addEventListener('click', () => handleChat());
+
+function send_suggestion(pesan) {
+	chatInput.value = pesan;
+	handleChat();
+}
+
+// ─── Voice Recording (Whisper) ───
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+if (micBtn) {
+	micBtn.addEventListener('click', async () => {
+		if (!isRecording) {
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+				mediaRecorder = new MediaRecorder(stream);
+				audioChunks = [];
+				mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+				mediaRecorder.onstop = async () => {
+					stream.getTracks().forEach(t => t.stop());
+					const blob = new Blob(audioChunks, { type: 'audio/webm' });
+					const formData = new FormData();
+					formData.append('audio', blob, 'recording.webm');
+
+					micBtn.classList.remove('recording');
+					micBtn.classList.add('processing');
+
+					try {
+						const res = await fetch(BASE + 'copilot/transcribe', { method: 'POST', body: formData });
+						const data = await res.json();
+						if (data.text) {
+							chatInput.value = data.text;
+							chatInput.focus();
+						}
+					} catch (err) { console.error('Transcribe error:', err); }
+					micBtn.classList.remove('processing');
+				};
+				mediaRecorder.start();
+				isRecording = true;
+				micBtn.classList.add('recording');
+			} catch (err) { console.error('Mic access denied:', err); }
+		} else {
+			mediaRecorder.stop();
+			isRecording = false;
+		}
+	});
+}
+</script>

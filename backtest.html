@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Back Test — TrendHidro</title>
+    <meta name="description" content="Lihat langkah-langkah perhitungan detail dari metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #F9FAFB; overflow-y: auto; height: auto; }
+        .bt-container { padding: 80px 24px 40px; max-width: 1100px; margin: 0 auto; }
+        .bt-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+        .bt-header p { font-size: 0.9rem; color: #6B7280; margin-bottom: 24px; }
+
+        .bt-toolbar {
+            background: #fff; border-radius: 12px; border: 1px solid #E5E7EB;
+            padding: 16px 20px; display: flex; gap: 12px; flex-wrap: wrap;
+            align-items: center; margin-bottom: 24px;
+        }
+        .bt-toolbar label { font-size: 0.88rem; font-weight: 600; color: #4B5563; min-width: max-content; }
+
+        .step-section {
+            background: #fff; border-radius: 12px; border: 1px solid #E5E7EB;
+            margin-bottom: 20px; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .step-header {
+            padding: 16px 20px; cursor: pointer; display: flex;
+            align-items: center; justify-content: space-between;
+            background: #F9FAFB; border-bottom: 1px solid #E5E7EB;
+            transition: background 0.2s;
+        }
+        .step-header:hover { background: #F3F4F6; }
+        .step-header h3 { font-size: 1rem; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
+        .step-header h3 svg { width: 20px; height: 20px; color: #2563EB; }
+        .step-chevron { transition: transform 0.3s; color: #9CA3AF; }
+        .step-header.open .step-chevron { transform: rotate(180deg); }
+        .step-body { display: none; padding: 20px; animation: fadeSlide 0.3s ease; }
+        .step-body.open { display: block; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Sub-step card with numbered badge */
+        .sub-step {
+            background: #FAFBFC; border: 1px solid #E5E7EB; border-left: 3px solid #2563EB;
+            border-radius: 8px; padding: 16px 18px; margin: 16px 0;
+        }
+        .sub-step-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+        }
+        .sub-step-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #3B82F6); color: #fff;
+            font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+        }
+        .sub-step-title {
+            font-size: 0.92rem; font-weight: 700; color: #1F2937;
+        }
+        .sub-step-desc {
+            font-size: 0.84rem; color: #6B7280; margin-bottom: 10px; line-height: 1.55;
+        }
+
+        /* Formula blocks */
+        .step-formula {
+            background: #F3F4F6; border-radius: 8px; padding: 12px 16px;
+            font-family: 'Courier New', monospace; font-size: 0.86rem;
+            color: #1F2937; margin: 10px 0; border-left: 3px solid #2563EB;
+            overflow-x: auto; line-height: 1.7;
+        }
+        .step-formula-label {
+            font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase;
+            letter-spacing: 0.05em; margin-bottom: 4px;
+        }
+        /* Substitution block (shows numbers plugged in) */
+        .step-substitution {
+            background: #EFF6FF; border-radius: 8px; padding: 12px 16px;
+            font-family: 'Courier New', monospace; font-size: 0.86rem;
+            color: #1E40AF; margin: 6px 0 12px; border-left: 3px solid #60A5FA;
+            overflow-x: auto; line-height: 1.7;
+        }
+
+        /* Info callout */
+        .step-info {
+            display: flex; gap: 8px; padding: 10px 14px;
+            background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
+            font-size: 0.82rem; color: #92400E; margin: 10px 0; line-height: 1.5;
+        }
+        .step-info-icon { flex-shrink: 0; font-size: 1rem; }
+
+        /* Result block */
+        .step-result {
+            padding: 14px 18px; background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+            border-radius: 8px; font-weight: 600; color: #1E40AF; margin-top: 16px;
+            display: flex; align-items: center; gap: 8px;
+            border: 1px solid #BFDBFE;
+        }
+        .step-result-icon { font-size: 1.1rem; }
+
+        /* Summary badges */
+        .summary-row {
+            display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0;
+        }
+        .summary-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .summary-badge.positive { background: #DCFCE7; color: #166534; }
+        .summary-badge.negative { background: #FEE2E2; color: #991B1B; }
+        .summary-badge.neutral  { background: #F3F4F6; color: #6B7280; }
+
+        /* Data table */
+        .data-tbl { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 12px 0; }
+        .data-tbl th { background: #F3F4F6; padding: 8px 10px; font-weight: 600; color: #4B5563; text-align: center; border: 1px solid #E5E7EB; font-size: 0.78rem; position: sticky; top: 0; z-index: 1; }
+        .data-tbl td { padding: 6px 10px; text-align: center; border: 1px solid #F3F4F6; color: #374151; }
+        .data-tbl tbody tr:hover { background: #F9FAFB; }
+        .data-tbl tfoot td { background: #EFF6FF; font-weight: 700; color: #1E40AF; border-top: 2px solid #BFDBFE; }
+
+        /* Divider */
+        .step-divider { border: none; border-top: 1px dashed #D1D5DB; margin: 18px 0; }
+
+        /* Separator row in sample tables */
+        .tbl-sep-row td {
+            background: #F9FAFB !important; color: #9CA3AF !important;
+            font-style: italic; font-size: 0.78rem !important;
+            padding: 4px 10px !important; border: 1px dashed #E5E7EB !important;
+            text-align: center !important;
+        }
+
+        .bt-loader { text-align: center; padding: 60px 20px; color: #6B7280; }
+        .bt-loader .spinner { margin: 0 auto 12px; }
+        #btResults { display: none; }
+        #btResults.show { display: block; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./">Beranda</a></li>
+            <li class="nav-dropdown">
+                <button class="nav-drop-btn" id="nav-fitur">
+                    Fitur
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="nav-drop-content">
+                    <a href="peta">Peta Interaktif</a>
+                    <a href="olah-data">Olah Data Anda</a>
+                </div>
+            </li>
+            <li><a href="data">Ketersediaan Data</a></li>
+            <li><a href="dok">Dokumentasi</a></li>
+            <li><a href="tentang">Tentang</a></li>
+        </ul>
+    </nav>
+
+    <div class="bt-container">
+        <div class="bt-header">
+            <h1>🧪 Back Test — Langkah Perhitungan</h1>
+            <p>Pilih stasiun dan parameter, lalu lihat setiap tahapan perhitungan dari ketiga metode analisis tren.</p>
+        </div>
+
+        <div class="bt-toolbar">
+            <label>Stasiun:</label>
+            <select id="btStation" class="form-select" style="width:auto; min-width:180px;"><option>Memuat...</option></select>
+            <label>Data:</label>
+            <select id="btType" class="form-select" style="width:auto; min-width:110px;" onchange="toggleBtMonth()">
+                <option value="bulanan" selected>Bulanan</option>
+                <option value="tahunan">Tahunan</option>
+                <option value="musiman">Musiman</option>
+            </select>
+            <select id="btMonth" class="form-select" style="width:auto; min-width:120px;">
+                <option value="all">Semua Bulan</option>
+                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+            </select>
+            <div class="year-picker-wrapper" style="width: auto; min-width: 220px;">
+                <div class="year-picker" id="pickerFrom">
+                    <button type="button" class="year-display" id="displayFrom">1980</button>
+                    <div class="year-grid hidden" id="gridFrom"></div>
+                </div>
+                <div class="year-sep">—</div>
+                <div class="year-picker" id="pickerTo">
+                    <button type="button" class="year-display" id="displayTo">2025</button>
+                    <div class="year-grid hidden" id="gridTo"></div>
+                </div>
+                <input type="hidden" id="btYFrom" value="1980">
+                <input type="hidden" id="btYTo" value="2025">
+            </div>
+            <button class="btn btn-primary" onclick="runBacktest()" id="btnBtRun" style="white-space:nowrap;">Hitung</button>
+            <div id="btSpinner" class="spinner" style="display:none; width:22px; height:22px; border-width:2.5px;"></div>
+        </div>
+
+        <div id="btResults">
+            <!-- Data Input -->
+            <div class="step-section">
+                <div class="step-header open" onclick="toggleStep(this)">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg> Data Input</h3>
+                    <svg class="step-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="step-body open" id="btDataInput"></div>
+            </div>
+
+            <!-- Mann-Kendall -->
+            <div class="step-section">
+                <div class="step-header" onclick="toggleStep(this)">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg> Mann-Kendall Test</h3>
+                    <svg class="step-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="step-body" id="btMK"></div>
+            </div>
+
+            <!-- Sen's Slope -->
+            <div class="step-section">
+                <div class="step-header" onclick="toggleStep(this)">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg> Sen's Slope Estimator</h3>
+                    <svg class="step-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="step-body" id="btSS"></div>
+            </div>
+
+            <!-- Regresi Linear -->
+            <div class="step-section">
+                <div class="step-header" onclick="toggleStep(this)">
+                    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/></svg> Regresi Linear</h3>
+                    <svg class="step-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+                <div class="step-body" id="btLR"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let btStations = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('php/get_stations.php');
+                const features = await res.json();
+                btStations = features.map(f => f.properties);
+                const sel = document.getElementById('btStation');
+                sel.innerHTML = '';
+                btStations.forEach(s => {
+                    sel.innerHTML += `<option value="${s.id}" data-ys="${s.yearStart||1980}" data-ye="${s.yearEnd||2025}">Pos ${s.name}</option>`;
+                });
+                sel.addEventListener('change', updateBtYears);
+                updateBtYears();
+            } catch(e) { console.error(e); }
+        });
+
+        function updateBtYears() {
+            const sel = document.getElementById('btStation');
+            const opt = sel.options[sel.selectedIndex];
+            const ys = parseInt(opt.dataset.ys) || 1980;
+            const ye = parseInt(opt.dataset.ye) || 2025;
+            
+            // Set global bounds for picker
+            window.stationMinYear = ys;
+            window.stationMaxYear = ye;
+
+            const yfInput = document.getElementById('btYFrom');
+            const ytInput = document.getElementById('btYTo');
+            const yfDisp = document.getElementById('displayFrom');
+            const ytDisp = document.getElementById('displayTo');
+
+            yfInput.value = ys;
+            ytInput.value = ye;
+            yfDisp.textContent = ys;
+            ytDisp.textContent = ye;
+
+            window.viewedDecadeFrom = Math.floor(ys / 10) * 10;
+            window.viewedDecadeTo = Math.floor(ye / 10) * 10;
+        }
+
+        // ====== YEAR PICKER LOGIC (Same as sidebar.js/app.js) ======
+        function renderDecadeGrid(idSuffix, startYear) {
+            const gridElem = document.getElementById(`grid${idSuffix}`);
+            if (!gridElem) return;
+            const decadeStart = Math.floor(startYear / 10) * 10;
+            const decadeEnd = decadeStart + 9;
+            const activeYear = document.getElementById(`btY${idSuffix}`).value;
+            let yearsHtml = '';
+            for (let i = 0; i < 12; i++) {
+                const y = decadeStart + i;
+                const isDisabled = (y < window.stationMinYear || y > window.stationMaxYear);
+                const isActive = (y == activeYear);
+                if (i > 9) { yearsHtml += `<div class="year-item hidden" data-year="${y}">${y}</div>`; }
+                else { yearsHtml += `<div class="year-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}" data-year="${y}">${y}</div>`; }
+            }
+            gridElem.innerHTML = `
+                <div class="year-grid-header">
+                    <button type="button" class="year-nav-btn prev" data-target="${idSuffix}">‹</button>
+                    <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+                    <button type="button" class="year-nav-btn next" data-target="${idSuffix}">›</button>
+                </div>
+                <div class="year-grid-content p-2"><div class="decade-grid">${yearsHtml}</div></div>
+            `;
+        }
+
+        document.getElementById('displayFrom').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('gridTo').classList.add('hidden');
+            document.getElementById('gridFrom').classList.toggle('hidden');
+            if (!document.getElementById('gridFrom').classList.contains('hidden')) renderDecadeGrid('From', window.viewedDecadeFrom);
+        });
+
+        document.getElementById('displayTo').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('gridFrom').classList.add('hidden');
+            document.getElementById('gridTo').classList.toggle('hidden');
+            if (!document.getElementById('gridTo').classList.contains('hidden')) renderDecadeGrid('To', window.viewedDecadeTo);
+        });
+
+        document.addEventListener('click', (e) => {
+            const navBtn = e.target.closest('.year-nav-btn');
+            if (navBtn) {
+                e.stopPropagation();
+                const target = navBtn.dataset.target;
+                const isNext = navBtn.classList.contains('next');
+                if (target === 'From') {
+                    window.viewedDecadeFrom += isNext ? 10 : -10;
+                    renderDecadeGrid('From', window.viewedDecadeFrom);
+                } else {
+                    window.viewedDecadeTo += isNext ? 10 : -10;
+                    renderDecadeGrid('To', window.viewedDecadeTo);
+                }
+                return;
+            }
+            const item = e.target.closest('.year-item');
+            if (!item) {
+                document.getElementById('gridFrom').classList.add('hidden');
+                document.getElementById('gridTo').classList.add('hidden');
+                return;
+            }
+            const grid = item.closest('.year-grid');
+            const year = item.dataset.year;
+            if (grid.id === 'gridFrom') {
+                document.getElementById('btYFrom').value = year;
+                document.getElementById('displayFrom').textContent = year;
+                document.getElementById('gridFrom').classList.add('hidden');
+            } else {
+                document.getElementById('btYTo').value = year;
+                document.getElementById('displayTo').textContent = year;
+                document.getElementById('gridTo').classList.add('hidden');
+            }
+        });
+
+        function toggleBtMonth() {
+            const dt = document.getElementById('btType').value;
+            const mo = document.getElementById('btMonth');
+            if (dt === 'tahunan') { mo.style.display = 'none'; }
+            else if (dt === 'musiman') {
+                mo.style.display = 'inline-block';
+                mo.innerHTML = `<option value="1,2,3">Jan–Feb–Mar</option><option value="4,5,6">Apr–Mei–Jun</option><option value="7,8,9">Jul–Agus–Sep</option><option value="10,11,12">Okt–Nov–Des</option>`;
+            } else {
+                mo.style.display = 'inline-block';
+                mo.innerHTML = `<option value="all">Semua Bulan</option><option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option><option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>`;
+            }
+        }
+
+        function toggleStep(header) {
+            header.classList.toggle('open');
+            const body = header.nextElementSibling;
+            body.classList.toggle('open');
+        }
+
+        async function runBacktest() {
+            const posId = document.getElementById('btStation').value;
+            const dtType = document.getElementById('btType').value;
+            let mo = document.getElementById('btMonth').value;
+            if (dtType === 'tahunan') mo = 'all';
+            const yFrom = parseInt(document.getElementById('btYFrom').value);
+            const yTo = parseInt(document.getElementById('btYTo').value);
+
+            document.getElementById('btSpinner').style.display = 'block';
+            document.getElementById('btnBtRun').disabled = true;
+
+            try {
+                // 1. Fetch timeseries
+                const tsRes = await fetch('php/get_timeseries.php', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ pos_id: posId, dataType: dtType, aggregation: 'kumulatif', yearFrom: yFrom, yearTo: yTo, month: mo })
+                });
+                const tsData = await tsRes.json();
+                if (!Array.isArray(tsData) || tsData.length < 3) {
+                    alert('Data tidak cukup (minimal 3 data point).');
+                    return;
+                }
+
+                // 2. Run backtest
+                const btRes = await fetch('php/backtest.php', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ data: tsData })
+                });
+                const bt = await btRes.json();
+                if (bt.error) { alert(bt.message); return; }
+
+                document.getElementById('btResults').classList.add('show');
+                renderDataInput(bt);
+                renderMK(bt.mann_kendall);
+                renderSS(bt.sens_slope);
+                renderLR(bt.regresi_linear);
+
+            } catch(e) {
+                console.error(e);
+                alert('Terjadi kesalahan: ' + e.message);
+            } finally {
+                document.getElementById('btSpinner').style.display = 'none';
+                document.getElementById('btnBtRun').disabled = false;
+            }
+        }
+
+        function renderDataInput(bt) {
+            const el = document.getElementById('btDataInput');
+            const d = bt.data_input;
+            const n = bt.n;
+            let html = `<div class="step-info"><span class="step-info-icon">📊</span><span>Data yang digunakan sebagai input perhitungan. Jumlah data: <strong>${n}</strong> titik. Data telah diurutkan berdasarkan tahun.</span></div>`;
+            html += '<div style="max-height:300px; overflow-y:auto;"><table class="data-tbl"><thead><tr><th>No</th><th>Tahun (x)</th><th>Nilai Curah Hujan (y)</th></tr></thead><tbody>';
+            if (n <= 20) {
+                d.forEach((r, i) => { html += `<tr><td>${i+1}</td><td>${r.year}</td><td>${r.value}</td></tr>`; });
+            } else {
+                for (let i = 0; i < 5; i++) html += `<tr><td>${i+1}</td><td>${d[i].year}</td><td>${d[i].value}</td></tr>`;
+                html += `<tr class="tbl-sep-row"><td colspan="3">⋯ ${n - 10} baris lainnya ⋯</td></tr>`;
+                for (let i = n - 5; i < n; i++) html += `<tr><td>${i+1}</td><td>${d[i].year}</td><td>${d[i].value}</td></tr>`;
+            }
+            html += '</tbody></table></div>';
+            if (n > 20) html += `<p style="font-size:0.8rem;color:#9CA3AF;margin-top:4px;">Menampilkan contoh 10 dari ${n} data. Angka i dan j pada tabel di bawah merujuk nomor urut di atas.</p>`;
+            el.innerHTML = html;
+        }
+
+        function renderMK(mk) {
+            const el = document.getElementById('btMK');
+            let html = '';
+
+            // Step 1: S
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">1</span><span class="sub-step-title">Hitung Statistik S</span></div>
+                <div class="sub-step-desc">Bandingkan <strong>setiap</strong> pasangan data (xᵢ, xⱼ) dimana j&nbsp;>&nbsp;i. Tentukan tanda (sign) dari selisihnya:<br>• Jika xⱼ > xᵢ → sign = <span style="color:#16A34A;font-weight:700">+1</span><br>• Jika xⱼ < xᵢ → sign = <span style="color:#DC2626;font-weight:700">−1</span><br>• Jika xⱼ = xᵢ → sign = <span style="color:#6B7280;font-weight:700">0</span></div>`;
+
+            if (mk.sign_table.length > 0) {
+                html += '<div style="max-height:300px; overflow-y:auto;"><table class="data-tbl"><thead><tr><th>i</th><th>j</th><th>xᵢ (data ke-i)</th><th>xⱼ (data ke-j)</th><th>xⱼ − xᵢ</th><th>sign</th></tr></thead><tbody>';
+                mk.sign_table.forEach(r => {
+                    if (r.separator) {
+                        html += `<tr class="tbl-sep-row"><td colspan="6">⋯ ${r.skipped} pasangan lainnya ⋯</td></tr>`;
+                        return;
+                    }
+                    const c = r.sign > 0 ? '#16A34A' : (r.sign < 0 ? '#DC2626' : '#6B7280');
+                    html += `<tr><td>${r.i}</td><td>${r.j}</td><td>${r.xi}</td><td>${r.xj}</td><td>${r.diff}</td><td style="font-weight:700;color:${c}">${r.sign > 0 ? '+1' : r.sign < 0 ? '−1' : '0'}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                const shown = mk.sign_table.filter(r => !r.separator).length;
+                if (mk.total_pairs > shown) html += `<p style="font-size:0.8rem;color:#9CA3AF;margin-top:4px;">Menampilkan contoh ${shown} dari ${mk.total_pairs} pasangan. Kolom i,j merujuk ke nomor data di tabel Data Input.</p>`;
+            }
+
+            html += `<div class="summary-row">
+                <span class="summary-badge positive">▲ Positif (+1): ${mk.positive_count}</span>
+                <span class="summary-badge negative">▼ Negatif (−1): ${mk.negative_count}</span>
+                <span class="summary-badge neutral">● Seri (0): ${mk.tie_count}</span>
+            </div>`;
+            html += `<div class="step-formula-label">Rumus</div>
+                <div class="step-formula">S = Σ sign(xⱼ − xᵢ) = jumlah_positif − jumlah_negatif</div>
+                <div class="step-formula-label">Substitusi</div>
+                <div class="step-substitution">${mk.S_formula_numeric}<br><strong>S = ${mk.S}</strong></div>
+            </div>`;
+
+            // Step 2: Var(S)
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">2</span><span class="sub-step-title">Hitung Variansi Var(S)</span></div>
+                <div class="sub-step-desc">Variansi digunakan untuk menstandarkan nilai S agar bisa diuji secara statistik. Jika ada tied groups (nilai sama), koreksi diterapkan.</div>
+                <div class="step-formula-label">Rumus umum</div>
+                <div class="step-formula">${mk.varS_formula}</div>
+                <div class="step-formula-label">Substitusi nilai (n = ${mk.n_for_var})</div>
+                <div class="step-substitution">${mk.varS_formula_numeric}<br><strong>Var(S) = ${mk.varS}</strong></div>`;
+
+            if (mk.tied_groups.length > 0) {
+                html += `<div class="step-info"><span class="step-info-icon">🔗</span><span>Terdapat <strong>${mk.tied_groups.length}</strong> tied group (nilai yang sama). Koreksi total = ${mk.tied_sum}</span></div>`;
+                html += '<div style="max-height:200px;overflow-y:auto;"><table class="data-tbl" style="width:auto;"><thead><tr><th>Nilai</th><th>Jumlah (tₚ)</th><th>tₚ(tₚ−1)(2tₚ+5)</th></tr></thead><tbody>';
+                mk.tied_groups.forEach(t => { html += `<tr><td>${t.value}</td><td>${t.count}</td><td>${t.contribution}</td></tr>`; });
+                html += '</tbody></table></div>';
+            } else {
+                html += `<div class="step-info"><span class="step-info-icon">✅</span><span>Tidak ada tied group — koreksi = 0</span></div>`;
+            }
+            html += `<div class="step-substitution">√Var(S) = √${mk.varS} = <strong>${mk.stdS}</strong></div></div>`;
+
+            // Step 3: Z
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">3</span><span class="sub-step-title">Hitung Z-Score (Standardized Test Statistic)</span></div>
+                <div class="sub-step-desc">Z-score mengubah nilai S ke skala distribusi normal standar. Rumus berbeda tergantung tanda S.</div>
+                <div class="step-formula-label">Rumus yang digunakan</div>
+                <div class="step-formula">${mk.Z_formula}</div>
+                <div class="step-formula-label">Substitusi</div>
+                <div class="step-substitution">${mk.Z_formula_numeric}<br><strong>Z = ${mk.Z}</strong></div>
+            </div>`;
+
+            // Step 4: Decision
+            const sig = mk.significant;
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">4</span><span class="sub-step-title">Uji Signifikansi (α = ${mk.alpha})</span></div>
+                <div class="sub-step-desc">Bandingkan |Z| dengan nilai kritis Z<sub>α/2</sub> = ${mk.threshold} (two-tailed test, tingkat kepercayaan 95%).</div>
+                <div class="step-formula">|Z| = |${mk.Z}| = ${mk.abs_Z}</div>
+                <div class="step-substitution">${mk.abs_Z} ${sig ? '>' : '≤'} ${mk.threshold} → <strong>${sig ? 'Tolak H₀ (Signifikan)' : 'Gagal tolak H₀ (Tidak Signifikan)'}</strong></div>
+                <div class="step-info"><span class="step-info-icon">${sig ? '⚡' : '💡'}</span><span>${sig ? 'Karena |Z| > 1.96, tren yang terdeteksi bersifat signifikan secara statistik pada level α = 0.05.' : 'Karena |Z| ≤ 1.96, tidak cukup bukti untuk menyatakan tren signifikan pada level α = 0.05.'}</span></div>
+            </div>`;
+
+            const trendColor = mk.trend.includes('Meningkat') ? '#16A34A' : (mk.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Mann-Kendall: <span style="color:${trendColor}">${mk.trend}</span></div>`;
+            el.innerHTML = html;
+        }
+
+        function renderSS(ss) {
+            const el = document.getElementById('btSS');
+            let html = '';
+
+            // Step 1
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">1</span><span class="sub-step-title">Hitung Kemiringan (Slope) Semua Pasangan</span></div>
+                <div class="sub-step-desc">Untuk setiap pasangan data (i, j) dimana j&nbsp;>&nbsp;i, hitung kemiringan:</div>
+                <div class="step-formula">Qᵢⱼ = (yⱼ − yᵢ) / (xⱼ − xᵢ)</div>
+                <div class="step-info"><span class="step-info-icon">📐</span><span>Total pasangan yang dihitung: <strong>${ss.total_slope_pairs}</strong></span></div>`;
+
+            if (ss.slope_table.length > 0) {
+                html += '<div style="max-height:300px; overflow-y:auto;"><table class="data-tbl"><thead><tr><th>i</th><th>j</th><th>yᵢ (data ke-i)</th><th>yⱼ (data ke-j)</th><th>xᵢ (tahun)</th><th>xⱼ (tahun)</th><th>Qᵢⱼ</th></tr></thead><tbody>';
+                ss.slope_table.forEach(r => {
+                    if (r.separator) {
+                        html += `<tr class="tbl-sep-row"><td colspan="7">⋯ ${r.skipped} pasangan lainnya ⋯</td></tr>`;
+                        return;
+                    }
+                    html += `<tr><td>${r.i}</td><td>${r.j}</td><td>${r.yi}</td><td>${r.yj}</td><td>${r.xi}</td><td>${r.xj}</td><td>${r.slope}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                const shown = ss.slope_table.filter(r => !r.separator).length;
+                if (ss.total_slope_pairs > shown) html += `<p style="font-size:0.8rem;color:#9CA3AF;margin-top:4px;">Menampilkan contoh ${shown} dari ${ss.total_slope_pairs} pasangan. Kolom i,j merujuk ke nomor data di tabel Data Input.</p>`;
+            }
+            html += '</div>';
+
+            // Step 2: Median
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">2</span><span class="sub-step-title">Urutkan & Ambil Median Kemiringan</span></div>
+                <div class="sub-step-desc">Semua nilai slope diurutkan dari kecil ke besar. Sen's Slope = <strong>median</strong> dari semua slope.</div>
+                <div class="step-formula-label">Jumlah slope (N)</div>
+                <div class="step-formula">N = ${ss.slopes_sorted_count}</div>`;
+
+            if (ss.sorted_slopes_sample && ss.sorted_slopes_sample.length > 0) {
+                html += '<div style="max-height:250px;overflow-y:auto;"><table class="data-tbl" style="width:auto;"><thead><tr><th>Posisi</th><th>Slope (terurut)</th></tr></thead><tbody>';
+                ss.sorted_slopes_sample.forEach(s => {
+                    if (String(s.pos) === '⋮') {
+                        html += `<tr class="tbl-sep-row"><td colspan="2">${s.value}</td></tr>`;
+                        return;
+                    }
+                    const isMed = s.is_median;
+                    html += `<tr style="${isMed ? 'background:#DBEAFE;font-weight:700;' : ''}"><td>${s.pos}${isMed ? ' ← median' : ''}</td><td>${s.value}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += `<div class="step-formula-label">Penentuan median</div>
+                <div class="step-substitution">${ss.median_explanation}<br><strong>Sen's Slope = ${ss.sen_slope}</strong></div>
+            </div>`;
+
+            // Step 3: Intercept
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">3</span><span class="sub-step-title">Hitung Intercept</span></div>
+                <div class="sub-step-desc">${ss.intercept_formula}</div>
+                <div class="step-formula">bᵢ = yᵢ − (${ss.sen_slope}) × xᵢ</div>`;
+
+            if (ss.intercept_sample && ss.intercept_sample.length > 0) {
+                html += '<div style="max-height:200px;overflow-y:auto;"><table class="data-tbl" style="width:auto;"><thead><tr><th>No</th><th>yᵢ</th><th>xᵢ</th><th>bᵢ = yᵢ − slope×xᵢ</th></tr></thead><tbody>';
+                ss.intercept_sample.forEach(r => {
+                    if (r.separator) {
+                        html += `<tr class="tbl-sep-row"><td colspan="4">⋯ ${r.skipped} baris lainnya ⋯</td></tr>`;
+                        return;
+                    }
+                    html += `<tr><td>${r.i}</td><td>${r.y}</td><td>${r.x}</td><td>${r.intercept}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += `<div class="step-substitution">Intercept = median(bᵢ) = <strong>${ss.intercept}</strong></div>
+            </div>`;
+
+            // Result
+            const trendColor = ss.trend.includes('Meningkat') ? '#16A34A' : (ss.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Sen's Slope: Tren <span style="color:${trendColor}"><strong>${ss.trend}</strong></span> — ${ss.equation}</div>`;
+            el.innerHTML = html;
+        }
+
+        function renderLR(lr) {
+            const el = document.getElementById('btLR');
+            let html = '';
+
+            // Step 1: Components
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">1</span><span class="sub-step-title">Hitung Rata-Rata & Deviasi</span></div>
+                <div class="sub-step-desc">Hitung jumlah dan rata-rata dari variabel x (tahun) dan y (nilai), lalu deviasi dari rata-rata.</div>
+                <div class="step-formula-label">Rata-rata</div>
+                <div class="step-substitution">n = ${lr.n}<br>${lr.mean_x_formula} = <strong>${lr.mean_x}</strong><br>${lr.mean_y_formula} = <strong>${lr.mean_y}</strong></div>`;
+
+            if (lr.detail_table && lr.detail_table.length > 0) {
+                html += '<div style="max-height:300px; overflow-y:auto;"><table class="data-tbl"><thead><tr><th>No</th><th>x</th><th>y</th><th>x−x̄</th><th>y−ȳ</th><th>(x−x̄)²</th><th>(y−ȳ)²</th><th>(x−x̄)(y−ȳ)</th></tr></thead><tbody>';
+                lr.detail_table.forEach(r => {
+                    if (r.separator) {
+                        html += `<tr class="tbl-sep-row"><td colspan="8">⋯ ${r.skipped} baris lainnya ⋯</td></tr>`;
+                        return;
+                    }
+                    html += `<tr><td>${r.i}</td><td>${r.x}</td><td>${r.y}</td><td>${r.dx}</td><td>${r.dy}</td><td>${r.dx2}</td><td>${r.dy2}</td><td>${r.dxdy}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += `<div class="step-formula-label">Jumlah kuadrat & cross-product</div>
+                <div class="step-substitution">${lr.Sxx_formula}<br>${lr.Syy_formula}<br>${lr.Sxy_formula}</div>
+            </div>`;
+
+            // Step 2: Slope & Intercept
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">2</span><span class="sub-step-title">Hitung Slope (β₁) & Intercept (β₀)</span></div>
+                <div class="sub-step-desc">Slope menunjukkan perubahan y per satuan x. Intercept adalah nilai y ketika x = 0.</div>
+                <div class="step-formula-label">Rumus Slope</div>
+                <div class="step-formula">β₁ = Sxy / Sxx</div>
+                <div class="step-formula-label">Substitusi</div>
+                <div class="step-substitution">${lr.slope_formula} = <strong>${lr.slope}</strong></div>
+                <div class="step-formula-label">Rumus Intercept</div>
+                <div class="step-formula">β₀ = ȳ − β₁ × x̄</div>
+                <div class="step-formula-label">Substitusi</div>
+                <div class="step-substitution">${lr.intercept_formula} = <strong>${lr.intercept}</strong></div>
+                <div class="step-info"><span class="step-info-icon">📈</span><span>Persamaan regresi: <strong>${lr.equation}</strong></span></div>
+            </div>`;
+
+            // Step 3: R²
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">3</span><span class="sub-step-title">Koefisien Determinasi (R²) & Korelasi (r)</span></div>
+                <div class="sub-step-desc">R² mengukur seberapa baik model regresi menjelaskan variasi data. Nilai 0–1, semakin mendekati 1 semakin baik.</div>`;
+
+            if (lr.prediction_table && lr.prediction_table.length > 0) {
+                html += '<div style="max-height:250px; overflow-y:auto;"><table class="data-tbl"><thead><tr><th>No</th><th>x</th><th>y (aktual)</th><th>ŷ (prediksi)</th><th>y − ŷ</th><th>(y − ŷ)²</th></tr></thead><tbody>';
+                lr.prediction_table.forEach(r => {
+                    if (r.separator) {
+                        html += `<tr class="tbl-sep-row"><td colspan="6">⋯ ${r.skipped} baris lainnya ⋯</td></tr>`;
+                        return;
+                    }
+                    html += `<tr><td>${r.i}</td><td>${r.x}</td><td>${r.y_actual}</td><td>${r.y_pred}</td><td>${r.residual}</td><td>${r.residual_sq}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+            }
+
+            html += `<div class="step-formula-label">Sum of Squares</div>
+                <div class="step-substitution">${lr.SSres_formula}<br>${lr.SStot_formula}</div>
+                <div class="step-formula-label">Koefisien Determinasi</div>
+                <div class="step-formula">R² = 1 − SSres / SStot</div>
+                <div class="step-substitution">${lr.rSquared_formula} = <strong>${lr.rSquared}</strong></div>
+                <div class="step-formula-label">Koefisien Korelasi</div>
+                <div class="step-substitution">${lr.r_formula} = <strong>${lr.r}</strong></div>
+                <div class="step-info"><span class="step-info-icon">💡</span><span>R² = ${lr.rSquared} berarti model menjelaskan <strong>${(lr.rSquared * 100).toFixed(2)}%</strong> variasi data.</span></div>
+            </div>`;
+
+            // Step 4: t-test
+            html += `<div class="sub-step">
+                <div class="sub-step-header"><span class="sub-step-badge">4</span><span class="sub-step-title">Uji-t (Signifikansi Slope)</span></div>
+                <div class="sub-step-desc">Menguji apakah slope berbeda signifikan dari nol. H₀: β₁ = 0 (tidak ada tren).</div>
+                <div class="step-formula-label">Derajat kebebasan</div>
+                <div class="step-substitution">df = n − 2 = ${lr.n} − 2 = <strong>${lr.df}</strong></div>`;
+
+            if (lr.MSE !== null) {
+                html += `<div class="step-formula-label">Mean Square Error</div>
+                    <div class="step-formula">MSE = SSres / df</div>
+                    <div class="step-substitution">${lr.MSE_formula} = <strong>${lr.MSE}</strong></div>
+                    <div class="step-formula-label">Standard Error</div>
+                    <div class="step-formula">SE = √(MSE / Sxx)</div>
+                    <div class="step-substitution">${lr.SE_formula} = <strong>${lr.SE}</strong></div>
+                    <div class="step-formula-label">t-statistik</div>
+                    <div class="step-formula">t = β₁ / SE</div>
+                    <div class="step-substitution">${lr.t_formula} = <strong>${lr.t_statistic}</strong></div>
+                    <div class="step-formula-label">Keputusan (α = 0.05, df = ${lr.df})</div>
+                    <div class="step-substitution">|t| = ${Math.abs(lr.t_statistic).toFixed(4)} ${lr.t_significant ? '>' : '≤'} t<sub>kritis</sub> = ${lr.t_critical}<br><strong>${lr.t_significant ? 'Tolak H₀ → Slope signifikan' : 'Gagal tolak H₀ → Slope tidak signifikan'}</strong></div>`;
+            } else {
+                html += `<div class="step-info"><span class="step-info-icon">⚠️</span><span>Data tidak cukup untuk uji-t (memerlukan n > 2)</span></div>`;
+            }
+            html += '</div>';
+
+            // Result
+            const trendColor = lr.trend.includes('Meningkat') ? '#16A34A' : (lr.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Regresi Linear: Tren <span style="color:${trendColor}"><strong>${lr.trend}</strong></span> — ${lr.equation}, R² = ${lr.rSquared}</div>`;
+            el.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

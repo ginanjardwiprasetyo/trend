@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crawler Dashboard — TrendHidro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .crawler-container {
+            max-width: 1000px;
+            margin: 100px auto 40px;
+            padding: 0 24px;
+        }
+        .crawler-card {
+            background: #fff;
+            border-radius: var(--radius-panel);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--color-border);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .crawler-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            color: var(--color-text);
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #2563EB; color: #fff; }
+        .btn-primary:hover { background: #1D4ED8; }
+        .btn-warning { background: #F59E0B; color: #fff; }
+        .btn-warning:hover { background: #D97706; }
+        .btn-success { background: #10B981; color: #fff; }
+        .btn-success:hover { background: #059669; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .log-box {
+            background: #1F2937;
+            color: #10B981;
+            font-family: monospace;
+            padding: 16px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .log-box p { margin: 0 0 4px 0; }
+        .log-error { color: #EF4444; }
+        .log-warn { color: #FBBF24; }
+        .log-info { color: #60A5FA; }
+        
+        .stat-box {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .stat-item {
+            flex: 1;
+            background: #F3F4F6;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 2rem;
+            color: #2563EB;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(37, 99, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: #2563EB;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body style="background: #F9FAFB; overflow-y: auto; height: auto;">
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./">Beranda</a></li>
+            <li><a href="crawler.html" class="active">Data Crawler</a></li>
+        </ul>
+    </nav>
+
+    <div class="crawler-container">
+        <div class="crawler-card">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin-bottom: 0;">Dashboard Crawler Hidrologi.net</h2>
+                <div id="mainSpinner" class="spinner"></div>
+            </div>
+            <p style="color:#6B7280; margin-bottom: 20px;">Gunakan dashboard ini untuk mensinkronisasi data dari hidrologi.net ke dalam database lokal (Supabase). Harap bersabar saat proses berjalan.</p>
+            
+            <div class="stat-box">
+                <div class="stat-item">
+                    <span style="font-size:0.9rem; color:#4B5563;">Total Stasiun (Database)</span>
+                    <strong id="statStations">-</strong>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btnPhase1" onclick="runPhase1()">Tahap 1: Sinkronisasi Stasiun</button>
+                <button class="btn btn-warning" id="btnPhase2" onclick="runPhase2()">Tahap 2: Ambil Metadata (Tahun & Pengelola)</button>
+                <button class="btn btn-success" id="btnPhase3" onclick="runPhase3()">Tahap 3: Tarik Data Hujan Harian</button>
+            </div>
+            
+            <div class="log-box" id="logBox">
+                <p class="log-info">>> Sistem siap. Silakan klik tombol tahapan di atas.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/crawler.js"></script>
+</body>
+</html>

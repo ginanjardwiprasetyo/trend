@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>TrendHidro — Pemetaan Tren Hidrologi Interaktif</title>
+    <meta name="description"
+        content="TrendHidro adalah aplikasi pemetaan interaktif untuk pengolahan tren data runtut waktu hidrologi (curah hujan) di berbagai wilayah sungai di Indonesia menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
+    <meta name="keywords"
+        content="hidrologi, tren curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, data hidrologi indonesia, trendhidro">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost/project01/">
+    <meta property="og:title" content="TrendHidro — Pemetaan Tren Hidrologi Indonesia">
+    <meta property="og:description"
+        content="Analisis tren curah hujan interaktif dengan metode statistik canggih di seluruh wilayah sungai Indonesia.">
+    <meta property="og:image" content="http://localhost/project01/favicon.svg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://localhost/project01/">
+    <meta property="twitter:title" content="TrendHidro — Pemetaan Tren Hidrologi Indonesia">
+    <meta property="twitter:description"
+        content="Analisis tren curah hujan interaktif dengan metode statistik canggih.">
+    <meta property="twitter:image" content="http://localhost/project01/favicon.svg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Referrer Policy untuk OpenStreetMap -->
+    <meta name="referrer" content="origin">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Tailwind CSS CDN v3 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- SEO H1 -->
+    <h1
+        style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
+        Analisis Tren Hidrologi Indonesia — TrendHidro</h1>
+
+    <!-- ====== LOADER LAYAR PENUH ====== -->
+    <div class="loader-overlay hidden" id="fullLoader">
+        <div class="loader-content">
+            <div class="spinner-large"></div>
+            <p class="loader-text">Memproses Data...</p>
+        </div>
+    </div>
+
+    <!-- ====== NAVBAR ====== -->
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./" id="nav-beranda">Beranda</a></li>
+            <li class="nav-dropdown">
+                <button class="nav-drop-btn active" id="nav-fitur">
+                    Fitur
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="nav-drop-content">
+                    <a href="peta" class="active">Peta Interaktif</a>
+                    <a href="olah-data">Olah Data Anda</a>
+                </div>
+            </li>
+            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
+            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
+            <li><a href="tentang" id="nav-about">Tentang</a></li>
+        </ul>
+    </nav>
+
+    <!-- ====== PETA ====== -->
+    <div id="map"></div>
+
+    <!-- ====== PANEL SISI (SIDEBAR) ====== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+
+            <!-- Pilih Wilayah Sungai -->
+            <div class="control-group">
+                <label class="control-label" for="dasSelect">Wilayah Sungai</label>
+                <select class="form-select" id="dasSelect">
+                    <option value="bbwsbs">WS Bengawan Solo</option>
+                </select>
+            </div>
+
+            <!-- Pilih Data -->
+            <div class="control-group">
+                <label class="control-label">Pilih Data</label>
+                <div class="radio-group" id="dataTypeGroup">
+                    <button class="radio-btn active" data-value="bulanan">Bulanan</button>
+                    <button class="radio-btn" data-value="tahunan">Tahunan</button>
+                    <button class="radio-btn" data-value="musiman">Musiman</button>
+                </div>
+            </div>
+
+            <!-- Agregasi (Sembunyi) -->
+            <div class="control-group hidden" id="aggregationWrapper">
+                <label class="control-label">Agregasi</label>
+                <div class="aggregation-group" id="aggregationGroup">
+                    <button class="agg-btn" data-value="min">Min</button>
+                    <button class="agg-btn" data-value="maks">Maks</button>
+                    <button class="agg-btn" data-value="rerata">Rerata</button>
+                    <button class="agg-btn active" data-value="kumulatif">Kumulatif</button>
+                </div>
+            </div>
+
+            <!-- Pilih Bulan (muncul sesuai kebutuhan) -->
+            <div class="control-group" id="monthWrapper">
+                <label class="control-label" for="monthSelect">Pilih Bulan</label>
+                <select class="form-select" id="monthSelect">
+                    <option value="all">Semua Bulan</option>
+                    <option value="1">Januari</option>
+                    <option value="2">Februari</option>
+                    <option value="3">Maret</option>
+                    <option value="4">April</option>
+                    <option value="5">Mei</option>
+                    <option value="6">Juni</option>
+                    <option value="7">Juli</option>
+                    <option value="8">Agustus</option>
+                    <option value="9">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+            </div>
+
+            <!-- Periode -->
+            <div class="control-group">
+                <label class="control-label">Periode</label>
+                <div class="year-picker-wrapper">
+                    <div class="year-picker" id="pickerFrom">
+                        <button type="button" class="year-display" id="displayFrom">1980</button>
+                        <div class="year-grid hidden" id="gridFrom"></div>
+                    </div>
+                    <div class="year-sep">—</div>
+                    <div class="year-picker" id="pickerTo">
+                        <button type="button" class="year-display" id="displayTo">2025</button>
+                        <div class="year-grid hidden" id="gridTo"></div>
+                    </div>
+                    <!-- Hidden for JS compatibility -->
+                    <input type="hidden" id="yearFrom" value="1980">
+                    <input type="hidden" id="yearTo" value="2025">
+                </div>
+            </div>
+
+            <!-- Pilih Metode -->
+            <div class="control-group">
+                <label class="control-label">Pilih Metode</label>
+                <div class="method-list" id="methodList">
+                    <!-- Overlay Loader Sektoral -->
+                    <div class="section-loader-overlay" id="methodLoader">
+                        <div class="spinner-small"></div>
+                    </div>
+
+                    <div class="method-item" data-method="mann-kendall" id="methodMK">
+                        <span class="method-name">Mann-Kendall</span>
+                        <div class="toggle-switch" id="toggleMK"></div>
+                    </div>
+                    <div class="method-item" data-method="sens-slope" id="methodSS">
+                        <span class="method-name">Sen's Slope</span>
+                        <div class="toggle-switch" id="toggleSS"></div>
+                    </div>
+                    <div class="method-item" data-method="regresi-linear" id="methodRL">
+                        <span class="method-name">Regresi Linear</span>
+                        <div class="toggle-switch" id="toggleRL"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Kualitas Data (muncul jika metode aktif) -->
+            <div class="control-group hidden" id="qualityFilterWrapper">
+                <label class="control-label">Opsi Lainnya</label>
+                <div class="method-list">
+                    <div class="filter-item" id="qualityToggleItem"
+                        style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; border: 1.5px solid var(--color-border); border-radius: var(--radius-btn); transition: all var(--transition);">
+                        <span class="method-name"
+                            style="font-size: 0.9rem; font-weight: 600; color: var(--color-text);">Sembunyikan Data <
+                                50%</span>
+                                <div class="toggle-switch" id="toggleLowQuality"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legenda (tersembunyi by default) -->
+            <div class="control-group hidden" id="legendWrapper">
+                <label class="control-label">Legenda</label>
+                <div class="legend-box" id="legendBox">
+                    <!-- Diisi dinamis oleh JS berdasarkan metode aktif -->
+                </div>
+            </div>
+    </aside>
+
+    <!-- ====== TOMBOL TOGGLE SIDEBAR ====== -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Buka/Tutup Panel">
+        ‹
+    </button>
+
+    <!-- ====== LIGHTBOX MODAL ====== -->
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <div class="lightbox-modal" id="lightboxModal">
+            <div class="lightbox-header">
+                <h2 id="lightboxTitle">Nama Stasiun</h2>
+                <button class="lightbox-close" id="lightboxClose" title="Tutup">✕</button>
+            </div>
+            <div class="lightbox-body" id="lightboxBody">
+                <div class="lightbox-field">
+                    <span class="field-label">Lokasi</span>
+                    <span class="field-value" id="lbLocation">—</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label" id="lbTrendLabel">Nilai Tren</span>
+                    <span class="field-value" id="lbTrendValue">—</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label">Elevasi</span>
+                    <span class="field-value" id="lbElevation">Memuat...</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label">Koordinat</span>
+                    <span class="field-value" id="lbCoords">—</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label">Pengelola</span>
+                    <span class="field-value" id="lbManager">—</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label">Rentang Data</span>
+                    <span class="field-value" id="lbRange">—</span>
+                </div>
+                <div class="lightbox-field">
+                    <span class="field-label">Panjang Data</span>
+                    <span class="field-value" id="lbLength">—</span>
+                </div>
+            </div>
+            <div class="lightbox-footer">
+                <button class="btn btn-secondary" id="lightboxCloseBtn">Tutup</button>
+                <button class="btn btn-primary" id="lightboxDetailBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                    </svg>
+                    Detail
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SCRIPTS ====== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/app.js?v=2"></script>
+    <script src="js/sidebar.js?v=2"></script>
+    <script src="js/markers.js?v=2"></script>
+    <script src="js/lightbox.js?v=2"></script>
+</body>
+
+</html>

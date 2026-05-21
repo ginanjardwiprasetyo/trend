@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/project01/favicon.svg">
+    <title>Informasi Eror — TrendHidro</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Halaman informasi kesalahan aplikasi TrendHidro.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/project01/css/style.css">
+
+    <style>
+        /* Drizzle / Gerimis Styles */
+        .water-drop {
+            position: fixed;
+            top: -100px;
+            width: 1px;
+            height: 20px;
+            background: linear-gradient(to bottom, rgba(37, 99, 235, 0), rgba(37, 99, 235, 0.4));
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(0.5px);
+        }
+
+        @keyframes rain-fall {
+            0% {
+                transform: translateY(-20vh);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(110vh);
+                opacity: 0;
+            }
+        }
+
+        :root {
+            --wave-speed: 10s;
+            --wave-opacity: 0.5;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-text);
+        }
+
+        /* --- Entrance & Floating Animations --- */
+        @keyframes entrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+                filter: blur(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes float-container {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        /* --- Glassmorphism Card --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 32px;
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            width: 90%;
+            animation: entrance 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .container-inner {
+            animation: float-container 6s ease-in-out infinite 1s;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, #60A5FA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            filter: drop-shadow(0 10px 20px rgba(37, 99, 235, 0.15));
+            animation: text-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes text-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.03);
+                opacity: 0.95;
+            }
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .btn-home {
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            background: var(--color-primary);
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-home:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-home svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- Animated Waves --- */
+        .waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 18vh;
+            min-height: 100px;
+            max-height: 150px;
+            z-index: 1;
+        }
+
+        .parallax>use {
+            animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
+        }
+
+        .parallax>use:nth-child(1) {
+            animation-delay: -2s;
+            animation-duration: 7s;
+        }
+
+        .parallax>use:nth-child(2) {
+            animation-delay: -3s;
+            animation-duration: 10s;
+        }
+
+        .parallax>use:nth-child(3) {
+            animation-delay: -4s;
+            animation-duration: 13s;
+        }
+
+        .parallax>use:nth-child(4) {
+            animation-delay: -5s;
+            animation-duration: 20s;
+        }
+
+        @keyframes move-forever {
+            0% {
+                transform: translate3d(-90px, 0, 0);
+            }
+
+            100% {
+                transform: translate3d(85px, 0, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 6rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="mainContainer">
+        <div class="container-inner">
+            <div class="error-code" id="errCode">404</div>
+            <h1 id="errTitle">Maaf Terjadi Kesalahan</h1>
+            <p id="errDesc">Halaman yang Anda cari tidak ditemukan. Sepertinya Anda mengunjungi laman yang tidak ada.
+            </p>
+            <a href="/project01/" class="btn-home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Kembali ke Beranda
+            </a>
+        </div>
+    </div>
+
+    <!-- SVG Waves -->
+    <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="parallax">
+            <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255, 255, 255, 0.6)" />
+            <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255, 255, 255, 0.4)" />
+            <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255, 255, 255, 0.2)" />
+            <use xlink:href="#gentle-wave" x="48" y="7" fill="rgba(255, 255, 255, 1)" />
+        </g>
+    </svg>
+
+    <!-- Floating Drizzle Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Drizzle / Gerimis Effect
+            const dropCount = 100; // Lebih banyak titisan untuk efek gerimis
+            for (let i = 0; i < dropCount; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'water-drop';
+                drop.style.left = Math.random() * 100 + 'vw';
+                // Durasi lebih lambat (1.5s - 3s) agar terasa halus/smooth
+                const duration = Math.random() * 1.5 + 1.5;
+                drop.style.animation = `rain-fall ${duration}s linear infinite`;
+
+                // NEGATIVE DELAY: Membuat rintik seolah sudah jatuh saat page di-load
+                drop.style.animationDelay = `-${Math.random() * duration}s`;
+
+                // Variasi ketinggian dan transparansi (Lebih Halus)
+                drop.style.opacity = Math.random() * 0.2 + 0.2;
+                drop.style.height = (Math.random() * 10 + 15) + 'px';
+
+                document.body.appendChild(drop);
+            }
+
+            // Dynamic Content Logic
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorType = urlParams.get('error');
+
+            if (errorType === 'forbidden') {
+                document.getElementById('errCode').textContent = '403';
+                document.getElementById('errTitle').textContent = 'Akses Ditolak';
+                document.getElementById('errDesc').textContent = 'Maaf, Anda tidak memiliki izin untuk mengakses halaman ini secara langsung. Silakan kembali ke halaman utama.';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Cek Ketersediaan Data — TrendHidro</title>
+    <meta name="description"
+        content="Jelajahi ketersediaan data hidrologi harian dan bulanan dari berbagai stasiun di Indonesia. Cek kelengkapan data dan temukan celah data dengan mudah.">
+    <meta name="keywords"
+        content="data hidrologi, ketersediaan data, stasiun hujan, curah hujan harian, kelengkapan data, trendhidro">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #F9FAFB;
+            overflow-y: auto;
+            height: auto;
+        }
+
+        .data-container {
+            padding: 84px 32px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .data-header {
+            margin-bottom: 24px;
+        }
+
+        .data-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .data-header p {
+            color: #6B7280;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .data-table-wrap {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #F3F4F6;
+            padding: 14px 20px;
+            font-size: 0.85rem;
+            color: #4B5563;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #E5E7EB;
+            text-align: center;
+        }
+
+        .data-table td {
+            padding: 16px 20px;
+            font-size: 0.9rem;
+            color: #1F2937;
+            border-bottom: 1px solid #E5E7EB;
+            text-align: center;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        .badge-green {
+            background: #DCFCE7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-yellow {
+            background: #FEF9C3;
+            color: #854D0E;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-red {
+            background: #FEE2E2;
+            color: #991B1B;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        /* Missing Dialog */
+        .miss-dialog {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .miss-dialog.show {
+            display: flex;
+        }
+
+        .miss-card {
+            background: #fff;
+            width: 500px;
+            max-width: 90%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+
+        .miss-header {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .miss-header h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .miss-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6B7280;
+            cursor: pointer;
+        }
+
+        .miss-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .year-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .date-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .date-list li {
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FCA5A5;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .loading-miss {
+            text-align: center;
+            padding: 30px;
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #fff;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .pagination-info {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid #E5E7EB;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+
+        .page-btn.active {
+            background: #2563EB;
+            color: #fff;
+            border-color: #2563EB;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #F3F4F6;
+        }
+
+        /* Full Screen Loader */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .loader-overlay.show {
+            display: flex;
+        }
+
+        .loader-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #E5E7EB;
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-text {
+            font-weight: 600;
+            color: #1F2937;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+            height: 14px;
+            width: 100%;
+            display: block;
+        }
+
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 auto;
+        }
+
+        .skeleton-btn {
+            height: 28px;
+            width: 80px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- LOADER -->
+    <div class="loader-overlay show" id="fullLoader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Memproses Basis Data...</div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./" id="nav-beranda">Beranda</a></li>
+            <li class="nav-dropdown">
+                <button class="nav-drop-btn" id="nav-fitur">
+                    Fitur
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        style="margin-left:4px;">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="nav-drop-content">
+                    <a href="peta">Peta Interaktif</a>
+                    <a href="olah-data">Olah Data Anda</a>
+                </div>
+            </li>
+            <li><a href="data" id="nav-data" class="active">Ketersediaan Data</a></li>
+            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
+            <li><a href="tentang" id="nav-about">Tentang</a></li>
+        </ul>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="data-container">
+        <div class="data-header">
+            <h1>Ketersediaan Data Hidrologi</h1>
+            <p>Tinjau ketersediaan data harian dari semua stasiun.</p>
+        </div>
+
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Pos</th>
+                        <th>Lokasi</th>
+                        <th style="white-space: nowrap;">Tahun</th>
+                        <th>Kelengkapan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:30px; color:#6B7280;">Memuat basis data
+                            stasiun...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="pagination" class="pagination-container">
+                <!-- Pagination rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- DIALOG MISSING DATES -->
+    <div class="miss-dialog" id="missDialog">
+        <div class="miss-card">
+            <div class="miss-header">
+                <h2 id="missTitle">Celah Data: Nama Pos</h2>
+                <button onclick="closeMissDialog()">×</button>
+            </div>
+            <div class="miss-body">
+                <div class="year-selector">
+                    <label style="font-size:0.85rem; font-weight:600;">Lihat Kekosongan Harian pada Tahun:</label>
+                    <select class="form-select" id="missYearSelect"
+                        style="width:100px; padding:6px 12px; font-size:0.85rem; border-radius:6px;"></select>
+                </div>
+                <div id="missContent">
+                    <!-- Date list rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stationsCache = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = document.getElementById('fullLoader');
+
+            // 1. Load from cache first for instant UI
+            const cached = localStorage.getItem('stations_cache_full');
+            if (cached) {
+                try {
+                    stationsCache = JSON.parse(cached);
+                    renderTable();
+                    renderPagination();
+                    // Keep loader visible but we will hide it when fresh data is ready
+                } catch (e) {
+                    localStorage.removeItem('stations_cache_full');
+                }
+            } else {
+                renderSkeleton();
+            }
+
+            try {
+                // 2. Fetch fresh data
+                const apiRes = await fetch("php/get_stations.php");
+                const features = await apiRes.json();
+
+                if (features.error) throw new Error(features.message);
+
+                // Sort by completeness descending by default
+                const newCache = features.map(f => f.properties).sort((a, b) => (b.completeness || 0) - (a.completeness || 0));
+
+                // 3. Update cache and UI if changed
+                if (JSON.stringify(newCache) !== JSON.stringify(stationsCache)) {
+                    stationsCache = newCache;
+                    localStorage.setItem('stations_cache_full', JSON.stringify(stationsCache));
+                    renderTable();
+                    renderPagination();
+                }
+            } catch (err) {
+                console.error(err);
+                if (stationsCache.length === 0) {
+                    document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">Gagal memuat Data Stasiun</td></tr>';
+                }
+            } finally {
+                loader.classList.remove('show');
+            }
+        });
+
+        function renderSkeleton() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="skeleton" style="width:20px; margin:0 auto;"></span></td>
+                    <td><span class="skeleton" style="width:120px;"></span></td>
+                    <td><span class="skeleton" style="width:150px;"></span></td>
+                    <td><span class="skeleton" style="width:80px; margin:0 auto;"></span></td>
+                    <td><span class="skeleton" style="width:60px; margin:0 auto; height:20px; border-radius:20px;"></span></td>
+                    <td><div class="skeleton skeleton-btn"></div></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Event listener for year select inside modal
+        document.getElementById('missYearSelect').addEventListener('change', (e) => {
+            const yr = parseInt(e.target.value);
+            const pos_id = document.getElementById('missDialog').dataset.posid;
+            loadMissingDates(pos_id, yr);
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const currentData = stationsCache.slice(start, end);
+
+            if (currentData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#6B7280;">Tidak ada data ditemukan</td></tr>';
+                return;
+            }
+
+            currentData.forEach((st, idx) => {
+                const tr = document.createElement('tr');
+
+                // Fix Location Casing (Title Case)
+                const locNames = (st.location || '-').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                const pct = st.completeness || 0;
+                const pctDisplay = parseFloat(pct).toFixed(2);
+
+                let badgeClass = 'badge-red';
+                if (pct > 80) badgeClass = 'badge-green';
+                else if (pct > 50) badgeClass = 'badge-yellow';
+
+                const rowNumber = start + idx + 1;
+
+                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart}—${st.yearEnd}` : '—';
+
+                tr.innerHTML = `
+                    <td style="color: #6B7280; font-weight: 500;">${rowNumber}</td>
+                    <td style="font-weight:600;">Pos ${st.name}</td>
+                    <td>${locNames}</td>
+                    <td style="white-space: nowrap;">${yearRange}</td>
+                    <td><span class="${badgeClass}">${pctDisplay}%</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem; background:#DBEAFE; color:#1D4ED8; border:none;" 
+                            onclick="openMissDialog('${st.id}')">
+                            <svg style="width:14px; height:14px; display:inline; margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> 
+                            Cek Data
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPagination() {
+            const paginationEl = document.getElementById('pagination');
+            const totalPages = Math.ceil(stationsCache.length / rowsPerPage);
+
+            if (totalPages <= 1) {
+                paginationEl.style.display = 'none';
+                return;
+            } else {
+                paginationEl.style.display = 'flex';
+            }
+
+            const startItem = (currentPage - 1) * rowsPerPage + 1;
+            const endItem = Math.min(currentPage * rowsPerPage, stationsCache.length);
+
+            let html = `
+                <div class="pagination-info">
+                    Menampilkan <b>${startItem}-${endItem}</b> dari <b>${stationsCache.length}</b> stasiun
+                </div>
+                <div class="pagination-controls">
+                    <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span style="padding: 0 4px; color: #9CA3AF;">...</span>`;
+                }
+            }
+
+            html += `
+                    <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            `;
+
+            paginationEl.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(stationsCache.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+
+            currentPage = page;
+            renderTable();
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================
+        // MODAL MISSING DATES LOGIC
+        // ============================
+        function openMissDialog(pos_id) {
+            const st = stationsCache.find(s => s.id === pos_id);
+            if (!st) return;
+
+            const dialog = document.getElementById('missDialog');
+            dialog.dataset.posid = pos_id;
+
+            document.getElementById('missTitle').textContent = `Lacak Celah Data: Pos ${st.name}`;
+
+            const sel = document.getElementById('missYearSelect');
+            sel.innerHTML = '';
+
+            const startYear = st.yearStart || 1980;
+            const endYear = st.yearEnd || new Date().getFullYear();
+
+            // Build options (recent first)
+            for (let y = endYear; y >= startYear; y--) {
+                sel.innerHTML += `<option value="${y}">${y}</option>`;
+            }
+
+            dialog.classList.add('show');
+            loadMissingDates(pos_id, endYear); // default most recent
+        }
+
+        function closeMissDialog() {
+            document.getElementById('missDialog').classList.remove('show');
+        }
+
+        async function loadMissingDates(pos_id, year) {
+            const content = document.getElementById('missContent');
+            content.innerHTML = '<div class="loading-miss"><div class="spinner" style="width:24px; height:24px; margin:0 auto 10px; border-width:2px;"></div>Memindai hari per hari pada database...</div>';
+
+            try {
+                // Fetch daily timeseries data for this year
+                const payload = {
+                    pos_id: pos_id,
+                    dataType: 'harian',
+                    yearFrom: year,
+                    yearTo: year,
+                    month: 'all'
+                };
+
+                const res = await fetch('php/get_timeseries.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                // Track day of year based on payload
+                const dataSet = new Set();
+                data.forEach(d => {
+                    let doy = Math.round((d.year - year) * 365.0) + 1;
+                    dataSet.add(doy);
+                });
+
+                const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                const daysInMonth = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+
+                let doyCounter = 1;
+                const missingList = [];
+
+                for (let m = 0; m < 12; m++) {
+                    for (let d = 1; d <= daysInMonth[m]; d++) {
+                        if (!dataSet.has(doyCounter)) {
+                            // Missing!
+                            missingList.push(`${d} ${monthNames[m]} ${year}`);
+                        }
+                        doyCounter++;
+                    }
+                }
+
+                if (missingList.length === 0) {
+                    content.innerHTML = `
+                        <div style="text-align:center; padding:40px 20px;">
+                            <svg style="width:48px; height:48px; color:#16A34A; margin:0 auto 10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                            <h3 style="color:#1F2937; margin-bottom:6px; font-weight:700;">Data Lengkap 100%</h3>
+                            <p style="color:#6B7280; font-size:0.9rem;">Tidak ada hari yang terlewat sepanjang tahun ${year}.</p>
+                        </div>
+                    `;
+                } else {
+                    let htmlList = `<div style="margin-bottom:12px; font-size:0.9rem; color:#4B5563;">Ditemukan <strong style="color:#DC2626;">${missingList.length}</strong> kekosongan data harian.</div>`;
+                    htmlList += '<ul class="date-list">';
+                    missingList.forEach(mDate => {
+                        htmlList += `<li>${mDate}</li>`;
+                    });
+                    htmlList += '</ul>';
+                    content.innerHTML = htmlList;
+                }
+
+            } catch (e) {
+                console.error(e);
+                content.innerHTML = '<div style="color:#DC2626; padding:20px; text-align:center;">Gagal memuat celah data.</div>';
+            }
+        }
+    </script>
+</body>
+
+</html>

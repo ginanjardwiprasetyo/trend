@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Dokumentasi — TrendHidro</title>
+    <meta name="description"
+        content="Dokumentasi lengkap TrendHidro: rumus, metode, panduan penggunaan, dan changelogs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #F9FAFB;
+            overflow-y: auto;
+            height: auto;
+        }
+
+        .docs-layout {
+            display: flex;
+            min-height: calc(100vh - 56px);
+            padding-top: 56px;
+        }
+
+        /* Sidebar Nav */
+        .docs-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #fff;
+            border-right: 1px solid #E5E7EB;
+            padding: 24px 0;
+            position: sticky;
+            top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+        }
+
+        .docs-sidebar h4 {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #9CA3AF;
+            padding: 8px 20px;
+            margin-top: 8px;
+        }
+
+        .docs-sidebar a {
+            display: block;
+            padding: 8px 20px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #4B5563;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .docs-sidebar a:hover {
+            color: #2563EB;
+            background: #F3F4F6;
+        }
+
+        .docs-sidebar a.active {
+            color: #2563EB;
+            border-left-color: #2563EB;
+            background: #EFF6FF;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .docs-content {
+            flex: 1;
+            padding: 32px 40px 60px;
+            max-width: 800px;
+        }
+
+        .docs-content h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #1F2937;
+        }
+
+        .docs-content h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 32px 0 12px;
+            color: #1F2937;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .docs-content h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 20px 0 8px;
+            color: #374151;
+        }
+
+        .docs-content p {
+            font-size: 0.93rem;
+            color: #4B5563;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .docs-content ul,
+        .docs-content ol {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .docs-content li {
+            font-size: 0.93rem;
+            color: #4B5563;
+            line-height: 1.8;
+            margin-bottom: 4px;
+        }
+
+        .docs-content code {
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #DC2626;
+        }
+
+        .docs-content .formula-box {
+            background: #F8FAFC;
+            border: 1px solid #E5E7EB;
+            border-left: 4px solid #2563EB;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+
+        .docs-content .info-box {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            color: #1E40AF;
+        }
+
+        .doc-section {
+            display: none;
+        }
+
+        .doc-section.active {
+            display: block;
+            animation: docFade 0.3s ease;
+        }
+
+        @keyframes docFade {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .changelog-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .changelog-item:last-child {
+            border-bottom: none;
+        }
+
+        .changelog-date {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #2563EB;
+            margin-bottom: 4px;
+        }
+
+        .changelog-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .changelog-desc {
+            font-size: 0.88rem;
+            color: #6B7280;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .docs-sidebar {
+                display: none;
+            }
+
+            .docs-content {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./">Beranda</a></li>
+            <li class="nav-dropdown">
+                <button class="nav-drop-btn" id="nav-fitur">
+                    Fitur
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        style="margin-left:4px;">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="nav-drop-content">
+                    <a href="peta">Peta Interaktif</a>
+                    <a href="olah-data">Olah Data Anda</a>
+                </div>
+            </li>
+            <li><a href="data">Ketersediaan Data</a></li>
+            <li><a href="dok" class="active">Dokumentasi</a></li>
+            <li><a href="tentang">Tentang</a></li>
+        </ul>
+    </nav>
+
+    <div class="docs-layout">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar" id="docsSidebar">
+            <h4>Umum</h4>
+            <a href="#tentang" class="active" onclick="showSection('tentang', this)">Tentang TrendHidro</a>
+            <a href="#format-data" onclick="showSection('format-data', this)">Format Data</a>
+            <a href="#changelog" onclick="showSection('changelog', this)"><i>Changelog</i></a>
+            <h4>Panduan</h4>
+            <a href="#peta-guide" onclick="showSection('peta-guide', this)">Peta Interaktif</a>
+            <a href="#olah-guide" onclick="showSection('olah-guide', this)">Olah Data Anda</a>
+            <h4>Metode</h4>
+            <a href="#mann-kendall" onclick="showSection('mann-kendall', this)">Mann-Kendall</a>
+            <a href="#sens-slope" onclick="showSection('sens-slope', this)">Sen's Slope</a>
+            <a href="#regresi-linear" onclick="showSection('regresi-linear', this)">Regresi Linear</a>
+        </aside>
+
+        <!-- Content -->
+        <main class="docs-content">
+
+            <!-- Tentang -->
+            <div class="doc-section active" id="sec-tentang">
+                <h1>Tentang TrendHidro</h1>
+                <p>TrendHidro adalah platform olah data runtut waktu hidrometeorologi.
+                    Aplikasi ini menyediakan tiga metode uji statistik untuk mendeteksi <i>trend</i> dalam data
+                    runtut waktu:
+                </p>
+                <ul>
+                    <li><strong>Mann-Kendall</strong> — Uji <i>trend</i> non-parametrik</li>
+                    <li><strong>Sen's Slope</strong> — Estimasi kemiringan <i>trend</i> non-parametrik</li>
+                    <li><strong>Regresi Linear</strong> — Uji <i>trend</i> parametrik</li>
+                </ul>
+            </div>
+
+            <!-- Panduan Peta -->
+            <div class="doc-section" id="sec-peta-guide">
+                <h1>Panduan Peta Interaktif</h1>
+                <p>Halaman <strong>Peta Interaktif</strong> menampilkan lokasi stasiun hujan pada peta Indonesia dengan
+                    warna marker yang menunjukkan hasil analisis <i>trend</i>.</p>
+                <h2>Cara Penggunaan</h2>
+                <ol>
+                    <li>Pilih <strong>Wilayah Sungai</strong> dari dropdown</li>
+                    <li>Pilih <strong>tipe data</strong>: Bulanan, Tahunan, atau Musiman</li>
+                    <li>Atur <strong>periode</strong> tahun analisis</li>
+                    <li>Aktifkan salah satu <strong>metode</strong> (Mann-Kendall, Sen's Slope, atau Regresi Linear)
+                    </li>
+                    <li>Klik marker stasiun untuk melihat detail</li>
+                </ol>
+                <h2>Fitur</h2>
+                <ul>
+                    <li>Warna marker berubah berdasarkan hasil <i>trend</i> (hijau = meningkat, merah = menurun, abu =
+                        tidak ada
+                        <i>trend</i>)
+                    </li>
+                    <li>Filter kualitas data untuk menyembunyikan stasiun dengan kelengkapan &lt; 50%</li>
+                    <li>Klik "Detail" pada popup untuk melihat grafik dan statistik lengkap</li>
+                </ul>
+            </div>
+
+            <!-- Panduan Olah Data -->
+            <div class="doc-section" id="sec-olah-guide">
+                <h1>Panduan Olah Data Anda</h1>
+                <p>Halaman <strong>Olah Data</strong> memungkinkan Anda mengupload data curah hujan sendiri dan
+                    menjalankan analisis <i>trend</i> langsung di browser.</p>
+                <h2>Format File</h2>
+                <p>File harus memiliki minimal 2 kolom:</p>
+                <ul>
+                    <li><strong>Kolom 1 — Tanggal:</strong> Format <code>dd/mm/yy</code> atau <code>dd/mm/yyyy</code>
+                    </li>
+                    <li><strong>Kolom 2 — Data:</strong> Nilai curah hujan (numerik, dalam mm)</li>
+                </ul>
+                <p>Format file yang didukung: <code>.csv</code>, <code>.xls</code>, <code>.xlsx</code></p>
+                <h2>Cara Penggunaan</h2>
+                <ol>
+                    <li>Seret file ke area upload atau klik untuk memilih file</li>
+                    <li>Data akan otomatis di-parse dan ditampilkan preview</li>
+                    <li>Pilih tipe agregasi data (Bulanan/Tahunan/Musiman) dan periode</li>
+                    <li>Klik <strong>Analisis</strong> untuk menjalankan perhitungan</li>
+                </ol>
+            </div>
+
+            <!-- Mann-Kendall -->
+            <div class="doc-section" id="sec-mann-kendall">
+                <h1>Mann-Kendall</h1>
+                <p>Uji non-parametrik untuk mendeteksi <i>trend</i> monoton dalam data runtut waktu. Tidak memerlukan
+                    asumsi
+                    distribusi normal.</p>
+
+                <h2>Langkah Perhitungan</h2>
+
+                <h3>Step 1: Hitung Statistik S</h3>
+                <p>Bandingkan semua pasangan data $(x_j, x_i)$ di mana $j > i$:</p>
+                <div class="formula-box">
+                    $$S = \sum_{k=1}^{n-1} \sum_{j=k+1}^{n} \text{sign}(x_j - x_k)$$
+
+                    $$\text{sign}(\theta) = \begin{cases} +1 & \text{jika } \theta > 0 \\ 0 & \text{jika } \theta = 0 \\
+                    -1 & \text{jika } \theta < 0 \end{cases}$$ </div>
+
+                        <h3>Step 2: Hitung Varians S</h3>
+                        <div class="formula-box">
+                            $$\text{Var}(S) = \frac{n(n-1)(2n+5) - \sum_{p=1}^{g} t_p(t_p - 1)(2t_p + 5)}{18}$$
+                        </div>
+                        <p>Di mana $t_p$ adalah jumlah data dalam <em>tied group</em> ke-$p$, dan $g$ adalah jumlah tied
+                            groups.</p>
+
+                        <h3>Step 3: Hitung Z-Score</h3>
+                        <div class="formula-box">
+                            $$Z = \begin{cases} \frac{S - 1}{\sqrt{\text{Var}(S)}} & \text{jika } S > 0 \\ 0 &
+                            \text{jika } S = 0 \\ \frac{S + 1}{\sqrt{\text{Var}(S)}} & \text{jika } S < 0 \end{cases}$$
+                                </div>
+
+                                <h3>Step 4: Keputusan</h3>
+                                <div class="info-box">
+                                    Jika $|Z| > 1.96$ → <i>Trend</i> <strong>signifikan</strong> pada tingkat
+                                    kepercayaan 95%
+                                    ($\alpha = 0.05$).<br>
+                                    $Z > 0$ → <i>Trend</i> <strong>meningkat</strong>, $Z < 0$ → <i>Trend</i>
+                                        <strong>menurun</strong>.
+                                </div>
+                        </div>
+
+                        <!-- Sen's Slope -->
+                        <div class="doc-section" id="sec-sens-slope">
+                            <h1>Sen's Slope</h1>
+                            <p>Estimator non-parametrik untuk menghitung besaran kemiringan <i>trend</i>. Lebih robust
+                                terhadap
+                                <i>outlier</i> dibanding regresi linear.
+                            </p>
+
+                            <h2>Langkah Perhitungan</h2>
+
+                            <h3>Step 1: Hitung Semua Kemiringan Pasangan</h3>
+                            <div class="formula-box">
+                                $$Q_i = \frac{x_j - x_k}{j - k} \quad \text{untuk semua } j > k$$
+                            </div>
+
+                            <h3>Step 2: Median Kemiringan</h3>
+                            <div class="formula-box">
+                                $$\hat{\beta} = \text{median}(Q_1, Q_2, \ldots, Q_N)$$
+                            </div>
+                            <p>Di mana $N = \frac{n(n-1)}{2}$ adalah jumlah total pasangan.</p>
+
+                            <h3>Step 3: Hitung Intercept</h3>
+                            <div class="formula-box">
+                                $$\hat{\alpha} = \text{median}(y_i - \hat{\beta} \cdot x_i)$$
+                            </div>
+
+                            <h3>Interpretasi</h3>
+                            <div class="info-box">
+                                $\hat{\beta} > 0$ → <i>Trend</i> <strong>meningkat</strong><br>
+                                $\hat{\beta} < 0$ → <i>Trend</i> <strong>menurun</strong><br>
+                                    $\hat{\beta} = 0$ → <strong>Tidak ada <i>trend</i></strong>
+                            </div>
+                        </div>
+
+                        <!-- Regresi Linear -->
+                        <div class="doc-section" id="sec-regresi-linear">
+                            <h1>Regresi Linear</h1>
+                            <p>Metode parametrik untuk menentukan garis <i>trend</i> yang meminimalkan jumlah kuadrat
+                                residual.
+                            </p>
+
+                            <h2>Langkah Perhitungan</h2>
+
+                            <h3>Step 1: Hitung Komponen</h3>
+                            <div class="formula-box">
+                                $$S_{xx} = \sum(x_i - \bar{x})^2, \quad S_{yy} = \sum(y_i - \bar{y})^2, \quad S_{xy} =
+                                \sum(x_i - \bar{x})(y_i - \bar{y})$$
+                            </div>
+
+                            <h3>Step 2: Slope & Intercept</h3>
+                            <div class="formula-box">
+                                $$\hat{\beta} = \frac{S_{xy}}{S_{xx}}, \quad \hat{\alpha} = \bar{y} - \hat{\beta} \cdot
+                                \bar{x}$$
+                            </div>
+
+                            <h3>Step 3: Koefisien Determinasi ($R^2$)</h3>
+                            <div class="formula-box">
+                                $$R^2 = 1 - \frac{SS_{res}}{SS_{tot}} = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i -
+                                \bar{y})^2}$$
+                            </div>
+
+                            <h3>Step 4: Uji-t untuk Slope</h3>
+                            <div class="formula-box">
+                                $$t = \frac{\hat{\beta}}{SE(\hat{\beta})}, \quad SE(\hat{\beta}) =
+                                \sqrt{\frac{MSE}{S_{xx}}}, \quad MSE = \frac{SS_{res}}{n - 2}$$
+                            </div>
+
+                            <h3>Interpretasi</h3>
+                            <div class="info-box">
+                                $\hat{\beta} > 0$ → <i>Trend</i> <strong>meningkat</strong><br>
+                                $\hat{\beta} < 0$ → <i>Trend</i> <strong>menurun</strong><br>
+                                    $\hat{\beta} = 0$ → <strong>Tidak ada <i>trend</i></strong>
+                            </div>
+                        </div>
+
+                        <!-- Format Data -->
+                        <div class="doc-section" id="sec-format-data">
+                            <h1>Format Data</h1>
+                            <h2>Data dari <i>Database</i> (Peta)</h2>
+                            <p>Data curah hujan harian disimpan di <a href="https://supabase.com"
+                                    target="_blank">Supabase</a>－penyedia
+                                berbagai layanan digital termasuk penyimpanan data berbasis
+                                <i>cloud</i>.
+                            </p>
+
+                            <h2>Upload CSV/XLSX (Olah Data)</h2>
+                            <p>Format kolom yang diharapkan:</p>
+                            <table class="stat-table" style="max-width:400px;">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-weight:600;">Kolom 1</td>
+                                        <td>Tanggal (dd/mm/yy)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:600;">Kolom 2</td>
+                                        <td>Data (berupa angka)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p style="margin-top:12px;">Separator CSV yang didukung: koma (<code>,</code>) atau titik
+                                koma (<code>;</code>).</p>
+                        </div>
+
+                        <!-- Changelog -->
+                        <div class="doc-section" id="sec-changelog">
+                            <h1><i>Changelog</i></h1>
+                            <div class="changelog-item">
+                                <div class="changelog-date">Mei 2026</div>
+                                <div class="changelog-title">v1.0 — Rilis Awal</div>
+                                <div class="changelog-desc">
+                                    Peta interaktif, olah data Anda, metode Mann-Kendall,
+                                    Sen's Slope, dan Regresi Linear, halaman detail stasiun, ketersediaan data harian,
+                                    dokumentasi.
+                                </div>
+                            </div>
+                        </div>
+
+        </main>
+    </div>
+
+    <script>
+        function showSection(id, link) {
+            document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.docs-sidebar a').forEach(a => a.classList.remove('active'));
+            const sec = document.getElementById('sec-' + id);
+            if (sec) sec.classList.add('active');
+            if (link) link.classList.add('active');
+            // Re-render math
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(sec, { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }] });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Handle hash navigation
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                const link = document.querySelector(`.docs-sidebar a[href="#${hash}"]`);
+                if (link) showSection(hash, link);
+            }
+        });
+    </script>
+</body>
+
+</html>

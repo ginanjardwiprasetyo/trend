@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Olah Data Anda — TrendHidro</title>
+    <meta name="description"
+        content="Upload dan analisis data runtut waktu hidrologi Anda sendiri menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di browser.">
+    <meta name="keywords"
+        content="upload data, analisis hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Flaticon Icons -->
+    <link rel="stylesheet"
+        href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        body {
+            background: #F3F4F6;
+            overflow-y: auto;
+            height: auto;
+        }
+
+        .olah-container {
+            padding: 80px 24px 40px;
+            margin: 0 auto;
+        }
+
+        .olah-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .olah-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .olah-header p {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--color-border);
+            border-radius: var(--radius-panel);
+            padding: 48px 24px;
+            text-align: center;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+
+        .upload-zone svg {
+            width: 48px;
+            height: 48px;
+            color: var(--color-primary);
+        }
+
+        .upload-zone h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .upload-zone p {
+            font-size: 0.88rem;
+            color: var(--color-text-secondary);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-zone .file-info {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        /* Preview & Config Section */
+        .config-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .config-section.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Data Table Preview */
+        .preview-wrap {
+            background: #fff;
+            border-radius: var(--radius-panel);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .preview-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+        }
+
+        .preview-table th {
+            background: #F3F4F6;
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            color: #4B5563;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .preview-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #F3F4F6;
+            color: #1F2937;
+        }
+
+        .preview-table tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        .preview-info {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: #6B7280;
+            border-top: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Toolbar */
+        .olah-toolbar {
+            background: #fff;
+            border-radius: var(--radius-panel);
+            border: 1px solid var(--color-border);
+            padding: 16px 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .olah-toolbar label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            min-width: max-content;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: var(--radius-panel);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--color-border);
+            padding: 24px;
+            position: relative;
+        }
+
+        .result-card.full {
+            grid-column: 1 / -1;
+            margin-bottom: 12px;
+        }
+
+        .result-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-card h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--color-primary);
+        }
+
+        /* Availability Bar */
+        .avail-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .avail-bar-bg {
+            height: 6px;
+            background: #F1F5F9;
+            border-radius: 100px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .avail-bar-fill {
+            height: 100%;
+            width: 0;
+            transition: width 1s ease, background 0.4s;
+        }
+
+        /* Card Loader */
+        .card-loader-olah {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 12px;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .card-loader-olah.active {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="./" class="navbar-brand">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 7v10" />
+                <path d="M9 10l3-3 3 3" />
+                <path d="M9 14l3 3 3-3" />
+            </svg>
+            <span>TrendHidro</span>
+        </a>
+        <ul class="navbar-nav">
+            <li><a href="./" id="nav-beranda">Beranda</a></li>
+            <li class="nav-dropdown">
+                <button class="nav-drop-btn" id="nav-fitur">
+                    Fitur
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                        style="margin-left:4px;">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
+                </button>
+                <div class="nav-drop-content">
+                    <a href="peta">Peta Interaktif</a>
+                    <a href="olah-data">Olah Data Anda</a>
+                </div>
+            </li>
+            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
+            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
+            <li><a href="tentang" id="nav-about">Tentang</a></li>
+        </ul>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="olah-container">
+        <div class="olah-header">
+            <div>
+                <h1><i class="fi fi-rr-chart-histogram" style="color:var(--color-primary); margin-right:8px;"></i>Olah
+                    Data Anda</h1>
+                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung <i>trend</i> data runtut waktu langsung di
+                    <i>browser</i> Anda.
+                </p>
+            </div>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept=".csv,.xls,.xlsx">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <h3>Seret file atau klik untuk upload</h3>
+            <p>Format yang didukung: CSV, XLS, XLSX — Kolom: <strong>Tanggal</strong> (dd/mm/yy) dan
+                <strong>Data</strong>
+            </p>
+            <div class="file-info" id="fileInfo" style="display:none;"></div>
+        </div>
+
+        <!-- Config & Preview -->
+        <div class="config-section" id="configSection">
+            <!-- Preview Table Accordion -->
+            <div class="preview-accordion" style="margin-bottom: 24px;">
+                <div class="accordion-header" id="previewAccordionHeader" onclick="togglePreviewAccordion()">
+                    <h4>
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18M9 3v18" />
+                        </svg>
+                        Preview Data <span id="previewCount"
+                            style="font-weight:400; font-size:0.8rem; color:#6B7280; margin-left:8px;">—</span>
+                    </h4>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <button class="btn btn-secondary" style="padding:4px 12px; font-size:0.75rem;"
+                            onclick="event.stopPropagation(); resetUpload()">Ganti File</button>
+                        <svg class="accordion-icon" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="accordion-content" id="previewAccordionContent">
+                    <div class="preview-scroll" id="previewScroll" style="max-height: 400px; overflow-y: auto;">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th id="previewDataHeader">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="olah-toolbar">
+                <label>Agregasi Data:</label>
+                <select id="olahDtType" class="form-select" style="width:auto; min-width:120px;"
+                    onchange="toggleOlahMonth()">
+                    <option value="bulanan" selected>Bulanan</option>
+                    <option value="tahunan">Tahunan</option>
+                    <option value="musiman">Musiman</option>
+                </select>
+                <select id="olahMonth" class="form-select" style="width:auto; min-width:130px;">
+                    <option value="all">Semua Bulan</option>
+                    <option value="1">Januari</option>
+                    <option value="2">Februari</option>
+                    <option value="3">Maret</option>
+                    <option value="4">April</option>
+                    <option value="5">Mei</option>
+                    <option value="6">Juni</option>
+                    <option value="7">Juli</option>
+                    <option value="8">Agustus</option>
+                    <option value="9">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+
+                <div class="year-picker-wrapper" style="width: auto; min-width: 220px;">
+                    <div class="year-picker" id="pickerFrom">
+                        <button type="button" class="year-display" id="displayFrom">1980</button>
+                        <div class="year-grid grid-up hidden" id="gridFrom"></div>
+                    </div>
+                    <div class="year-sep">—</div>
+                    <div class="year-picker" id="pickerTo">
+                        <button type="button" class="year-display" id="displayTo">2025</button>
+                        <div class="year-grid grid-up hidden" id="gridTo"></div>
+                    </div>
+                    <input type="hidden" id="olahYFrom" value="1980">
+                    <input type="hidden" id="olahYTo" value="2025">
+                </div>
+
+                <button class="btn btn-primary" onclick="runOlahAnalysis()" id="btnOlahRun" style="white-space:nowrap;">
+                    Olah Data
+                </button>
+                <div id="olahSpinner" class="spinner"
+                    style="display:none; width:22px; height:22px; border-width:2.5px;"></div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-section" id="resultsSection">
+            <!-- Chart -->
+            <div class="result-card full">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18" />
+                        <path d="M7 16l4-8 4 4 4-10" />
+                    </svg>
+                    Grafik Data Runtut Waktu
+                </h3>
+                <div style="height:320px;">
+                    <canvas id="olahChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Trend Results + Availability -->
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px;">
+                <!-- Trend Recap -->
+                <div class="result-card" style="flex: 2; min-width: 380px;">
+                    <div class="card-loader-olah" id="olahTrendLoader">
+                        <div class="spinner"></div>
+                        <span style="font-size:0.8rem; font-weight:600; color:var(--color-primary);">Menghitung
+                            <i>Trend</i>...</span>
+                    </div>
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 6l-9.5 9.5-5-5L1 18" />
+                        </svg>
+                        Rekapitulasi <i>Trend</i> Data Runtut Waktu
+                    </h3>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong
+                                style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Mann-Kendall</strong>
+                            <div id="olahMkResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                        </div>
+                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Sen's
+                                Slope</strong>
+                            <div id="olahSsResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                        </div>
+                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Regresi
+                                Linear</strong>
+                            <div id="olahLrResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Availability -->
+                <div class="result-card" style="flex: 1; min-width: 200px;">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                        Ketersediaan Data
+                    </h3>
+                    <div class="avail-bar-wrap">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                            <span id="olahAvailPct"
+                                style="font-size:2rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
+                            <span id="olahAvailLabel"
+                                style="font-size:0.85rem; font-weight:600; color:#6B7280;">—</span>
+                        </div>
+                        <div class="avail-bar-bg">
+                            <div id="olahAvailBar" class="avail-bar-fill"></div>
+                        </div>
+                        <p style="font-size:0.9rem; color:#9CA3AF; margin-top:4px;">Persentase kelengkapan data pada
+                            periode terpilih.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="result-grid">
+                <div class="result-card">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18M9 3v18" />
+                        </svg>
+                        Parameter Statistik
+                    </h3>
+                    <table class="stat-table" id="olahStatTable">
+                        <tbody>
+                            <tr>
+                                <td>Rerata</td>
+                                <td id="olahStatMean">—</td>
+                            </tr>
+                            <tr>
+                                <td>Maksimum</td>
+                                <td id="olahStatMax">—</td>
+                            </tr>
+                            <tr>
+                                <td>Minimum</td>
+                                <td id="olahStatMin">—</td>
+                            </tr>
+                            <tr>
+                                <td>Simpangan Baku</td>
+                                <td id="olahStatStd">—</td>
+                            </tr>
+                            <tr>
+                                <td>Koefisien Variansi</td>
+                                <td id="olahStatCv">—</td>
+                            </tr>
+                            <tr>
+                                <td>Jumlah Data</td>
+                                <td id="olahStatLength">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="result-card">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18M9 3v18" />
+                        </svg>
+                        <i>Outlier</i> (IQR)
+                    </h3>
+                    <table class="stat-table">
+                        <tbody>
+                            <tr>
+                                <td>Batas Bawah</td>
+                                <td id="olahStatLb">—</td>
+                            </tr>
+                            <tr>
+                                <td>Batas Atas</td>
+                                <td id="olahStatUb">—</td>
+                            </tr>
+                            <tr>
+                                <td>Terdapat <i>Outlier</i>?</td>
+                                <td id="olahStatOutlier">—</td>
+                            </tr>
+                            <tr>
+                                <td>Periode Data</td>
+                                <td id="olahStatRange">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/olah-data.js"></script>
+
+</body>
+
+</html>

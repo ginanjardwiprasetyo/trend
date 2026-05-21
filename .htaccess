@@ -1,0 +1,25 @@
+# Matikan MultiViews dan Indexes untuk menghindari konflik dan menyembunyikan struktur folder
+Options -MultiViews -Indexes
+
+# Konfigurasi Error
+ErrorDocument 404 /project01/error.html
+ErrorDocument 403 /project01/error.html?error=forbidden
+
+RewriteEngine On
+RewriteBase /project01/
+
+# 1. Hapus Trailing Slash (biar /data/ jadi /data)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ $1 [L,R=301]
+
+# 2. Tangani file .html (misal: /data -> data.html)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^([^.]+)$ $1.html [NC,L]
+
+# 3. Tangani file .php (misal: /detail -> detail.php)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^.]+)$ $1.php [NC,L]
