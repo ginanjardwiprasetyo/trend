@@ -85,7 +85,19 @@ async function loadDAS(dasName) {
 
         // 2. Fetch Stasiun LITE (hanya tabel pos_hujan, skip query berat data_ch)
         const apiRes = await fetch("php/get_stations.php?lite=1");
-        if (!apiRes.ok) throw new Error('Gagal memuat Data Stasiun');
+        if (!apiRes.ok) {
+            try {
+                const errJson = await apiRes.json();
+                if (errJson && errJson.error) {
+                    throw new Error(errJson.message + (errJson.details ? " - " + errJson.details : ""));
+                }
+            } catch (jsonErr) {
+                if (jsonErr.message && !jsonErr.message.includes('JSON')) {
+                    throw jsonErr;
+                }
+            }
+            throw new Error('Gagal memuat Data Stasiun (HTTP ' + apiRes.status + ')');
+        }
         const stations = await apiRes.json();
 
         if (stations.error) {
