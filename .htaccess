@@ -1,12 +1,17 @@
 # Matikan MultiViews dan Indexes untuk menghindari konflik dan menyembunyikan struktur folder
 Options -MultiViews -Indexes
 
-# Konfigurasi Error
-ErrorDocument 404 /project01/error.html
-ErrorDocument 403 /project01/error.html?error=forbidden
+# Konfigurasi Error secara dinamis (XAMPP vs Render)
+<If "%{REQUEST_URI} =~ m#^/project01/#">
+    ErrorDocument 404 /project01/error.html
+    ErrorDocument 403 /project01/error.html?error=forbidden
+</If>
+<Else>
+    ErrorDocument 404 /error.html
+    ErrorDocument 403 /error.html?error=forbidden
+</Else>
 
 RewriteEngine On
-RewriteBase /project01/
 
 # 1. Hapus Trailing Slash (biar /data/ jadi /data)
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -23,3 +28,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^([^.]+)$ $1.php [NC,L]
+
