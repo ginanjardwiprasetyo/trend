@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libonig-dev \
-  && docker-php-ext-install zip mysqli pdo pdo_mysql mbstring
+    libpq-dev \
+  && docker-php-ext-install zip mysqli pdo pdo_mysql pdo_pgsql pgsql mbstring
 
 # Salin semua file web ke folder publik Apache
 COPY . /var/www/html/
