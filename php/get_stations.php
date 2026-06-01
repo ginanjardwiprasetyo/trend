@@ -51,7 +51,9 @@ try {
                        MIN(CASE WHEN rain IS NOT NULL THEN EXTRACT(YEAR FROM (tanggal::date)) END) as minYear, 
                        MAX(CASE WHEN rain IS NOT NULL THEN EXTRACT(YEAR FROM (tanggal::date)) END) as maxYear, 
                        COUNT(CASE WHEN rain IS NOT NULL THEN 1 END) as countRain,
-                       MAX(tanggal::date) - MIN(tanggal::date) + 1 as totalDays
+                       MAX(tanggal::date) - MIN(tanggal::date) + 1 as totalDays,
+                       MAX(rain) as maxRain,
+                       AVG(rain) as avgRain
                 FROM data_ch 
                 GROUP BY pos_id
             ");
@@ -86,7 +88,7 @@ try {
         $lokasi = (isset($st['lokasi']) && !empty($st['lokasi'])) ? $st['lokasi'] : '-';
         
         $st_stats = isset($stats[$pos_id]) ? $stats[$pos_id] : [
-            'minyear' => null, 'maxyear' => null, 'completeness' => 0, 'wilayah' => '-'
+            'minyear' => null, 'maxyear' => null, 'completeness' => 0, 'wilayah' => '-', 'maxrain' => null, 'avgrain' => null
         ];
 
         $wilayah = $st_stats['wilayah'] ?: '-';
@@ -105,6 +107,8 @@ try {
                 'yearStart' => $st_stats['minyear'] !== null ? (int)$st_stats['minyear'] : null,
                 'yearEnd' => $st_stats['maxyear'] !== null ? (int)$st_stats['maxyear'] : null,
                 'completeness' => (float)$st_stats['completeness'],
+                'maxRain' => $st_stats['maxrain'] !== null ? round((float)$st_stats['maxrain'], 1) : null,
+                'avgAnnualRain' => $st_stats['avgrain'] !== null ? round((float)$st_stats['avgrain'] * 365.25, 1) : null,
                 'trendData' => []
             ],
             'geometry' => [
