@@ -8,6 +8,7 @@ header('Access-Control-Allow-Origin: *');
 
 ini_set('max_execution_time', '60');
 ini_set('log_errors', 1);
+ini_set('display_errors', 0);
 ini_set('error_log', __DIR__ . '/php_error.log');
 
 require_once __DIR__ . '/../config/database.php';
@@ -122,7 +123,7 @@ try {
     
     // Simpan ke cache jika bukan mode lite
     if (!$isLite) {
-        file_put_contents($cacheFile, $output);
+        @file_put_contents($cacheFile, $output);
     }
     
     header('X-Cache: MISS');
