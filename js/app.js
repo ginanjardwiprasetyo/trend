@@ -433,42 +433,32 @@ function showLegend(method = null) {
     if (!activeMethod) return;
 
     // Item Legend umum (Kualitas Data)
-    const toggleQuality = document.getElementById('toggleLowQuality');
-    const hideLowQuality = toggleQuality ? toggleQuality.classList.contains('on') : false;
+    const t16 = document.getElementById('toggleHide16');
+    const hide16 = t16 ? t16.classList.contains('on') : false;
 
     let qualityLegend = '';
-    // Hanya munculkan legenda "Data < 50%" jika filternya NONAKTIF (data masih tampil di peta)
-    if (!hideLowQuality) {
+    // Hanya munculkan legenda "Data < 16 tahun" jika filternya NONAKTIF (data masih tampil di peta)
+    if (!hide16) {
         qualityLegend = `
             <div class="legend-divider" style="height:1px; background:var(--color-border); margin:4px 0;"></div>
             <div class="legend-item">
                 <span class="legend-icon" style="position:relative;">
                     <div style="width:16px; height:16px; background:#FACC15; color:#B91C1C; border:1px solid #B91C1C; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900;">!</div>
                 </span>
-                <span>Data kurang dari 50%</span>
+                <span>Data kurang dari 16 tahun</span>
             </div>
         `;
     }
 
-    // Mann-Kendall: 5 kategori dengan signifikansi
-    if (activeMethod === 'mann-kendall') {
-        legendBox.innerHTML = `
-            <div class="legend-item"><span class="legend-icon" style="color:#0B6E2F;">▲</span><span>Meningkat (Signifikan)</span></div>
-            <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span>Meningkat (Tidak Signifikan)</span></div>
-            <div class="legend-item"><span class="legend-icon" style="color:#991B1B;">▼</span><span>Menurun (Signifikan)</span></div>
-            <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span>Menurun (Tidak Signifikan)</span></div>
-            <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
-            ${qualityLegend}
-        `;
-    } else {
-        // Sen's Slope / Regresi Linear: 3 kategori sederhana
-        legendBox.innerHTML = `
-            <div class="legend-item"><span class="legend-icon up">▲</span><span>Tren Meningkat</span></div>
-            <div class="legend-item"><span class="legend-icon down">▼</span><span>Tren Menurun</span></div>
-            <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
-            ${qualityLegend}
-        `;
-    }
+    // Semua metode sekarang punya signifikansi
+    legendBox.innerHTML = `
+        <div class="legend-item"><span class="legend-icon" style="color:#0B6E2F;">▲</span><span>Meningkat (Signifikan)</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span>Meningkat (Tidak Signifikan)</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#991B1B;">▼</span><span>Menurun (Signifikan)</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span>Menurun (Tidak Signifikan)</span></div>
+        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
+        ${qualityLegend}
+    `;
 
     legendBox.classList.add('visible');
 }

@@ -441,9 +441,9 @@
 
         <!-- TABS HEADER -->
         <div class="tabs-header">
-            <button class="tab-btn active" onclick="switchTab('tab-ringkasan')">Ringkasan & Basis Data</button>
-            <button class="tab-btn" onclick="switchTab('tab-tren')">Olahan Trend Curah Hujan</button>
-            <button class="tab-btn" onclick="switchTab('tab-deskriptif')">Statistik Deskriptif</button>
+            <button class="tab-btn active" onclick="switchTab('tab-ringkasan', this)">Ringkasan & Basis Data</button>
+            <button class="tab-btn" onclick="switchTab('tab-tren', this)">Olahan Trend Curah Hujan</button>
+            <button class="tab-btn" onclick="switchTab('tab-deskriptif', this)">Statistik Deskriptif</button>
         </div>
 
         <!-- ==================== TAB 1: RINGKASAN & BASIS DATA ==================== -->
@@ -734,12 +734,12 @@
         let activeTrenResults = null;
 
         // Switch Tabs
-        function switchTab(tabId) {
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
             document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
+            btn.classList.add('active');
 
             if (tabId === 'tab-tren' && !activeTrenResults) {
                 loadTrendAnalysis();
@@ -1158,8 +1158,8 @@
                 const tr = document.createElement('tr');
 
                 const mkCell = formatTrendVal(mk.Z, mk.trend, displayStyle, true);
-                const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, false);
-                const lrCell = formatTrendVal(lr.slope, lr.trend || '', displayStyle, false);
+                const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, true);
+                const lrCell = formatTrendVal(lr.slope, lr.trend || '', displayStyle, true);
 
                 tr.innerHTML = `
                     <td style="color:#64748B; font-weight:600;">${counter++}</td>
@@ -1190,7 +1190,7 @@
                         <span style="font-weight: 700; color: #334155; margin-right: 4px;">Keterangan:</span>
                         <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#16A34A;">+</b> Naik</span>
                         <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#DC2626;">&minus;</b> Turun</span>
-                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#B91C1C;">*</b> Signifikan (α = 0.05, khusus kolom MK)</span>
+                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#B91C1C;">*</b> Signifikan (α = 0.05)</span>
                     </div>
                 `;
             } else {
@@ -1204,7 +1204,7 @@
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#DC2626; font-weight:bold;">▼</span> Menurun</span>
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#94A3B8; font-weight:bold;">•</span> Tidak Ada Tren</span>
                         </div>
-                        <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Warna gelap menunjukkan signifikansi (α = 0.05), khusus kolom Mann-Kendall.</div>
+                        <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Warna gelap menunjukkan signifikansi (α = 0.05).</div>
                     </div>
                 `;
             }

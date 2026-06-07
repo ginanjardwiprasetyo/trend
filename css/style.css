@@ -771,19 +771,25 @@ i, em {
     background: #fff;
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-btn);
-    padding: 4px;
+    padding: 0 6px;
     position: relative;
+    height: 42px;
+    box-sizing: border-box;
 }
 
 .year-picker {
     flex: 1;
     position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 .year-display {
     width: 100%;
-    padding: 8px 12px;
-    font-size: 0.93rem;
+    padding: 0 12px;
+    height: 32px;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text);
     background: #F9FAFB;
@@ -792,6 +798,9 @@ i, em {
     cursor: pointer;
     text-align: center;
     transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .year-display:hover {
@@ -814,7 +823,7 @@ i, em {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-panel);
     box-shadow: var(--shadow-large);
-    z-index: 1000;
+    z-index: 45;
     display: flex;
     flex-direction: column;
     min-width: 180px;
@@ -1271,4 +1280,78 @@ i, em {
         display: flex;
         flex-direction: column;
     }
+}
+
+/* --- Custom UI Select Dropdown --- */
+.custom-select-wrapper {
+    position: relative;
+    display: inline-block;
+    user-select: none;
+}
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 0.93rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #fff;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 8px;
+}
+.custom-select-trigger:hover, .custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.custom-select-trigger svg {
+    width: 14px;
+    height: 14px;
+    color: var(--color-text-secondary);
+    transition: transform 0.2s ease;
+}
+.custom-select-wrapper.open .custom-select-trigger svg {
+    transform: rotate(180deg);
+}
+.custom-select-options {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    min-width: 150px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-panel);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 250px;
+    overflow-y: auto;
+}
+.custom-select-wrapper.open .custom-select-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.custom-select-option {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.custom-select-option:hover {
+    background: #F3F4F6;
+}
+.custom-select-option.selected {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    font-weight: 600;
 }

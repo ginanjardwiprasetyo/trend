@@ -44,11 +44,9 @@
             box-sizing: border-box;
         }
 
-        /* Center vertically when upload zone is active (i.e. config-section is hidden) */
-        .olah-container:not(:has(.config-section.show)) {
-            justify-content: center;
-            padding-top: 40px;
-            padding-bottom: 40px;
+        /* Widen container when config section is active */
+        .olah-container:has(.config-section.show) {
+            max-width: 100%;
         }
 
         .olah-header {
@@ -74,9 +72,9 @@
         .upload-zone {
             border: 2px dashed #CBD5E1;
             border-radius: 24px;
-            padding: 64px 24px;
-            min-height: 320px;
-            max-width: 680px;
+            padding: 64px 40px;
+            min-height: 400px;
+            max-width: 740px;
             width: 100%;
             margin: 0 auto 24px;
             text-align: center;
@@ -274,28 +272,6 @@
             color: var(--color-primary);
         }
 
-        /* Availability Bar */
-        .avail-bar-wrap {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            gap: 10px;
-        }
-
-        .avail-bar-bg {
-            height: 6px;
-            background: #F1F5F9;
-            border-radius: 100px;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .avail-bar-fill {
-            height: 100%;
-            width: 0;
-            transition: width 1s ease, background 0.4s;
-        }
-
         /* Card Loader */
         .card-loader-olah {
             position: absolute;
@@ -427,7 +403,7 @@
 
             <!-- Toolbar -->
             <div class="olah-toolbar">
-                <label>Agregasi Data:</label>
+                <label>Pilih Data:</label>
                 <select id="olahDtType" class="form-select" style="width:auto; min-width:120px;"
                     onchange="toggleOlahMonth()">
                     <option value="bulanan" selected>Bulanan</option>
@@ -503,45 +479,49 @@
                         </svg>
                         Rekapitulasi <i>Trend</i> Data Runtut Waktu
                     </h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong
-                                style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Mann-Kendall</strong>
-                            <div id="olahMkResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
+                            <div id="olahMkResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
-                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Sen's
-                                Slope</strong>
-                            <div id="olahSsResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                        <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Sen's Slope</strong>
+                            <div id="olahSsResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
-                        <div style="padding:12px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:6px; color:#2563EB; font-size:0.88rem;">Regresi
-                                Linear</strong>
-                            <div id="olahLrResult" style="font-size:0.85rem; color:#4B5563;">Menunggu...</div>
+                        <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
+                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Regresi</strong>
+                            <div id="olahLrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;">*Warna gelap menunjukkan
+                        signifikansi tingkat kepercayaan 95% (α = 0.05)</div>
                 </div>
 
                 <!-- Availability -->
-                <div class="result-card" style="flex: 1; min-width: 200px;">
+                <div class="result-card" style="flex: 1; min-width: 220px; display: flex; flex-direction: column;">
                     <h3>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                         </svg>
-                        Ketersediaan Data
+                        Ketersediaan Data Periode Terpilih
                     </h3>
-                    <div class="avail-bar-wrap">
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <span id="olahAvailPct"
-                                style="font-size:2rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
-                            <span id="olahAvailLabel"
-                                style="font-size:0.85rem; font-weight:600; color:#6B7280;">—</span>
+                                style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
+                            <div id="olahAvailBadge"
+                                style="padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; background:#F3F4F6; color:#6B7280;">
+                                —
+                            </div>
                         </div>
-                        <div class="avail-bar-bg">
-                            <div id="olahAvailBar" class="avail-bar-fill"></div>
+                        <div style="height:6px; background:#F1F5F9; border-radius:100px; overflow:hidden; width:100%;">
+                            <div id="olahAvailBar"
+                                style="height:100%; width:0%; background:#3B82F6; transition: width 1s ease, background 0.4s;">
+                            </div>
                         </div>
-                        <p style="font-size:0.9rem; color:#9CA3AF; margin-top:4px;">Persentase kelengkapan data pada
-                            periode terpilih.</p>
+                        <div id="olahAvailLabel" style="font-size:0.85rem; color:#6B7280; font-weight:500;">
+                            Menunggu data...
+                        </div>
                     </div>
                 </div>
             </div>
@@ -617,6 +597,11 @@
                 </div>
             </div>
         </div>
+
+        <footer
+            style="margin-top:auto; padding: 24px 0 8px; text-align:center; font-size:0.8rem; color:#9CA3AF; border-top:1px solid #E5E7EB;">
+            &copy; 2026 TrendHidro. Platform Olah Data Runtut Waktu.
+        </footer>
     </div>
 
     <script src="js/olah-data.js"></script>

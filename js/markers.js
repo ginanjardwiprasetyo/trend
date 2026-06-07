@@ -48,9 +48,9 @@ function createTrendIcon(trend, completeness = 1.0) {
             symbol = '—';
     }
 
-    // Indikator peringatan jika data < 50%
+    // Indikator peringatan jika data < 16 tahun
     let warningOverlay = '';
-    if (parseFloat(completeness) < 0.5) {
+    if (parseFloat(completeness) < 16) {
         warningOverlay = `
             <div style="
                 position: absolute;
@@ -69,7 +69,7 @@ function createTrendIcon(trend, completeness = 1.0) {
                 font-weight: 900;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.4);
                 z-index: 10;
-            " title="Data Kurang dari 50%">!</div>
+            " title="Panjang Data Kurang dari 16 Tahun">!</div>
         `;
     }
 
@@ -135,8 +135,10 @@ function clearStationMarkers() {
 // ====== UPDATE IKON TREN ======
 function updateTrendMarkers(results) {
     // Cek status filter kualitas data dari UI
-    const toggleQuality = document.getElementById('toggleLowQuality');
-    const hideLowQuality = toggleQuality ? toggleQuality.classList.contains('on') : false;
+    const t16 = document.getElementById('toggleHide16');
+    const t30 = document.getElementById('toggleHide30');
+    const hide16 = t16 ? t16.classList.contains('on') : false;
+    const hide30 = t30 ? t30.classList.contains('on') : false;
 
     // Optimasi O(N): Gunakan Map untuk pencarian cepat berdasarkan ID
     const resultMap = new Map();
@@ -145,24 +147,25 @@ function updateTrendMarkers(results) {
     stationMarkers.forEach(marker => {
         const result = resultMap.get(marker.stationData.id);
         
-        // Ambil kelengkapan dari hasil analisis per periode, 
-        // atau gunakan kelengkapan global stasiun jika analisis tidak tersedia
-        let completeness = (result && result.completeness !== undefined) 
-            ? result.completeness 
-            : (marker.stationData.completeness / 100 || 0);
+        // Panjang Data (Tahun)
+        const start = marker.stationData.yearStart;
+        const end = marker.stationData.yearEnd;
+        const hasRange = (start !== null && start !== undefined && end !== null && end !== undefined);
+        const dataLength = hasRange ? (end - start + 1) : 0;
 
-        // Jika ada di statistik data_ch dan completeness > 1, asumsikan skala 0-100
-        if (completeness > 1) completeness /= 100;
-
-        // Filter Kualitas Data: Sembunyikan marker jika < 50% dan filter aktif
-        if (hideLowQuality && completeness < 0.5) {
+        // Filter Kualitas Data: Sembunyikan marker jika < 16 atau < 30 tahun dan filter aktif.
+        // Stasiun tanpa yearStart/yearEnd (dataLength = 0) tidak disembunyikan oleh filter
+        // karena tidak ada info panjang data yang valid.
+        if (hasRange && ((hide16 && dataLength < 16) || (hide30 && dataLength < 30))) {
             map.removeLayer(marker);
         } else {
             // Pastikan muncul kembali jika sebelumnya disembunyikan
             if (!map.hasLayer(marker)) marker.addTo(map);
             
             if (result) {
-                marker.setIcon(createTrendIcon(result.trend, completeness));
+                // Pass dataLength as completeness to createTrendIcon so it knows whether to show warning
+                // warning is only shown if hide16 is false, which is naturally handled if dataLength < 16 is passed and not filtered
+                marker.setIcon(createTrendIcon(result.trend, hide16 ? 99 : dataLength));
             } else {
                 marker.setIcon(createStationIcon());
             }
@@ -175,5 +178,27 @@ function resetMarkerIcons() {
     stationMarkers.forEach(marker => {
         if (!map.hasLayer(marker)) marker.addTo(map);
         marker.setIcon(createStationIcon());
+    });
+}
+
+// ====== APPLY QUALITY FILTER (tanpa metode aktif) ======
+function applyQualityFilter() {
+    const t16 = document.getElementById('toggleHide16');
+    const t30 = document.getElementById('toggleHide30');
+    const hide16 = t16 ? t16.classList.contains('on') : false;
+    const hide30 = t30 ? t30.classList.contains('on') : false;
+
+    stationMarkers.forEach(marker => {
+        const start = marker.stationData.yearStart;
+        const end = marker.stationData.yearEnd;
+        const hasRange = (start !== null && start !== undefined && end !== null && end !== undefined);
+        const dataLength = hasRange ? (end - start + 1) : 0;
+
+        // Stasiun tanpa yearStart/yearEnd (dataLength = 0) tidak disembunyikan oleh filter
+        if (hasRange && ((hide16 && dataLength < 16) || (hide30 && dataLength < 30))) {
+            map.removeLayer(marker);
+        } else {
+            if (!map.hasLayer(marker)) marker.addTo(map);
+        }
     });
 }

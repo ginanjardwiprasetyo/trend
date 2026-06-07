@@ -121,11 +121,31 @@ $pValue = $mk['pValue'];
 $alpha = 0.05;
 
 // ====== TENTUKAN TREN ======
+// Hitung Confidence Interval 95% (alpha = 0.05)
+// Z_{1-alpha/2} = Z_0.975 = 1.96
+$C_alpha = 1.96 * sqrt($mk['varS']);
+$M1 = ($slopeCount - $C_alpha) / 2;
+$M2 = ($slopeCount + $C_alpha) / 2;
+
+// Indices (0-based) for M1-th and (M2+1)-th largest slopes
+$idxLower = max(0, floor($M1) - 1); // Approximation for M1-th
+$idxUpper = min($slopeCount - 1, floor($M2 + 1) - 1); // Approximation for (M2+1)-th
+
+$Qmin = $slopes[$idxLower] ?? 0;
+$Qmax = $slopes[$idxUpper] ?? 0;
+
+// Signifikan jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
+$significant = ($Qmin > 0) || ($Qmax < 0);
+
 $trend = 'Tidak Ada Tren';
 if ($senSlope > 0) {
     $trend = 'Meningkat';
 } elseif ($senSlope < 0) {
     $trend = 'Menurun';
+}
+
+if ($trend !== 'Tidak Ada Tren') {
+    $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 
 // ====== OUTPUT ======
@@ -136,8 +156,10 @@ echo json_encode([
     'S' => $S,
     'Z' => round($Z, 3),
     'pValue' => round($pValue, 3),
+    'Qmin' => round($Qmin, 3),
+    'Qmax' => round($Qmax, 3),
     'alpha' => $alpha,
-    'significant' => $pValue <= $alpha,
+    'significant' => $significant,
     'trend' => $trend,
     'n' => $n,
     'slopeCount' => $slopeCount

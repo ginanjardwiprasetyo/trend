@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+require_once 'lib/stats.php';
+
 $input = json_decode(file_get_contents('php://input'), true);
 if (!$input) {
     echo json_encode(['error' => true, 'message' => 'Data tidak valid']);
@@ -310,9 +312,28 @@ if ($n <= $maxSampleRows) {
 }
 unset($allIntercepts);
 
+$C_alpha = 1.96 * sqrt($varS);
+$M1 = ($slopeCount - $C_alpha) / 2;
+$M2 = ($slopeCount + $C_alpha) / 2;
+
+$idxLower = max(0, floor($M1) - 1);
+$idxUpper = min($slopeCount - 1, floor($M2 + 1) - 1);
+
+$Qmin = $slopes[$idxLower] ?? 0;
+$Qmax = $slopes[$idxUpper] ?? 0;
+
+$ssSignificant = ($Qmin > 0) || ($Qmax < 0);
+
 $ssTrend = 'Tidak Ada Tren';
-if ($senSlope > 0) $ssTrend = 'Meningkat';
-elseif ($senSlope < 0) $ssTrend = 'Menurun';
+if ($senSlope > 0) {
+    $ssTrend = 'Meningkat';
+} elseif ($senSlope < 0) {
+    $ssTrend = 'Menurun';
+}
+
+if ($ssTrend !== 'Tidak Ada Tren') {
+    $ssTrend .= $ssSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+}
 
 $ssResult = [
     'slope_table' => $slopeTable,
@@ -328,7 +349,13 @@ $ssResult = [
     'intercept_formula' => 'bᵢ = yᵢ − slope × xᵢ, lalu ambil median dari semua bᵢ',
     'intercept' => round($ssIntercept, 4),
     'trend' => $ssTrend,
-    'equation' => 'y = ' . round($senSlope, 6) . ' × x + (' . round($ssIntercept, 4) . ')'
+    'equation' => 'y = ' . round($senSlope, 6) . ' × x + (' . round($ssIntercept, 4) . ')',
+    'C_alpha' => round($C_alpha, 4),
+    'M1' => round($M1, 4),
+    'M2' => round($M2, 4),
+    'Qmin' => round($Qmin, 6),
+    'Qmax' => round($Qmax, 6),
+    'significant' => $ssSignificant
 ];
 
 // ====== 3. REGRESI LINEAR STEP-BY-STEP ======
@@ -404,19 +431,8 @@ $r = ($lrSlope >= 0 ? 1 : -1) * sqrt(max(0, $rSquared));
 
 // t-test
 $SE = 0; $tStat = 0; $MSE = 0;
-$df = $n - 2;
-// t-critical at 0.05 two-tailed approximation
-$tCritical = 1.96; // approximate for large df
-if ($df <= 30 && $df > 0) {
-    // Lookup table for common df values
-    $tTable = [1=>12.706, 2=>4.303, 3=>3.182, 4=>2.776, 5=>2.571,
-               6=>2.447, 7=>2.365, 8=>2.306, 9=>2.262, 10=>2.228,
-               11=>2.201, 12=>2.179, 13=>2.160, 14=>2.145, 15=>2.131,
-               16=>2.120, 17=>2.110, 18=>2.101, 19=>2.093, 20=>2.086,
-               21=>2.080, 22=>2.074, 23=>2.069, 24=>2.064, 25=>2.060,
-               26=>2.056, 27=>2.052, 28=>2.048, 29=>2.045, 30=>2.042];
-    $tCritical = isset($tTable[$df]) ? $tTable[$df] : 1.96;
-}
+$df = max(1, $n - 2);
+$tCritical = getCriticalT($df, 0.05);
 
 if ($n > 2 && $Sxx > 0) {
     $MSE = $SSres / $df;
@@ -427,8 +443,15 @@ if ($n > 2 && $Sxx > 0) {
 $tSignificant = abs($tStat) > $tCritical;
 
 $lrTrend = 'Tidak Ada Tren';
-if ($lrSlope > 0) $lrTrend = 'Meningkat';
-elseif ($lrSlope < 0) $lrTrend = 'Menurun';
+if ($lrSlope > 0) {
+    $lrTrend = 'Meningkat';
+} elseif ($lrSlope < 0) {
+    $lrTrend = 'Menurun';
+}
+
+if ($lrTrend !== 'Tidak Ada Tren') {
+    $lrTrend .= $tSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+}
 
 $lrResult = [
     'detail_table' => $lrTable,

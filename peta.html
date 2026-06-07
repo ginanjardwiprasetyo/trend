@@ -192,13 +192,18 @@
             <!-- Filter Kualitas Data (muncul jika metode aktif) -->
             <div class="control-group hidden" id="qualityFilterWrapper">
                 <label class="control-label">Opsi Lainnya</label>
-                <div class="method-list">
-                    <div class="filter-item" id="qualityToggleItem"
+                <div class="method-list" style="gap: 8px;">
+                    <div class="filter-item" id="qualityToggle16Item"
                         style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; border: 1.5px solid var(--color-border); border-radius: var(--radius-btn); transition: all var(--transition);">
                         <span class="method-name"
-                            style="font-size: 0.9rem; font-weight: 600; color: var(--color-text);">Sembunyikan Data <
-                                50%</span>
-                                <div class="toggle-switch" id="toggleLowQuality"></div>
+                            style="font-size: 0.9rem; font-weight: 600; color: var(--color-text);">Sembunyikan Data < 16 Tahun</span>
+                        <div class="toggle-switch" id="toggleHide16"></div>
+                    </div>
+                    <div class="filter-item" id="qualityToggle30Item"
+                        style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; border: 1.5px solid var(--color-border); border-radius: var(--radius-btn); transition: all var(--transition);">
+                        <span class="method-name"
+                            style="font-size: 0.9rem; font-weight: 600; color: var(--color-text);">Sembunyikan Data < 30 Tahun</span>
+                        <div class="toggle-switch" id="toggleHide30"></div>
                     </div>
                 </div>
             </div>
@@ -268,10 +273,10 @@
 
     <!-- ====== SCRIPTS ====== -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="js/app.js?v=2"></script>
-    <script src="js/sidebar.js?v=2"></script>
-    <script src="js/markers.js?v=2"></script>
-    <script src="js/lightbox.js?v=2"></script>
+    <script src="js/app.js?v=3"></script>
+    <script src="js/sidebar.js?v=3"></script>
+    <script src="js/markers.js?v=3"></script>
+    <script src="js/lightbox.js?v=3"></script>
 </body>
 
 </html>

@@ -95,20 +95,24 @@ $rSquared = ($SStot > 0) ? 1 - ($SSres / $SStot) : 0;
 
 // ====== UJI SIGNIFIKANSI (t-test) ======
 $SE = 0;
+$tStat = 0;
+$pValue = 1;
+$tCritical = 1.96;
+$df = max(1, $n - 2);
+
 if ($n > 2 && $Sxx > 0) {
-    $MSE = $SSres / ($n - 2);
+    $MSE = $SSres / $df;
     $SE = sqrt($MSE / $Sxx);
     
     $tStat = ($SE > 0) ? $slope / $SE : 0;
     
-    // Pendekatan p-value menggunakan distribusi normal untuk n besar
+    // Pendekatan p-value menggunakan distribusi normal untuk n besar (masih dipertahankan untuk pValue API)
     $pValue = 2 * (1 - normalCDF(abs($tStat)));
-} else {
-    $tStat = 0;
-    $pValue = 1;
 }
 
 $alpha = 0.05;
+$tCritical = getCriticalT($df, $alpha);
+$significant = abs($tStat) > $tCritical;
 
 // ====== TENTUKAN TREN ======
 $trend = 'Tidak Ada Tren';
@@ -116,6 +120,10 @@ if ($slope > 0) {
     $trend = 'Meningkat';
 } elseif ($slope < 0) {
     $trend = 'Menurun';
+}
+
+if ($trend !== 'Tidak Ada Tren') {
+    $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 
 // ====== KOEFISIEN KORELASI (r) ======
@@ -130,9 +138,10 @@ echo json_encode([
     'rSquared' => round($rSquared, 3),
     'r' => round($r, 3),
     'tStatistic' => round($tStat, 3),
+    'tCritical' => round($tCritical, 3),
     'pValue' => round($pValue, 3),
     'alpha' => $alpha,
-    'significant' => $pValue <= $alpha,
+    'significant' => $significant,
     'trend' => $trend,
     'n' => $n,
     'meanX' => $meanX,

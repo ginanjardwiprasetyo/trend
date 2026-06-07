@@ -226,15 +226,15 @@ if (empty($stationId)) {
 
             <!-- Toolbar Grafik -->
             <div class="detail-card toolbar-sticky"
-                style="grid-column: 1 / -1; display:flex; gap:12px; flex-wrap:nowrap; align-items:center; overflow:visible !important;">
-                <label style="font-size:0.9rem; font-weight:600; color:#4B5563; min-width:max-content;">Pilih
+                style="grid-column: 1 / -1; display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; overflow:visible !important;">
+                <label style="font-size:0.9rem; font-weight:600; color:#4B5563; min-width:max-content; flex-shrink:0; display:flex; align-items:center;">Pilih
                     Data:</label>
-                <select id="dtType" class="form-select" style="min-width:100px;" onchange="toggleMonthAgg()">
+                <select id="dtType" class="form-select" style="min-width:135px; flex-shrink:0;" onchange="toggleMonthAgg()">
                     <option value="bulanan" selected>Bulanan</option>
                     <option value="tahunan">Tahunan</option>
                     <option value="musiman">Musiman</option>
                 </select>
-                <select id="dtMonth" class="form-select" style="min-width:120px;">
+                <select id="dtMonth" class="form-select" style="min-width:165px; flex-shrink:0;">
                     <option value="all">Semua Bulan</option>
                     <option value="1">Januari</option>
                     <option value="2">Februari</option>
@@ -251,8 +251,9 @@ if (empty($stationId)) {
                 </select>
                 <!-- Agregasi dihilangkan sesuai request -->
                 <input type="hidden" id="dtAgg" value="kumulatif">
-
-                <div class="year-picker-wrapper" style="width: auto; min-width: 220px;">
+<label style="font-size:0.9rem; font-weight:600; color:#4B5563; min-width:max-content; flex-shrink:0; display:flex; align-items:center; margin-left:auto;">Rentang
+                    Tahun:</label>
+                <div class="year-picker-wrapper" style="width: auto; min-width: 230px; flex-shrink:0; height:42px;">
                     <div class="year-picker" id="pickerFrom">
                         <button type="button" class="year-display" id="displayFrom">1980</button>
                         <div class="year-grid hidden" id="gridFrom"></div>
@@ -267,9 +268,9 @@ if (empty($stationId)) {
                 </div>
 
                 <button class="btn btn-primary" onclick="updateGraphData()" id="btnUpdateData"
-                    style="white-space: nowrap;">Olah Data</button>
+                    style="white-space: nowrap; flex-shrink:0; height:42px; padding:0 22px;">Olah Data</button>
                 <div id="graphLoader" class="spinner"
-                    style="display:none; width:22px; height:22px; border-width:2.5px; margin-left:20px; flex-shrink:0; aspect-ratio:1/1;">
+                    style="display:none; width:22px; height:22px; border-width:2.5px; margin-left:4px; flex-shrink:0; aspect-ratio:1/1; align-self:center;">
                 </div>
             </div>
 
@@ -279,13 +280,23 @@ if (empty($stationId)) {
                     <div class="spinner"></div>
                     <span class="loader-label">Memuat Grafik...</span>
                 </div>
-                <h3>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 3v18h18" />
-                        <path d="M7 16l4-8 4 4 4-10" />
-                    </svg>
-                    Grafik Curah Hujan
-                </h3>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <h3 style="margin: 0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3v18h18" />
+                            <path d="M7 16l4-8 4 4 4-10" />
+                        </svg>
+                        Grafik Curah Hujan
+                    </h3>
+                    <div style="display:flex; gap:12px; font-size:0.8rem; font-weight:600; color:#4B5563;">
+                        <span style="display:flex; align-items:center; gap:4px;">
+                            <span style="width:16px; height:3px; background:#3B82F6; border-radius:2px;"></span> Curah Hujan
+                        </span>
+                        <span style="display:flex; align-items:center; gap:4px;">
+                            <span style="width:16px; height:3px; background:#DC2626; border-radius:2px;"></span> Garis Regresi
+                        </span>
+                    </div>
+                </div>
                 <div class="chart-container" style="height:320px;">
                     <canvas id="rainfallChart"></canvas>
                 </div>
@@ -307,7 +318,7 @@ if (empty($stationId)) {
                     </h3>
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Mann-Kendall</strong>
+                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
                             <div id="mkResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
@@ -319,6 +330,7 @@ if (empty($stationId)) {
                             <div id="lrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;">*Warna gelap menunjukkan signifikansi tingkat kepercayaan 95% (α = 0.05)</div>
                 </div>
 
                 <!-- Ketersediaan Data Periode (kanan, 1/3) -->
@@ -331,7 +343,7 @@ if (empty($stationId)) {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                         </svg>
-                        Ketersediaan Data
+                        Ketersediaan Data Periode Terpilih
                     </h3>
 
                     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
@@ -448,66 +460,82 @@ if (empty($stationId)) {
                         </svg>
                         Ketersediaan Data Curah Hujan Harian
                     </h3>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
-                            onclick="changeAvailabilityYear(-1)">← Mundur</button>
-                        <div class="avail-year-picker-wrap">
-                            <button type="button" class="avail-year-btn" id="availYearDisplay" onclick="toggleAvailYearPicker(event)">-</button>
-                            <div class="avail-year-grid" id="availYearGrid"></div>
-                        </div>
-                        <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
-                            onclick="changeAvailabilityYear(1)">Maju →</button>
-                    </div>
-                </div>
-
-
-
-                <!-- X = Tanggal (1-31), Y = Bulan (1-12) -->
-                <div style="display:flex; align-items: flex-start; gap: 8px; justify-content: center;">
-                    <!-- Nama Bulan -->
-                    <div
-                        style="display:grid; grid-template-rows: repeat(12, 35px); gap: 2px; font-size: 0.75rem; color: #6B7280; text-align: right; font-weight: 600; padding-top: 15px;">
-                        <div>Januari</div>
-                        <div>Februari</div>
-                        <div>Maret</div>
-                        <div>April</div>
-                        <div>Mei</div>
-                        <div>Juni</div>
-                        <div>Juli</div>
-                        <div>Agustus</div>
-                        <div>September</div>
-                        <div>Oktober</div>
-                        <div>November</div>
-                        <div>Desember</div>
-                    </div>
-
-                    <div style="flex:none; overflow-x: auto;" class="no-scrollbar">
-                        <div id="availabilityGrid" class="github-grid" style="width: max-content;"></div>
-                        <!-- Angka Tanggal (1-31) -->
-                        <div
-                            style="display:grid; grid-template-columns: repeat(31, 35px); gap: 2px; margin-top: 8px; font-size: 0.7rem; color:#9CA3AF; text-align: center; font-weight: 500;">
-                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                            <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                            <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
-                            <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
-                            <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
-                            <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
-                            <span>31</span>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <button class="btn btn-secondary" id="btnTogglePie" style="padding:6px 14px; font-size:0.82rem; font-weight:600; border-radius:8px; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s ease; box-shadow:0 1px 2px rgba(0,0,0,0.04);" onclick="toggleDailyPieChart()">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path d="M12 3v9l4 2"/>
+                            </svg>
+                            <span id="btnTogglePieText">Tampilkan Ringkasan (Pie Chart)</span>
+                        </button>
+                        <div id="dailyYearNavControls" style="display:flex; gap:8px; align-items:center;">
+                            <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
+                                onclick="changeAvailabilityYear(-1)">← Mundur</button>
+                            <div class="avail-year-picker-wrap">
+                                <button type="button" class="avail-year-btn" id="availYearDisplay" onclick="toggleAvailYearPicker(event)">-</button>
+                                <div class="avail-year-grid" id="availYearGrid"></div>
+                            </div>
+                            <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
+                                onclick="changeAvailabilityYear(1)">Maju →</button>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    style="display:flex; gap:16px; margin-top:20px; border-top:1px solid #E5E7EB; padding-top:12px; font-size:0.85rem; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:300px;">
-                        <div class="avail-summary" id="availSummary">-</div>
+                <div id="dailyGridWrapper">
+                    <div id="dailyGridContent">
+                        <div style="display:flex; align-items: flex-start; gap: 8px; justify-content: center;">
+                            <!-- Nama Bulan -->
+                            <div
+                                style="display:grid; grid-template-rows: repeat(12, 35px); gap: 2px; font-size: 0.75rem; color: #6B7280; text-align: right; font-weight: 600; padding-top: 15px;">
+                                <div>Januari</div>
+                                <div>Februari</div>
+                                <div>Maret</div>
+                                <div>April</div>
+                                <div>Mei</div>
+                                <div>Juni</div>
+                                <div>Juli</div>
+                                <div>Agustus</div>
+                                <div>September</div>
+                                <div>Oktober</div>
+                                <div>November</div>
+                                <div>Desember</div>
+                            </div>
 
+                            <div style="flex:none; overflow-x: auto;" class="no-scrollbar">
+                                <div id="availabilityGrid" class="github-grid" style="width: max-content;"></div>
+                                <!-- Angka Tanggal (1-31) -->
+                                <div
+                                    style="display:grid; grid-template-columns: repeat(31, 35px); gap: 2px; margin-top: 8px; font-size: 0.7rem; color:#9CA3AF; text-align: center; font-weight: 500;">
+                                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                    <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                                    <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+                                    <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+                                    <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+                                    <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+                                    <span>31</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dailyGridFooter"
+                            style="display:flex; gap:16px; margin-top:20px; border-top:1px solid #E5E7EB; padding-top:12px; font-size:0.85rem; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:300px;">
+                                <div class="avail-summary" id="availSummary">-</div>
+                            </div>
+                            <div style="display:flex; gap:16px; align-items:center; font-size:0.8rem; color:#4B5563;">
+                                <span><span
+                                        style="display:inline-block;width:12px;height:12px;background:#3B82F6;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Tersedia</span>
+                                <span><span
+                                        style="display:inline-block;width:12px;height:12px;background:#EF4444;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Hilang</span>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:16px; align-items:center; font-size:0.8rem; color:#4B5563;">
-                        <span><span
-                                style="display:inline-block;width:12px;height:12px;background:#3B82F6;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Tersedia</span>
-                        <span><span
-                                style="display:inline-block;width:12px;height:12px;background:#EF4444;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Hilang</span>
+
+                    <div id="dailyPieWrapper" style="display:none; align-items:center; justify-content:center; flex-direction:column; min-height: 300px; width: 100%; padding: 24px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; box-sizing:border-box;">
+                        <div style="width: min(320px, 100%); aspect-ratio: 1/1; margin-bottom: 20px; position: relative;">
+                            <canvas id="dailyPieChart"></canvas>
+                        </div>
+                        <div id="dailyPieSummary" style="font-size: 0.95rem; color: #4B5563; text-align: center; max-width: 90%; line-height:1.6;"></div>
                     </div>
                 </div>
             </div>
@@ -521,6 +549,7 @@ if (empty($stationId)) {
         const STATION_ID = '<?php echo $stationId; ?>';
         let stationMeta = null;
         let chartInstance = null;
+        let pieChartInstance = null;
         let currentAvailYear = new Date().getFullYear();
         let minAvailYear = 1980;
         let maxAvailYear = currentAvailYear;
@@ -640,10 +669,13 @@ if (empty($stationId)) {
             const dtType = document.getElementById('dtType').value;
             const mo = document.getElementById('dtMonth');
 
-            if (dtType === 'tahunan') {
-                mo.style.display = 'none';
-            } else if (dtType === 'musiman') {
-                mo.style.display = 'inline-block';
+            // PENTING: Jangan ubah mo.style.display di sini.
+            // setupCustomSelects() sudah menyembunyikan native select (display:none)
+            // dan menggantinya dengan custom select wrapper. Visibilitas wrapper
+            // diatur oleh listener 'optionsChanged' di bawah.
+            mo.style.display = 'none';
+
+            if (dtType === 'musiman') {
                 // Update ke seasonal blocks
                 mo.innerHTML = `
                     <option value="1,2,3">Jan–Feb–Mar</option>
@@ -652,8 +684,7 @@ if (empty($stationId)) {
                     <option value="10,11,12">Okt–Nov–Des</option>
                 `;
             } else {
-                // bulanan
-                mo.style.display = 'inline-block';
+                // bulanan (default & tahunan aman-aman saja, fallback ke bulanan)
                 // Reset ke bulanan
                 mo.innerHTML = `
                     <option value="all">Semua Bulan</option>
@@ -671,6 +702,9 @@ if (empty($stationId)) {
                     <option value="12">Desember</option>
                 `;
             }
+            // Trigger update on custom select if it exists
+            const evt = new Event('optionsChanged');
+            mo.dispatchEvent(evt);
         }
 
         async function updateGraphData() {
@@ -940,11 +974,14 @@ if (empty($stationId)) {
                 if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
                     const mk = mkRes.value;
                     let mkColor = '#6B7280';
-                    if (mk.trend.includes('Meningkat') && mk.trend.includes('Signifikan)') && !mk.trend.includes('Tidak')) mkColor = '#0B6E2F';
-                    else if (mk.trend.includes('Meningkat')) mkColor = '#16A34A';
-                    else if (mk.trend.includes('Menurun') && mk.trend.includes('Signifikan)') && !mk.trend.includes('Tidak')) mkColor = '#991B1B';
-                    else if (mk.trend.includes('Menurun')) mkColor = '#DC2626';
-                    document.getElementById('mkResult').innerHTML = `<i>Trend</i> <strong style="color:${mkColor}">${mk.trend.replace('Tren', '<i>Trend</i>')}</strong><br>S: ${fM(mk.S)}<br>Z-Score: ${fM(mk.Z)}`;
+                    let tTrendMK = mk.trend === 'Tidak Ada Tren' ? 'tidak ada' : mk.trend;
+                    if (tTrendMK.includes('Meningkat') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#0B6E2F';
+                    else if (tTrendMK.includes('Meningkat')) mkColor = '#16A34A';
+                    else if (tTrendMK.includes('Menurun') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#991B1B';
+                    else if (tTrendMK.includes('Menurun')) mkColor = '#DC2626';
+                    
+                    const zKritis = 1.96;
+                    document.getElementById('mkResult').innerHTML = `<i>Trend</i>: <strong style="color:${mkColor}">${tTrendMK}</strong><br>Z Uji: ${fM(mk.Z)}<br>Z Kritis: ±${zKritis}`;
                 } else {
                     document.getElementById('mkResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -953,7 +990,19 @@ if (empty($stationId)) {
                 const ssRes = results[1];
                 if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
                     const ss = ssRes.value;
-                    document.getElementById('ssResult').innerHTML = `<i>Trend</i> <strong>${ss.trend.replace('Tren', '<i>Trend</i>')}</strong><br>Slope: ${fM(ss.slope)}`;
+                    let ssColor = '#6B7280';
+                    let tTrendSS = ss.trend === 'Tidak Ada Tren' ? 'tidak ada' : ss.trend;
+                    if (tTrendSS.includes('Meningkat') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#0B6E2F';
+                    else if (tTrendSS.includes('Meningkat')) ssColor = '#16A34A';
+                    else if (tTrendSS.includes('Menurun') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#991B1B';
+                    else if (tTrendSS.includes('Menurun')) ssColor = '#DC2626';
+                    
+                    let boundsHtml = '';
+                    if (ss.Qmin !== undefined && ss.Qmax !== undefined) {
+                        boundsHtml = `<br>Q<sub>min</sub>: ${fM(ss.Qmin)}<br>Q<sub>max</sub>: ${fM(ss.Qmax)}`;
+                    }
+                    
+                    document.getElementById('ssResult').innerHTML = `<i>Trend</i>: <strong style="color:${ssColor}">${tTrendSS}</strong><br>Q<sub>med</sub>: ${fM(ss.slope)}${boundsHtml}`;
                 } else {
                     document.getElementById('ssResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -962,7 +1011,16 @@ if (empty($stationId)) {
                 const lrRes = results[2];
                 if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
                     const lr = lrRes.value;
-                    document.getElementById('lrResult').innerHTML = `<i>Trend</i> <strong>${lr.trend.replace('Tren', '<i>Trend</i>')}</strong><br>Slope: ${fM(lr.slope)}<br>R²: ${lr.rSquared}`;
+                    let lrColor = '#6B7280';
+                    let tTrendLR = lr.trend === 'Tidak Ada Tren' ? 'tidak ada' : lr.trend;
+                    if (tTrendLR.includes('Meningkat') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#0B6E2F';
+                    else if (tTrendLR.includes('Meningkat')) lrColor = '#16A34A';
+                    else if (tTrendLR.includes('Menurun') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#991B1B';
+                    else if (tTrendLR.includes('Menurun')) lrColor = '#DC2626';
+                    
+                    const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
+                    const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
+                    document.getElementById('lrResult').innerHTML = `<i>Trend</i>: <strong style="color:${lrColor}">${tTrendLR}</strong><br>t Uji: ${tUji}<br>t Kritis: ${tKrit}`;
 
                     // Update main chart with trend line if available
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -971,11 +1029,11 @@ if (empty($stationId)) {
                         });
 
                         // Remove existing trend line if any
-                        chartInstance.data.datasets = chartInstance.data.datasets.filter(ds => ds.label !== 'Garis Regresi Linear');
+                        chartInstance.data.datasets = chartInstance.data.datasets.filter(ds => ds.label !== 'Garis Regresi');
 
                         chartInstance.data.datasets.push({
                             type: 'line',
-                            label: 'Garis Regresi Linear',
+                            label: 'Garis Regresi',
                             data: trendDataPts,
                             borderColor: '#DC2626',
                             borderWidth: 2,
@@ -1136,6 +1194,117 @@ if (empty($stationId)) {
             loadAvailabilityYear();
         }
 
+        let isDailyPieChartActive = false;
+        async function toggleDailyPieChart() {
+            isDailyPieChartActive = !isDailyPieChartActive;
+            const btn = document.getElementById('btnTogglePie');
+            const btnText = document.getElementById('btnTogglePieText');
+            const btnIcon = btn.querySelector('svg');
+            const gridContent = document.getElementById('dailyGridContent');
+            const pieWrapper = document.getElementById('dailyPieWrapper');
+            const navControls = document.getElementById('dailyYearNavControls');
+
+            if (isDailyPieChartActive) {
+                btnText.textContent = "Kembali ke Kalender";
+                btnIcon.innerHTML = '<path d="M19 12H5M12 19l-7-7 7-7"/>';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+                btn.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.25)';
+                gridContent.style.display = 'none';
+                navControls.style.display = 'none';
+                pieWrapper.style.display = 'flex';
+                
+                setCardLoading('availLoaderOverlay', true);
+                try {
+                    const payload = {
+                        pos_id: STATION_ID,
+                        dataType: 'harian',
+                        yearFrom: minAvailYear,
+                        yearTo: maxAvailYear,
+                        month: 'all'
+                    };
+                    const res = await fetch('php/get_timeseries.php', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    });
+                    const tsData = await res.json();
+                    
+                    const actualDataCount = tsData.length;
+                    let expectedDataCount = 0;
+                    for (let y = minAvailYear; y <= maxAvailYear; y++) {
+                        const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+                        expectedDataCount += isLeap ? 366 : 365;
+                    }
+                    if (expectedDataCount === 0) expectedDataCount = 1;
+                    const missingCount = expectedDataCount - actualDataCount;
+                    const pct = ((actualDataCount / expectedDataCount) * 100).toFixed(2);
+                    
+                    document.getElementById('dailyPieSummary').innerHTML = `Dari rentang tahun <strong>${minAvailYear} — ${maxAvailYear}</strong>,<br>Data tersedia: <strong>${actualDataCount}</strong> hari (${pct}%)<br>Data hilang: <strong>${missingCount}</strong> hari`;
+                    
+                    const ctx = document.getElementById('dailyPieChart').getContext('2d');
+                    if (pieChartInstance) {
+                        pieChartInstance.destroy();
+                    }
+                    pieChartInstance = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Tersedia', 'Hilang'],
+                            datasets: [{
+                                data: [actualDataCount, missingCount],
+                                backgroundColor: ['#3B82F6', '#EF4444'],
+                                borderWidth: 2,
+                                borderColor: '#fff',
+                                hoverOffset: 8
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { 
+                                        font: { family: 'Inter', size: 13, weight: '600' },
+                                        padding: 16,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                    padding: 12,
+                                    titleFont: { family: 'Inter', size: 13, weight: '600' },
+                                    bodyFont: { family: 'Inter', size: 12 },
+                                    cornerRadius: 8,
+                                    displayColors: true,
+                                    boxPadding: 4
+                                }
+                            },
+                            animation: {
+                                animateRotate: true,
+                                animateScale: true,
+                                duration: 600,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('dailyPieSummary').innerHTML = "Gagal memuat pie chart.";
+                } finally {
+                    setCardLoading('availLoaderOverlay', false);
+                }
+            } else {
+                btnText.textContent = "Tampilkan Ringkasan (Pie Chart)";
+                btnIcon.innerHTML = '<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 3v9l4 2"/>';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+                btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+                gridContent.style.display = 'block';
+                navControls.style.display = 'flex';
+                pieWrapper.style.display = 'none';
+            }
+        }
+
         // ====== AVAILABILITY YEAR PICKER ======
         let availViewedDecade = Math.floor(new Date().getFullYear() / 10) * 10;
 
@@ -1267,6 +1436,102 @@ if (empty($stationId)) {
                 document.getElementById('gridTo').classList.add('hidden');
             }
         });
+
+        // ====== CUSTOM SELECT UI ======
+        function setupCustomSelects() {
+            document.querySelectorAll('select.form-select').forEach(selectEl => {
+                if(selectEl.dataset.customized) return;
+                selectEl.dataset.customized = "true";
+                selectEl.style.display = 'none'; // Hide native select
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'custom-select-wrapper';
+                // Copy margin/width styles
+                wrapper.style.minWidth = selectEl.style.minWidth;
+                
+                const trigger = document.createElement('div');
+                trigger.className = 'custom-select-trigger';
+                trigger.style.width = '100%';
+                const triggerText = document.createElement('span');
+                triggerText.style.whiteSpace = 'nowrap';
+                triggerText.style.overflow = 'hidden';
+                triggerText.style.textOverflow = 'ellipsis';
+                trigger.appendChild(triggerText);
+                trigger.innerHTML += `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M6 9l6 6 6-6"/></svg>`;
+                
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'custom-select-options';
+                
+                wrapper.appendChild(trigger);
+                wrapper.appendChild(optionsContainer);
+                selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+                function renderOptions() {
+                    // Cek visibilitas select asal
+                    if (selectEl.style.display === 'none' && !selectEl.dataset.customized) {
+                        wrapper.style.display = 'none';
+                    } else if (selectEl.style.display === 'none') { 
+                        // sometimes native select is forced to none by our script, we should check its old display logic or let toggleMonthAgg handle wrapper display
+                    }
+
+                    optionsContainer.innerHTML = '';
+                    let selectedOption = selectEl.options[selectEl.selectedIndex] || selectEl.options[0];
+                    if (selectedOption) {
+                        trigger.querySelector('span').textContent = selectedOption.textContent;
+                    }
+
+                    Array.from(selectEl.options).forEach(opt => {
+                        const optEl = document.createElement('div');
+                        optEl.className = 'custom-select-option' + (opt.selected ? ' selected' : '');
+                        optEl.textContent = opt.textContent;
+                        optEl.dataset.value = opt.value;
+                        
+                        optEl.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            selectEl.value = opt.value;
+                            selectEl.dispatchEvent(new Event('change'));
+                            wrapper.classList.remove('open');
+                            renderOptions();
+                        });
+                        optionsContainer.appendChild(optEl);
+                    });
+                }
+                
+                renderOptions();
+
+                // Toggle dropdown
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Close other open selects
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                        if (w !== wrapper) w.classList.remove('open');
+                    });
+                    wrapper.classList.toggle('open');
+                });
+                
+                // Watch for changes via JS
+                selectEl.addEventListener('change', renderOptions);
+                selectEl.addEventListener('optionsChanged', () => {
+                    if (selectEl.id === 'dtMonth' || selectEl.id === 'dtAgg') {
+                        const dtType = document.getElementById('dtType').value;
+                        wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+                    }
+                    renderOptions();
+                });
+                
+                // Initial visibility check
+                if (selectEl.id === 'dtMonth' || selectEl.id === 'dtAgg') {
+                    const dtType = document.getElementById('dtType').value;
+                    wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+                }
+            });
+            
+            // Close dropdowns on outside click
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
+            });
+        }
+        setupCustomSelects();
     </script>
 </body>
 

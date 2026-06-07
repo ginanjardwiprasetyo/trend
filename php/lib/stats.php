@@ -63,3 +63,46 @@ function calcMannKendallBase($values, $n) {
 
     return ['S' => $S, 'varS' => $varS, 'Z' => $Z, 'pValue' => $pValue];
 }
+
+/**
+ * Fungsi untuk mendapatkan nilai kritis distribusi t
+ */
+function getCriticalT($df, $alpha = 0.05) {
+    if ($df <= 0) return 1.96;
+    
+    // T-table values for alpha = 0.05 (two-tailed)
+    $tTable = [
+        1 => 12.706, 2 => 4.303, 3 => 3.182, 4 => 2.776, 5 => 2.571,
+        6 => 2.447, 7 => 2.365, 8 => 2.306, 9 => 2.262, 10 => 2.228,
+        11 => 2.201, 12 => 2.179, 13 => 2.160, 14 => 2.145, 15 => 2.131,
+        16 => 2.120, 17 => 2.110, 18 => 2.101, 19 => 2.093, 20 => 2.086,
+        21 => 2.080, 22 => 2.074, 23 => 2.069, 24 => 2.064, 25 => 2.060,
+        26 => 2.056, 27 => 2.052, 28 => 2.048, 29 => 2.045, 30 => 2.042,
+        40 => 2.021, 50 => 2.009, 60 => 2.000, 80 => 1.990, 100 => 1.984,
+        120 => 1.980
+    ];
+
+    if (isset($tTable[$df])) {
+        return $tTable[$df];
+    }
+    
+    // For df not directly in table but <= 120, find closest (or just interpolate, but simple fallback is fine)
+    if ($df <= 30) {
+        return $tTable[$df]; // Already covered
+    } elseif ($df <= 40) {
+        return 2.021;
+    } elseif ($df <= 50) {
+        return 2.009;
+    } elseif ($df <= 60) {
+        return 2.000;
+    } elseif ($df <= 80) {
+        return 1.990;
+    } elseif ($df <= 100) {
+        return 1.984;
+    } elseif ($df <= 120) {
+        return 1.980;
+    }
+    
+    return 1.96; // Approximation for very large df
+}
+

@@ -191,7 +191,25 @@ function calcSensSlope($data) {
         $medianSlope = $slopes[$mid];
     }
     
-    // Signifikansi pinjam MK
+    // ====== SIGNIFIKANSI via Confidence Interval 95% (alpha = 0.05) ======
+    // Reuse the Mann-Kendall S untuk mendapatkan varS (variansi S)
+    $values = array_column($data, 'value');
+    $mk = calcMannKendallBase($values, $n);
+    $varS = $mk['varS'];
+    
+    $C_alpha = 1.96 * sqrt($varS);
+    $M1 = ($count - $C_alpha) / 2;
+    $M2 = ($count + $C_alpha) / 2;
+    
+    $idxLower = max(0, floor($M1) - 1);
+    $idxUpper = min($count - 1, floor($M2 + 1) - 1);
+    
+    $Qmin = $slopes[$idxLower] ?? 0;
+    $Qmax = $slopes[$idxUpper] ?? 0;
+    
+    // Signifikan jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
+    $significant = ($Qmin > 0) || ($Qmax < 0);
+    
     $trend = 'Tidak Ada Tren';
     if ($medianSlope > 0) {
         $trend = 'Meningkat';
@@ -199,9 +217,16 @@ function calcSensSlope($data) {
         $trend = 'Menurun';
     }
     
+    if ($trend !== 'Tidak Ada Tren') {
+        $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+    }
+    
     return [
         'trend' => $trend,
-        'slope' => round($medianSlope, 3)
+        'significant' => $significant,
+        'slope' => round($medianSlope, 3),
+        'Qmin' => round($Qmin, 3),
+        'Qmax' => round($Qmax, 3)
     ];
 }
 
@@ -242,10 +267,20 @@ function calcLinearRegression($data) {
 
     $rSquared = ($SStot > 0) ? 1 - ($SSres / $SStot) : 0;
 
-    $stdErrSlope = ($n > 2 && $Sxx > 0) ? sqrt(($SSres / ($n - 2)) / $Sxx) : 0;
-    $tStat = $stdErrSlope == 0 ? 0 : $slope / $stdErrSlope;
+    // ====== UJI SIGNIFIKANSI (t-test) ======
+    $df = max(1, $n - 2);
+    $tStat = 0;
+    $tCritical = 1.96;
+    $significant = false;
     
-    $significant = abs($tStat) > 2.0; // aprox
+    if ($n > 2 && $Sxx > 0) {
+        $MSE = $SSres / $df;
+        $stdErrSlope = sqrt($MSE / $Sxx);
+        $tStat = ($stdErrSlope > 0) ? $slope / $stdErrSlope : 0;
+        // Pendekatan normal distribution: t-kritis ±1.96 untuk df besar / n besar
+        // Untuk akurasi pada df kecil, idealnya gunakan tabel t. Di sini kita gunakan 1.96 untuk konsistensi dengan MK.
+        $significant = abs($tStat) > 1.96;
+    }
     
     $trend = 'Tidak Ada Tren';
     if ($slope > 0) {
@@ -254,10 +289,16 @@ function calcLinearRegression($data) {
         $trend = 'Menurun';
     }
     
+    if ($trend !== 'Tidak Ada Tren') {
+        $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+    }
+    
     return [
         'trend' => $trend,
+        'significant' => $significant,
         'slope' => round($slope, 3),
-        'rSquared' => round($rSquared, 3) 
+        'rSquared' => round($rSquared, 3),
+        'tStatistic' => round($tStat, 3)
     ];
 }
 

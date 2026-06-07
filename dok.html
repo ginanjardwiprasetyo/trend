@@ -259,6 +259,11 @@
             <a href="#mann-kendall" onclick="showSection('mann-kendall', this)">Mann-Kendall</a>
             <a href="#sens-slope" onclick="showSection('sens-slope', this)">Sen's Slope</a>
             <a href="#regresi-linear" onclick="showSection('regresi-linear', this)">Regresi Linear</a>
+            <h4>Lanjutan</h4>
+            <a href="#interpretasi" onclick="showSection('interpretasi', this)">Interpretasi Hasil</a>
+            <a href="#faq" onclick="showSection('faq', this)">FAQ</a>
+            <a href="#referensi" onclick="showSection('referensi', this)">Referensi</a>
+            <a href="#glosarium" onclick="showSection('glosarium', this)">Glosarium</a>
         </aside>
 
         <!-- Content -->
@@ -267,210 +272,1190 @@
             <!-- Tentang -->
             <div class="doc-section active" id="sec-tentang">
                 <h1>Tentang TrendHidro</h1>
-                <p>TrendHidro adalah platform olah data runtut waktu hidrometeorologi.
-                    Aplikasi ini menyediakan tiga metode uji statistik untuk mendeteksi <i>trend</i> dalam data
-                    runtut waktu:
+
+                <h2>Apa itu TrendHidro?</h2>
+                <p>TrendHidro adalah platform berbasis web untuk analisis <i>trend</i> data runtut waktu (<i>time
+                        series</i>) hidrometeorologi, khususnya data curah hujan. Platform ini menyediakan tiga metode
+                    uji statistik untuk mendeteksi, mengestimasi, dan memvalidasi <i>trend</i> dalam data hidrologi:
                 </p>
                 <ul>
-                    <li><strong>Mann-Kendall</strong> — Uji <i>trend</i> non-parametrik</li>
-                    <li><strong>Sen's Slope</strong> — Estimasi kemiringan <i>trend</i> non-parametrik</li>
-                    <li><strong>Regresi Linear</strong> — Uji <i>trend</i> parametrik</li>
+                    <li><strong>Uji Mann-Kendall</strong> — Mendeteksi keberadaan <i>trend</i> monoton secara
+                        non-parametrik</li>
+                    <li><strong>Sen's Slope Estimator</strong> — Mengestimasi besaran kemiringan <i>trend</i> secara
+                        non-parametrik (robust terhadap <i>outlier</i>)</li>
+                    <li><strong>Regresi Linear</strong> — Uji <i>trend</i> parametrik dengan estimasi
+                        <i>slope</i>, koefisien determinasi ($R^2$), dan uji signifikansi <i>t</i></li>
+                </ul>
+
+                <h2>Siapa Target Pengguna?</h2>
+                <ul>
+                    <li>Hidrolog dan peneliti sumber daya air</li>
+                    <li>Mahasiswa dan akademisi di bidang teknik sipil, lingkungan, dan geografi</li>
+                    <li>Pengelola wilayah sungai dan balai besar sumber daya air</li>
+                    <li>Praktisi kebencanaan dan klimatologi</li>
+                    <li>Siapa pun yang perlu menganalisis perubahan pola curah hujan dalam periode waktu tertentu</li>
+                </ul>
+
+                <h2>Arsitektur Platform</h2>
+                <p>TrendHidro dibangun dengan arsitektur berikut:</p>
+                <ul>
+                    <li><strong>Front-end:</strong> HTML5, CSS3 (Tailwind CSS + kustom), JavaScript vanilla.
+                        Peta interaktif menggunakan <strong>Leaflet.js</strong>, grafik menggunakan
+                        <strong>Chart.js</strong>, penulisan rumus menggunakan <strong>KaTeX</strong>.</li>
+                    <li><strong>Back-end:</strong> PHP 8+ untuk API dan logika komputasi statistik.</li>
+                    <li><strong>Database:</strong> Supabase (PostgreSQL) untuk penyimpanan data stasiun dan
+                        <i>time series</i> curah hujan harian.</li>
+                    <li><strong>Parsing File:</strong> <i>SheetJS (XLSX)</i> untuk pembacaan file Excel,
+                        parser CSV bawaan untuk file koma/titik-koma.</li>
+                </ul>
+                <p>Analisis data untuk halaman Peta Interaktif dilakukan di <i>server</i> (PHP),
+                    sedangkan untuk halaman Olah Data, pengguna dapat mengunggah file sendiri dan data
+                    dikirim ke <i>server</i> untuk diproses.</p>
+
+                <h2>Batasan Platform</h2>
+                <ul>
+                    <li>Data curah hujan harian yang tersedia di <i>database</i> mencakup stasiun tertentu
+                        di wilayah sungai yang terdaftar.</li>
+                    <li>Analisis bulk untuk Peta Interaktif dibatasi maksimal 1.000 titik data per stasiun
+                        untuk metode Mann-Kendall dan Sen's Slope (karena kompleksitas O(n²)). Regresi Linear
+                        tetap dapat dijalankan untuk data yang lebih besar.</li>
+                    <li>Platform menggunakan tingkat kepercayaan 95% ($\alpha = 0.05$) sebagai <i>default</i>
+                        untuk semua uji signifikansi.</li>
                 </ul>
             </div>
 
             <!-- Panduan Peta -->
             <div class="doc-section" id="sec-peta-guide">
                 <h1>Panduan Peta Interaktif</h1>
-                <p>Halaman <strong>Peta Interaktif</strong> menampilkan lokasi stasiun hujan pada peta Indonesia dengan
-                    warna marker yang menunjukkan hasil analisis <i>trend</i>.</p>
-                <h2>Cara Penggunaan</h2>
-                <ol>
-                    <li>Pilih <strong>Wilayah Sungai</strong> dari dropdown</li>
-                    <li>Pilih <strong>tipe data</strong>: Bulanan, Tahunan, atau Musiman</li>
-                    <li>Atur <strong>periode</strong> tahun analisis</li>
-                    <li>Aktifkan salah satu <strong>metode</strong> (Mann-Kendall, Sen's Slope, atau Regresi Linear)
-                    </li>
-                    <li>Klik marker stasiun untuk melihat detail</li>
-                </ol>
-                <h2>Fitur</h2>
+                <p>Halaman <strong>Peta Interaktif</strong> menampilkan peta Indonesia dengan marker
+                    stasiun hujan yang warnanya menunjukkan hasil analisis <i>trend</i> berdasarkan
+                    metode yang dipilih. Pengguna dapat menjelajahi data secara <i>real-time</i> dengan
+                    mengubah parameter filter.</p>
+
+                <h2>Panel Kontrol (Sidebar)</h2>
+                <p>Panel sisi kiri (<i>sidebar</i>) dapat disembunyikan/ditampilkan dengan tombol
+                    <strong>‹</strong> atau <strong>›</strong> di tepi kiri layar.</p>
+
+                <h3>1. Wilayah Sungai</h3>
+                <p>Dropdown untuk memilih Wilayah Sungai (WS) yang akan ditampilkan. Saat dipilih,
+                    peta akan memperbesar ke batas wilayah tersebut dan memuat semua stasiun hujan
+                    di dalamnya.</p>
+
+                <h3>2. Tipe Data</h3>
+                <p>Tiga opsi agregasi data:</p>
                 <ul>
-                    <li>Warna marker berubah berdasarkan hasil <i>trend</i> (hijau = meningkat, merah = menurun, abu =
-                        tidak ada
-                        <i>trend</i>)
-                    </li>
-                    <li>Filter kualitas data untuk menyembunyikan stasiun dengan kelengkapan &lt; 50%</li>
-                    <li>Klik "Detail" pada popup untuk melihat grafik dan statistik lengkap</li>
+                    <li><strong>Bulanan</strong> — Data harian dijumlah per bulan. Anda dapat memilih
+                        bulan tertentu atau "Semua Bulan".</li>
+                    <li><strong>Tahunan</strong> — Data harian dijumlah per tahun kalender.</li>
+                    <li><strong>Musiman</strong> — Data dijumlah per musim (3 bulanan):
+                        Jan–Mar, Apr–Jun, Jul–Sep, Okt–Des.</li>
+                </ul>
+
+                <h3>3. Agregasi</h3>
+                <p>Empat fungsi agregasi untuk meringkas data bulanan/tahunan/musiman:</p>
+                <ul>
+                    <li><strong>Kumulatif (SUM)</strong> — Jumlah total curah hujan dalam periode</li>
+                    <li><strong>Rerata (AVG)</strong> — Rata-rata curah hujan per periode</li>
+                    <li><strong>Maksimum (MAX)</strong> — Nilai tertinggi dalam periode</li>
+                    <li><strong>Minimum (MIN)</strong> — Nilai terendah dalam periode</li>
+                </ul>
+
+                <h3>4. Periode Tahun</h3>
+                <p><i>Year picker</i> untuk memilih rentang tahun analisis. Klik angka tahun untuk
+                    membuka pemilih, navigasi antar dekade dengan tombol ‹ ›. Tahun yang tidak
+                    tersedia akan berwarna abu-abu (tidak dapat dipilih).</p>
+
+                <h3>5. Metode Analisis</h3>
+                <p>Aktifkan salah satu metode dengan meng-klik <i>toggle switch</i>:
+                    Mann-Kendall, Sen's Slope, atau Regresi Linear. Hanya satu metode yang dapat
+                    aktif dalam satu waktu. Saat metode aktif, marker stasiun akan berubah warna
+                    sesuai hasil analisis.</p>
+
+                <h3>6. Filter Kualitas Data</h3>
+                <p>Muncul setelah metode diaktifkan:</p>
+                <ul>
+                    <li><strong>Sembunyikan Data &lt; 16 Tahun</strong> — Menyembunyikan stasiun
+                        dengan panjang data kurang dari 16 tahun (rekomendasi minimum untuk uji
+                        Mann-Kendall).</li>
+                    <li><strong>Sembunyikan Data &lt; 30 Tahun</strong> — Menyembunyikan stasiun
+                        dengan panjang data kurang dari 30 tahun (standar WMO untuk analisis
+                        klimatologi).</li>
+                </ul>
+
+                <h2>Legenda Marker</h2>
+                <p>Warna marker pada peta:</p>
+                <table class="stat-table" style="max-width:400px;">
+                    <tbody>
+                        <tr><td style="color:#0B6E2F;font-weight:700;">▲ Hijau Gelap</td><td>Meningkat signifikan</td></tr>
+                        <tr><td style="color:#16A34A;font-weight:700;">▲ Hijau Terang</td><td>Meningkat tidak signifikan</td></tr>
+                        <tr><td style="color:#991B1B;font-weight:700;">▼ Merah Gelap</td><td>Menurun signifikan</td></tr>
+                        <tr><td style="color:#DC2626;font-weight:700;">▼ Merah Terang</td><td>Menurun tidak signifikan</td></tr>
+                        <tr><td style="color:#6B7280;font-weight:700;">— Abu-abu</td><td>Tidak ada <i>trend</i></td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top:8px;">Tanda <strong>⚠︎ (kuning)</strong> pada marker menandakan
+                    panjang data stasiun &lt; 16 tahun yang perlu diinterpretasi dengan hati-hati.</p>
+
+                <h2>Interaksi Peta</h2>
+                <ul>
+                    <li><strong>Klik marker</strong> — Membuka <i>lightbox</i> informasi stasiun
+                        (nama, lokasi, elevasi, koordinat, pengelola, rentang data, nilai <i>trend</i>)</li>
+                    <li><strong>Tombol Detail</strong> di <i>lightbox</i> — Membuka halaman detail
+                        stasiun yang berisi grafik, statistik, ketersediaan data harian, dan peta mini</li>
+                    <li><strong>Scroll / Zoom</strong> — Perbesar dan perkecil peta dengan
+                        <i>scroll</i> atau tombol +/− di kiri bawah</li>
+                    <li><strong>Ganti <i>base map</i></strong> — Klik ikon lapisan di kiri bawah
+                        untuk memilih antara OpenStreetMap, ESRI Gray, atau Topo v4</li>
+                </ul>
+
+                <h2>Halaman Detail Stasiun</h2>
+                <p>Halaman detail menyediakan analisis mendalam untuk satu stasiun:</p>
+                <ul>
+                    <li><strong>Grafik Curah Hujan</strong> — Diagram batang/garis data runtut waktu
+                        dengan garis regresi linear (merah)</li>
+                    <li><strong>Rekapitulasi <i>Trend</i></strong> — Hasil ketiga metode ditampilkan
+                        berdampingan</li>
+                    <li><strong>Ketersediaan Data Periode</strong> — Persentase kelengkapan data pada
+                        periode terpilih</li>
+                    <li><strong>Peta Mini</strong> — Lokasi stasiun dalam peta kecil</li>
+                    <li><strong>Parameter Statistik</strong> — Rerata, maks, min, simpangan baku,
+                        koefisien variasi, deteksi <i>outlier</i> (IQR)</li>
+                    <li><strong>Ketersediaan Data Harian</strong> — Grid setahun penuh warna biru
+                        (tersedia) / merah (hilang), dengan tombol Diagram Lingkaran (Pie Chart)
+                        untuk melihat distribusi data</li>
                 </ul>
             </div>
 
             <!-- Panduan Olah Data -->
             <div class="doc-section" id="sec-olah-guide">
                 <h1>Panduan Olah Data Anda</h1>
-                <p>Halaman <strong>Olah Data</strong> memungkinkan Anda mengupload data curah hujan sendiri dan
-                    menjalankan analisis <i>trend</i> langsung di browser.</p>
-                <h2>Format File</h2>
+                <p>Halaman <strong>Olah Data</strong> memungkinkan Anda mengunggah data curah hujan
+                    sendiri (CSV, XLS, atau XLSX) dan menjalankan analisis <i>trend</i> menggunakan
+                    ketiga metode statistik. Data <strong>tidak</strong> disimpan di server — file
+                    hanya dikirim untuk diproses dan hasil ditampilkan di browser Anda.</p>
+
+                <h2>Format File yang Didukung</h2>
+                <table class="stat-table" style="max-width:350px;">
+                    <tbody>
+                        <tr><td style="font-weight:600;">CSV</td><td><code>.csv</code></td></tr>
+                        <tr><td style="font-weight:600;">Excel 97–2003</td><td><code>.xls</code></td></tr>
+                        <tr><td style="font-weight:600;">Excel 2007+</td><td><code>.xlsx</code></td></tr>
+                    </tbody>
+                </table>
+
+                <h2>Struktur Kolom</h2>
                 <p>File harus memiliki minimal 2 kolom:</p>
+                <table class="stat-table" style="max-width:450px;">
+                    <thead>
+                        <tr><th>Posisi</th><th>Isi</th><th>Format</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Kolom 1</td><td>Tanggal</td><td><code>dd/mm/yy</code> atau <code>dd/mm/yyyy</code></td></tr>
+                        <tr><td>Kolom 2</td><td>Nilai curah hujan</td><td>Numerik (dalam mm)</td></tr>
+                        <tr><td colspan="3" style="font-size:0.85rem;color:#6B7280;">Baris pertama (header) dilewati secara otomatis</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Contoh File CSV</h3>
+                <div class="formula-box" style="font-family:monospace;font-size:0.85rem;line-height:1.6;">
+                    Tanggal,Curah Hujan<br>
+                    01/01/2020,12<br>
+                    02/01/2020,0<br>
+                    03/01/2020,5<br>
+                    04/01/2020,8<br>
+                    05/01/2020,15
+                </div>
+
+                <h3>Separator CSV</h3>
+                <p>File CSV dapat menggunakan separator koma (<code>,</code>) atau titik koma
+                    (<code>;</code>). Deteksi separator dilakukan otomatis berdasarkan baris pertama.</p>
+
+                <h3>Format Tanggal yang Didukung</h3>
                 <ul>
-                    <li><strong>Kolom 1 — Tanggal:</strong> Format <code>dd/mm/yy</code> atau <code>dd/mm/yyyy</code>
-                    </li>
-                    <li><strong>Kolom 2 — Data:</strong> Nilai curah hujan (numerik, dalam mm)</li>
+                    <li><code>dd/mm/yy</code> — contoh: <code>01/01/20</code></li>
+                    <li><code>dd/mm/yyyy</code> — contoh: <code>01/01/2020</code></li>
+                    <li><code>dd-mm-yyyy</code> — contoh: <code>01-01-2020</code></li>
+                    <li><code>dd.mm.yyyy</code> — contoh: <code>01.01.2020</code></li>
+                    <li><code>yyyy-mm-dd</code> (ISO 8601) — contoh: <code>2020-01-01</code></li>
                 </ul>
-                <p>Format file yang didukung: <code>.csv</code>, <code>.xls</code>, <code>.xlsx</code></p>
+                <p>Untuk format 2 digit tahun (<code>yy</code>): tahun &gt; 50 dianggap 1900-an,
+                    tahun ≤ 50 dianggap 2000-an.</p>
+
                 <h2>Cara Penggunaan</h2>
                 <ol>
-                    <li>Seret file ke area upload atau klik untuk memilih file</li>
-                    <li>Data akan otomatis di-parse dan ditampilkan preview</li>
-                    <li>Pilih tipe agregasi data (Bulanan/Tahunan/Musiman) dan periode</li>
-                    <li>Klik <strong>Analisis</strong> untuk menjalankan perhitungan</li>
+                    <li><strong>Upload file</strong> — Seret file ke area upload (drag &amp; drop)
+                        atau klik untuk memilih file melalui dialog.</li>
+                    <li><strong>Preview data</strong> — Setelah file diproses, tabel pratinjau
+                        akan menampilkan 20 baris pertama data Anda. Klik "Ganti File" untuk
+                        mengunggah ulang.</li>
+                    <li><strong>Pilih parameter analisis:</strong>
+                        <ul>
+                            <li><strong>Tipe Data:</strong> Bulanan, Tahunan, atau Musiman</li>
+                            <li><strong>Bulan/Musim:</strong> Filter spesifik (untuk Bulanan/Musiman)</li>
+                            <li><strong>Periode Tahun:</strong> Rentang tahun yang akan dianalisis</li>
+                        </ul>
+                    </li>
+                    <li>Klik <strong>Olah Data</strong> untuk menjalankan perhitungan.</li>
                 </ol>
+
+                <h2>Penanganan Error</h2>
+                <p>Jika terjadi masalah saat memproses file, sistem akan menampilkan pesan error:</p>
+                <ul>
+                    <li><strong>"Format file tidak didukung"</strong> — File bukan CSV, XLS, atau XLSX</li>
+                    <li><strong>"File CSV kosong"</strong> — File tidak memiliki baris data</li>
+                    <li><strong>"Tidak ada data valid"</strong> — Semua baris gagal di-parse
+                        (tanggal tidak dikenali atau nilai bukan angka)</li>
+                    <li><strong>"Gagal membaca file Excel"</strong> — File Excel rusak atau
+                        format tidak kompatibel</li>
+                    <li><strong>"Tahun awal &gt; tahun akhir"</strong> — Rentang tahun tidak valid</li>
+                    <li><strong>"Tidak ada data untuk periode"</strong> — Data kosong setelah filter</li>
+                </ul>
+
+                <h2>Hasil Analisis</h2>
+
+                <h3>Grafik Data Runtut Waktu</h3>
+                <p>Diagram batang (bar chart) menampilkan data agregat per periode.
+                    Jika Regresi Linear aktif, garis <i>trend</i> merah akan ditampilkan
+                    di atas diagram. <i>Tooltip</i> muncul saat kursor diarahkan ke batang data.</p>
+
+                <h3>Rekapitulasi <i>Trend</i></h3>
+                <p>Hasil ketiga metode ditampilkan berdampingan dalam kartu:</p>
+                <ul>
+                    <li><strong>Mann-Kendall:</strong> Jenis <i>trend</i> + nilai Z uji dan Z kritis (±1.96)</li>
+                    <li><strong>Sen's Slope:</strong> Jenis <i>trend</i> + Q<sub>med</sub> (kemiringan median)
+                        + Q<sub>min</sub> dan Q<sub>max</sub> (interval kepercayaan 95%)</li>
+                    <li><strong>Regresi Linear:</strong> Jenis <i>trend</i> + t uji dan t kritis</li>
+                </ul>
+                <p>Warna teks mengikuti kode warna yang sama seperti di Peta Interaktif.</p>
+
+                <h3>Ketersediaan Data</h3>
+                <p>Menampilkan persentase data yang tersedia pada periode terpilih:</p>
+                <ul>
+                    <li><strong>Baik</strong> (≥ 80%) — <span style="color:#16A34A;">hijau</span></li>
+                    <li><strong>Cukup</strong> (50%–79%) — <span style="color:#F59E0B;">kuning</span></li>
+                    <li><strong>Kurang</strong> (&lt; 50%) — <span style="color:#EF4444;">merah</span></li>
+                </ul>
+
+                <h3>Statistik Deskriptif</h3>
+                <table class="stat-table" style="max-width:400px;">
+                    <tbody>
+                        <tr><td>Rerata (<i>Mean</i>)</td><td>Jumlah data dibagi banyaknya data</td></tr>
+                        <tr><td>Maksimum</td><td>Nilai tertinggi dalam periode</td></tr>
+                        <tr><td>Minimum</td><td>Nilai terendah dalam periode</td></tr>
+                        <tr><td>Simpangan Baku (<i>Std Dev</i>)</td><td>Ukuran sebaran data (sampel)</td></tr>
+                        <tr><td>Koefisien Variansi (CV)</td><td>$\frac{\text{Std Dev}}{\text{Mean}}$ — semakin besar semakin bervariasi</td></tr>
+                        <tr><td>Jumlah Data</td><td>Banyaknya titik data setelah agregasi</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Deteksi <i>Outlier</i> (IQR)</h3>
+                <p>Menggunakan metode <i>Interquartile Range</i> (IQR):</p>
+                <div class="formula-box">
+                    $$Q1 = \text{persentil ke-25}, \quad Q3 = \text{persentil ke-75}$$
+                    $$IQR = Q3 - Q1$$
+                    $$\text{Batas Bawah} = \max(0, Q1 - 1.5 \times IQR)$$
+                    $$\text{Batas Atas} = Q3 + 1.5 \times IQR$$
+                </div>
+                <p>Data di luar batas bawah dan batas atas dikategorikan sebagai <i>outlier</i>
+                    (pencilan).</p>
             </div>
 
             <!-- Mann-Kendall -->
             <div class="doc-section" id="sec-mann-kendall">
-                <h1>Mann-Kendall</h1>
-                <p>Uji non-parametrik untuk mendeteksi <i>trend</i> monoton dalam data runtut waktu. Tidak memerlukan
-                    asumsi
-                    distribusi normal.</p>
+                <h1>Uji Mann-Kendall</h1>
+
+                <h2>Pendahuluan</h2>
+                <p>Uji Mann-Kendall (Mann 1945, Kendall 1975) adalah uji statistik non-parametrik
+                    untuk mendeteksi keberadaan <i>trend</i> monoton dalam data runtut waktu.
+                    Disebut <strong>non-parametrik</strong> karena tidak memerlukan asumsi distribusi
+                    normal pada data — menjadikannya sangat cocok untuk data hidrologi yang sering
+                    memiliki distribusi miring (<i>skewed</i>).</p>
+
+                <p>Uji ini mendeteksi apakah nilai data cenderung meningkat atau menurun secara
+                    konsisten sepanjang waktu, tanpa mengkuantifikasi besarnya perubahan.
+                    Besaran <i>trend</i> diestimasi oleh Sen's Slope (lihat halaman terpisah).</p>
+
+                <h2>Kapan Menggunakan?</h2>
+                <ul>
+                    <li>Data tidak berdistribusi normal</li>
+                    <li>Terdapat <i>outlier</i> (pencilan) dalam data — uji ini robust terhadapnya</li>
+                    <li>Data bersifat <i>ordinal</i> atau peringkat (<i>rank</i>)</li>
+                    <li>Jumlah data minimal 4 titik direkomendasikan</li>
+                    <li>Standar dalam analisis <i>trend</i> hidrologi dan klimatologi</li>
+                </ul>
 
                 <h2>Langkah Perhitungan</h2>
 
                 <h3>Step 1: Hitung Statistik S</h3>
-                <p>Bandingkan semua pasangan data $(x_j, x_i)$ di mana $j > i$:</p>
+                <p>Bandingkan setiap pasangan data $(x_j, x_k)$ di mana indeks waktu $j > k$.
+                    Untuk setiap pasangan, hitung fungsi tanda (<i>sign function</i>):</p>
                 <div class="formula-box">
                     $$S = \sum_{k=1}^{n-1} \sum_{j=k+1}^{n} \text{sign}(x_j - x_k)$$
 
-                    $$\text{sign}(\theta) = \begin{cases} +1 & \text{jika } \theta > 0 \\ 0 & \text{jika } \theta = 0 \\
+                    $$\text{sign}(\theta) = \begin{cases} +1 & \text{jika } \theta > 0 \\
+                    0 & \text{jika } \theta = 0 \\
                     -1 & \text{jika } \theta < 0 \end{cases}$$ </div>
+                        <p>Interpretasi: $S$ positif → banyak pasangan meningkat seiring waktu.
+                            $S$ negatif → banyak pasangan menurun. $S$ mendekati 0 → tidak ada perubahan sistematis.</p>
 
                         <h3>Step 2: Hitung Varians S</h3>
+                        <p>Varians dari statistik $S$ dihitung dengan mempertimbangkan jumlah data
+                            $n$ dan koreksi untuk <i>tied groups</i> (data yang nilainya sama):</p>
                         <div class="formula-box">
                             $$\text{Var}(S) = \frac{n(n-1)(2n+5) - \sum_{p=1}^{g} t_p(t_p - 1)(2t_p + 5)}{18}$$
                         </div>
-                        <p>Di mana $t_p$ adalah jumlah data dalam <em>tied group</em> ke-$p$, dan $g$ adalah jumlah tied
-                            groups.</p>
+                        <p>Di mana $t_p$ adalah jumlah data dalam <i>tied group</i> (kelompok data bernilai sama)
+                            ke-$p$, dan $g$ adalah banyaknya <i>tied groups</i>. Jika tidak ada data yang sama
+                            nilainya, maka $\sum = 0$.</p>
 
-                        <h3>Step 3: Hitung Z-Score</h3>
+                        <h3>Step 3: Hitung Statistik Z</h3>
+                        <p>Standarisasi $S$ menjadi skor $Z$ (distribusi normal standar):</p>
                         <div class="formula-box">
-                            $$Z = \begin{cases} \frac{S - 1}{\sqrt{\text{Var}(S)}} & \text{jika } S > 0 \\ 0 &
-                            \text{jika } S = 0 \\ \frac{S + 1}{\sqrt{\text{Var}(S)}} & \text{jika } S < 0 \end{cases}$$
-                                </div>
+                            $$Z = \begin{cases}
+                            \dfrac{S - 1}{\sqrt{\text{Var}(S)}} & \text{jika } S > 0 \\[8pt]
+                            0 & \text{jika } S = 0 \\[8pt]
+                            \dfrac{S + 1}{\sqrt{\text{Var}(S)}} & \text{jika } S < 0
+                            \end{cases}$$
+                        </div>
+                        <p>Koreksi $\pm 1$ disebut <i>continuity correction</i>, yang meningkatkan akurasi
+                            pendekatan distribusi normal untuk sampel kecil.</p>
 
-                                <h3>Step 4: Keputusan</h3>
-                                <div class="info-box">
-                                    Jika $|Z| > 1.96$ → <i>Trend</i> <strong>signifikan</strong> pada tingkat
-                                    kepercayaan 95%
-                                    ($\alpha = 0.05$).<br>
-                                    $Z > 0$ → <i>Trend</i> <strong>meningkat</strong>, $Z < 0$ → <i>Trend</i>
-                                        <strong>menurun</strong>.
-                                </div>
+                        <h3>Step 4: Hitung <i>p-value</i></h3>
+                        <p><i>p-value</i> dihitung menggunakan pendekatan distribusi normal standar
+                            (Abramowitz &amp; Stegun):</p>
+                        <div class="formula-box">
+                            $$p = 2 \times \big[1 - \Phi(|Z|)\big]$$
+                        </div>
+                        <p>Di mana $\Phi$ adalah fungsi distribusi kumulatif (CDF) dari distribusi normal
+                            standar $N(0,1)$.</p>
+
+                        <h3>Step 5: Keputusan</h3>
+                        <div class="info-box">
+                            <strong>Pada $\alpha = 0.05$ (tingkat kepercayaan 95%):</strong><br><br>
+                            $|Z| > 1.96$ → <i>Trend</i> <strong>signifikan</strong><br>
+                            $|Z| \le 1.96$ → <i>Trend</i> <strong>tidak signifikan</strong><br><br>
+                            $Z > 0$ → <i>Trend</i> <strong>meningkat</strong><br>
+                            $Z < 0$ → <i>Trend</i> <strong>menurun</strong><br><br>
+                                <strong>Atau:</strong> $p \le 0.05$ → signifikan (tolak $H_0$).
+                        </div>
+
+                        <h2>Hipotesis</h2>
+                        <ul>
+                            <li>$H_0$ (Hipotesis nol): Tidak ada <i>trend</i> monoton dalam data
+                                (data bersifat <i>i.i.d.</i>)</li>
+                            <li>$H_1$ (Hipotesis alternatif): Terdapat <i>trend</i> monoton
+                                (meningkat atau menurun)</li>
+                        </ul>
+
+                        <h2>Contoh Perhitungan Lengkap</h2>
+                        <p>Data curah hujan tahunan (mm) dari tahun 2016–2020:</p>
+                        <div class="formula-box" style="font-family:monospace;font-size:0.9rem;line-height:1.8;">
+                            Tahun:   2016  2017  2018  2019  2020<br>
+                            Curah hujan (mm): 1200  1350  1280  1420  1510
+                        </div>
+
+                        <p><strong>Step 1 — Hitung S:</strong></p>
+                        <p style="font-family:monospace;font-size:0.85rem;">
+                            Semua pasangan $(x_j, x_k)$ dengan $j > k$:
+                        </p>
+                        <div class="formula-box" style="font-family:monospace;font-size:0.85rem;line-height:1.8;">
+                            x<sub>2017</sub>−x<sub>2016</sub> = 1350−1200 = +150 → +1<br>
+                            x<sub>2018</sub>−x<sub>2016</sub> = 1280−1200 = +80 → +1<br>
+                            x<sub>2019</sub>−x<sub>2016</sub> = 1420−1200 = +220 → +1<br>
+                            x<sub>2020</sub>−x<sub>2016</sub> = 1510−1200 = +310 → +1<br>
+                            x<sub>2018</sub>−x<sub>2017</sub> = 1280−1350 = −70 → −1<br>
+                            x<sub>2019</sub>−x<sub>2017</sub> = 1420−1350 = +70 → +1<br>
+                            x<sub>2020</sub>−x<sub>2017</sub> = 1510−1350 = +160 → +1<br>
+                            x<sub>2019</sub>−x<sub>2018</sub> = 1420−1280 = +140 → +1<br>
+                            x<sub>2020</sub>−x<sub>2018</sub> = 1510−1280 = +230 → +1<br>
+                            x<sub>2020</sub>−x<sub>2019</sub> = 1510−1420 = +90 → +1<br><br>
+                            <strong>S = 1+1+1+1−1+1+1+1+1+1 = 8</strong>
+                        </div>
+
+                        <p><strong>Step 2 — Hitung Var(S):</strong></p>
+                        <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                            n = 5<br>
+                            n(n−1)(2n+5) = 5 × 4 × 15 = 300<br>
+                            Tidak ada tied groups → ∑ = 0<br><br>
+                            <strong>Var(S) = 300 / 18 = 16.667</strong>
+                        </div>
+
+                        <p><strong>Step 3 — Hitung Z:</strong></p>
+                        <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                            S = 8 &gt; 0 → Z = (8 − 1) / √16.667<br>
+                            <strong>Z = 7 / 4.082 = 1.715</strong>
+                        </div>
+
+                        <p><strong>Step 4 — Keputusan:</strong></p>
+                        <div class="info-box">
+                            |Z| = 1.715 &lt; 1.96 → <strong>Tidak signifikan</strong> pada α = 0.05<br>
+                            Z = 1.715 &gt; 0 → <i>Trend</i> <strong>meningkat</strong> (tidak signifikan)<br><br>
+                            Kesimpulan: Curah hujan cenderung meningkat dalam periode 2016–2020,
+                            namun secara statistik tidak cukup bukti untuk menyatakan perubahan signifikan.
+                        </div>
+
+                        <h2>Nilai Kritis Z pada Berbagai Tingkat Signifikansi</h2>
+                        <table class="stat-table" style="max-width:400px;">
+                            <thead>
+                                <tr><th>α</th><th>Tingkat Kepercayaan</th><th>Z<sub>kritis</sub> (dua sisi)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>0.10</td><td>90%</td><td>±1.645</td></tr>
+                                <tr><td>0.05</td><td>95%</td><td>±1.960</td></tr>
+                                <tr><td>0.01</td><td>99%</td><td>±2.576</td></tr>
+                                <tr><td>0.001</td><td>99.9%</td><td>±3.291</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h2>Asumsi dan Keterbatasan</h2>
+                        <div class="info-box" style="background:#FEF2F2;border-color:#FECACA;color:#991B1B;">
+                            <strong>Asumsi:</strong>
+                            <ul style="margin:4px 0 0 16px;">
+                                <li>Data independen (tidak ada <i>autokorelasi</i> serial)</li>
+                                <li>Data diukur dalam skala ordinal atau kontinu</li>
+                                <li><i>Trend</i> bersifat monoton (terus meningkat atau menurun)</li>
+                            </ul>
+                            <strong style="display:block;margin-top:8px;">Keterbatasan:</strong>
+                            <ul style="margin:4px 0 0 16px;">
+                                <li>Tidak mengestimasi besaran <i>trend</i> (gunakan Sen's Slope)</li>
+                                <li>Sensitif terhadap autokorelasi — data dengan <i>seasonality</i>
+                                    kuat dapat menghasilkan <i>false positive</i></li>
+                                <li>Untuk data &lt; 10 titik, kekuatan uji (<i>statistical power</i>)
+                                    sangat rendah — <i>trend</i> perlu sangat kuat untuk terdeteksi</li>
+                                <li>Kompleksitas O(n²) — lambat untuk dataset sangat besar
+                                    (&gt; 10.000 titik)</li>
+                            </ul>
+                        </div>
+
+                        <h2>Kode Warna Hasil</h2>
+                        <div class="info-box">
+                            <strong style="color:#0B6E2F;">● Hijau Gelap</strong> = Meningkat signifikan<br>
+                            <strong style="color:#16A34A;">● Hijau Terang</strong> = Meningkat tidak signifikan<br>
+                            <strong style="color:#991B1B;">● Merah Gelap</strong> = Menurun signifikan<br>
+                            <strong style="color:#DC2626;">● Merah Terang</strong> = Menurun tidak signifikan<br>
+                            <strong style="color:#6B7280;">● Abu-abu</strong> = Tidak ada <i>trend</i>
+                        </div>
                         </div>
 
                         <!-- Sen's Slope -->
                         <div class="doc-section" id="sec-sens-slope">
-                            <h1>Sen's Slope</h1>
-                            <p>Estimator non-parametrik untuk menghitung besaran kemiringan <i>trend</i>. Lebih robust
-                                terhadap
-                                <i>outlier</i> dibanding regresi linear.
-                            </p>
+                            <h1>Sen's Slope Estimator</h1>
+
+                            <h2>Pendahuluan</h2>
+                            <p>Sen's Slope (Sen 1968) adalah estimator non-parametrik untuk
+                                menghitung besaran kemiringan <i>trend</i> (disebut $\hat{\beta}$).
+                                Metode ini lebih <em>robust</em> terhadap <i>outlier</i> dibandingkan
+                                regresi linear karena menggunakan <strong>median</strong> dari seluruh
+                                kemiringan pasangan data, bukan meminimalkan kuadrat residual.</p>
+
+                            <p>Sen's Slope hampir selalu digunakan bersama dengan uji Mann-Kendall:
+                                Mann-Kendall mendeteksi <strong>apakah</strong> ada <i>trend</i>,
+                                Sen's Slope mengestimasi <strong>seberapa besar</strong> <i>trend</i>-nya.</p>
+
+                            <h2>Kapan Menggunakan?</h2>
+                            <ul>
+                                <li>Bersama dengan uji Mann-Kendall untuk melengkapi hasil</li>
+                                <li>Data mengandung <i>outlier</i> — regresi linear akan terpengaruh,
+                                    Sen's Slope jauh lebih tahan</li>
+                                <li>Hubungan antara waktu dan data tidak harus linear — metode ini
+                                    hanya mengestimasi kemiringan median</li>
+                                <li>Data tidak berdistribusi normal</li>
+                            </ul>
 
                             <h2>Langkah Perhitungan</h2>
 
                             <h3>Step 1: Hitung Semua Kemiringan Pasangan</h3>
+                            <p>Untuk setiap pasangan data $(t_j, y_j)$ dan $(t_k, y_k)$ dengan
+                                $j > k$, hitung kemiringan:</p>
                             <div class="formula-box">
-                                $$Q_i = \frac{x_j - x_k}{j - k} \quad \text{untuk semua } j > k$$
+                                $$Q_i = \frac{y_j - y_k}{t_j - t_k} \quad \text{untuk semua } j > k$$
                             </div>
+                            <p>Di mana $t$ adalah waktu (tahun) dan $y$ adalah nilai data.
+                                Jumlah total pasangan adalah $N = \dfrac{n(n-1)}{2}$.</p>
 
-                            <h3>Step 2: Median Kemiringan</h3>
+                            <h3>Step 2: Median dari Semua Kemiringan</h3>
                             <div class="formula-box">
                                 $$\hat{\beta} = \text{median}(Q_1, Q_2, \ldots, Q_N)$$
                             </div>
-                            <p>Di mana $N = \frac{n(n-1)}{2}$ adalah jumlah total pasangan.</p>
+                            <p>Jika $N$ ganjil, median adalah nilai tengah setelah diurutkan.
+                                Jika $N$ genap, median adalah rata-rata dua nilai tengah.</p>
 
                             <h3>Step 3: Hitung Intercept</h3>
+                            <p>Setelah $\hat{\beta}$ diperoleh, hitung <i>intercept</i> untuk
+                                setiap titik data, lalu ambil mediannya:</p>
                             <div class="formula-box">
-                                $$\hat{\alpha} = \text{median}(y_i - \hat{\beta} \cdot x_i)$$
+                                $$\hat{\alpha} = \text{median}(y_i - \hat{\beta} \cdot t_i)$$
+                            </div>
+                            <p>Garis <i>trend</i>: $\hat{y}_i = \hat{\alpha} + \hat{\beta} \cdot t_i$</p>
+
+                            <h3>Step 4: Interval Kepercayaan 95%</h3>
+                            <p>Menggunakan varians $S$ dari uji Mann-Kendall, hitung indeks untuk
+                                menentukan batas bawah dan atas dari interval kepercayaan:</p>
+                            <div class="formula-box">
+                                $$C_{\alpha} = Z_{\alpha/2} \cdot \sqrt{\text{Var}(S)}$$
+                                $$M_1 = \frac{N - C_{\alpha}}{2}, \quad
+                                M_2 = \frac{N + C_{\alpha}}{2}$$
+                                $$Q_{\min} = Q_{(M_1)}, \quad Q_{\max} = Q_{(M_2)}$$
+                            </div>
+                            <p>Di mana $Q_{(M_1)}$ adalah kemiringan ke-$M_1$ setelah diurutkan,
+                                dan $Q_{(M_2)}$ adalah kemiringan ke-$M_2$.</p>
+
+                            <h2>Contoh Perhitungan Lengkap</h2>
+                            <p>Data yang sama dengan contoh Mann-Kendall:</p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;line-height:1.8;">
+                                t: [1, 2, 3, 4, 5] (tahun 2016–2020)<br>
+                                y: [1200, 1350, 1280, 1420, 1510]
                             </div>
 
-                            <h3>Interpretasi</h3>
+                            <p><strong>Step 1 — Hitung semua kemiringan:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.85rem;line-height:1.8;">
+                                Q₁ = (1350−1200)/(2−1) = 150<br>
+                                Q₂ = (1280−1200)/(3−1) = 40<br>
+                                Q₃ = (1420−1200)/(4−1) = 73.33<br>
+                                Q₄ = (1510−1200)/(5−1) = 77.5<br>
+                                Q₅ = (1280−1350)/(3−2) = −70<br>
+                                Q₆ = (1420−1350)/(4−2) = 35<br>
+                                Q₇ = (1510−1350)/(5−2) = 53.33<br>
+                                Q₈ = (1420−1280)/(4−3) = 140<br>
+                                Q₉ = (1510−1280)/(5−3) = 115<br>
+                                Q₁₀ = (1510−1420)/(5−4) = 90
+                            </div>
+
+                            <p><strong>Step 2 — Urutkan dan cari median:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                                Q terurut: [−70, 35, 40, 53.33, 73.33, 77.5, 90, 115, 140, 150]<br>
+                                N = 10 (genap) → median = (73.33 + 77.5) / 2<br><br>
+                                <strong>$\hat{\beta}$ = 75.42 mm/tahun</strong>
+                            </div>
+
+                            <p><strong>Step 3 — Hitung intercept:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                                Intercepts: yᵢ − 75.42 × tᵢ<br>
+                                1200 − 75.42×1 = 1124.58<br>
+                                1350 − 75.42×2 = 1199.16<br>
+                                1280 − 75.42×3 = 1053.74<br>
+                                1420 − 75.42×4 = 1118.32<br>
+                                1510 − 75.42×5 = 1132.90<br><br>
+                                Median dari [1053.74, 1118.32, 1124.58, 1132.90, 1199.16]<br>
+                                <strong>$\hat{\alpha}$ = 1124.58</strong>
+                            </div>
+
+                            <p><strong>Garis trend:</strong> $\hat{y} = 1124.58 + 75.42 \times t$</p>
+
+                            <p><strong>Interpretasi:</strong></p>
                             <div class="info-box">
-                                $\hat{\beta} > 0$ → <i>Trend</i> <strong>meningkat</strong><br>
-                                $\hat{\beta} < 0$ → <i>Trend</i> <strong>menurun</strong><br>
-                                    $\hat{\beta} = 0$ → <strong>Tidak ada <i>trend</i></strong>
+                                $\hat{\beta} = 75.42$ mm/tahun → Curah hujan meningkat rata-rata
+                                <strong>75.42 mm per tahun</strong> selama periode 2016–2020.<br><br>
+                                Bandingkan dengan contoh Mann-Kendall sebelumnya: Z = 1.715 (tidak signifikan).
+                                Ini berarti meskipun secara numerik ada kenaikan ~75 mm/tahun,
+                                secara statistik belum cukup bukti untuk menyatakan perubahan signifikan
+                                (karena periode data pendek, hanya 5 tahun).
+                            </div>
+
+                            <h2>Perbandingan dengan Regresi Linear</h2>
+                            <table class="stat-table" style="max-width:550px;">
+                                <thead>
+                                    <tr><th>Karakteristik</th><th>Sen's Slope</th><th>Regresi Linear</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Metode</td><td>Non-parametrik (median)</td><td>Parametrik (kuadrat terkecil)</td></tr>
+                                    <tr><td>Robust terhadap outlier</td><td style="color:#16A34A;">Ya</td><td style="color:#DC2626;">Tidak</td></tr>
+                                    <tr><td>Asumsi distribusi</td><td>Tidak ada</td><td>Normal</td></tr>
+                                    <tr><td>Kompleksitas</td><td>O(n²)</td><td>O(n)</td></tr>
+                                    <tr><td>Interpretasi</td><td>Kemiringan median</td><td>Kemiringan rata-rata</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h2>Asumsi dan Keterbatasan</h2>
+                            <div class="info-box" style="background:#FEF2F2;border-color:#FECACA;color:#991B1B;">
+                                <strong>Asumsi:</strong>
+                                <ul style="margin:4px 0 0 16px;">
+                                    <li>Data independen (tidak ada autokorelasi)</li>
+                                    <li>Skala pengukuran kontinu</li>
+                                </ul>
+                                <strong style="display:block;margin-top:8px;">Keterbatasan:</strong>
+                                <ul style="margin:4px 0 0 16px;">
+                                    <li>Kompleksitas O(n²) — untuk n &gt; 50.000, estimasi menggunakan
+                                        <i>sampling</i> acak (tersedia di platform untuk data besar)</li>
+                                    <li>Hanya mengestimasi kemiringan, tidak memberikan R² atau
+                                        ukuran kecocokan model</li>
+                                    <li>Signifikansi ditentukan melalui interval kepercayaan —
+                                        tidak memberikan <i>p-value</i> langsung</li>
+                                </ul>
                             </div>
                         </div>
 
                         <!-- Regresi Linear -->
                         <div class="doc-section" id="sec-regresi-linear">
                             <h1>Regresi Linear</h1>
-                            <p>Metode parametrik untuk menentukan garis <i>trend</i> yang meminimalkan jumlah kuadrat
-                                residual.
-                            </p>
+
+                            <h2>Pendahuluan</h2>
+                            <p>Regresi Linear Sederhana (atau <i>Ordinary Least Squares</i>, OLS)
+                                adalah metode parametrik untuk menentukan garis lurus terbaik
+                                (<i>line of best fit</i>) yang meminimalkan jumlah kuadrat residual
+                                (selisih antara data aktual dan nilai prediksi).</p>
+
+                            <p>Berbeda dengan Mann-Kendall dan Sen's Slope, Regresi Linear mengasumsikan
+                                bahwa hubungan antara waktu dan data bersifat <strong>linear</strong>
+                                dan <i>error</i> (residual) berdistribusi normal.</p>
+
+                            <h2>Kapan Menggunakan?</h2>
+                            <ul>
+                                <li>Data berdistribusi normal (atau mendekati normal)</li>
+                                <li>Hubungan antara waktu dan data tampak linear</li>
+                                <li>Setelah <i>outlier</i> telah diidentifikasi dan ditangani</li>
+                                <li>Diperlukan koefisien determinasi $R^2$ untuk mengukur kualitas
+                                    kecocokan model</li>
+                                <li>Dataset besar — regresi linear O(n) sangat cepat</li>
+                            </ul>
+
+                            <h2>Asumsi Regresi Linear</h2>
+                            <div class="info-box" style="background:#FFF7ED;border-color:#FED7AA;color:#9A3412;">
+                                Untuk hasil yang valid, asumsi berikut harus dipenuhi:
+                                <ol style="margin:8px 0 0 16px;">
+                                    <li><strong>Linearitas:</strong> Hubungan antara $x$ (waktu) dan $y$ (data)
+                                        bersifat linear</li>
+                                    <li><strong>Independensi:</strong> Residual bersifat independen
+                                        (tidak ada autokorelasi)</li>
+                                    <li><strong>Homoskedastisitas:</strong> Varians residual konstan
+                                        di seluruh rentang $x$</li>
+                                    <li><strong>Normalitas:</strong> Residual berdistribusi normal
+                                        (terutama penting untuk sampel kecil)</li>
+                                </ol>
+                            </div>
 
                             <h2>Langkah Perhitungan</h2>
 
-                            <h3>Step 1: Hitung Komponen</h3>
+                            <h3>Step 1: Hitung Komponen Dasar</h3>
                             <div class="formula-box">
-                                $$S_{xx} = \sum(x_i - \bar{x})^2, \quad S_{yy} = \sum(y_i - \bar{y})^2, \quad S_{xy} =
-                                \sum(x_i - \bar{x})(y_i - \bar{y})$$
+                                $$S_{xx} = \sum_{i=1}^{n}(x_i - \bar{x})^2, \quad
+                                S_{yy} = \sum_{i=1}^{n}(y_i - \bar{y})^2, \quad
+                                S_{xy} = \sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})$$
+                            </div>
+                            <p>Di mana $\bar{x}$ dan $\bar{y}$ adalah rata-rata dari $x$ (waktu)
+                                dan $y$ (data).</p>
+
+                            <h3>Step 2: Hitung Slope ($\hat{\beta}$) dan Intercept ($\hat{\alpha}$)</h3>
+                            <div class="formula-box">
+                                $$\hat{\beta} = \frac{S_{xy}}{S_{xx}}, \quad
+                                \hat{\alpha} = \bar{y} - \hat{\beta} \cdot \bar{x}$$
+                            </div>
+                            <p>Garis regresi: $\hat{y}_i = \hat{\alpha} + \hat{\beta} \cdot x_i$</p>
+
+                            <h3>Step 3: Hitung Koefisien Determinasi ($R^2$)</h3>
+                            <div class="formula-box">
+                                $$R^2 = 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}}
+                                = 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2}$$
+                            </div>
+                            <p>$R^2$ berkisar antara 0–1. Nilai 1 berarti model menjelaskan 100% variasi data.
+                                Nilai 0 berarti model tidak menjelaskan variasi apa pun.</p>
+
+                            <h3>Step 4: Uji Signifikansi (<i>t-test</i>)</h3>
+                            <div class="formula-box">
+                                $$SE(\hat{\beta}) = \sqrt{\frac{MSE}{S_{xx}}}, \quad
+                                MSE = \frac{SS_{\text{res}}}{n - 2}$$
+                                $$t = \frac{\hat{\beta}}{SE(\hat{\beta})}$$
+                            </div>
+                            <p>Nilai $t$ hitung dibandingkan dengan $t_{\text{kritis}}$ dari
+                                tabel <i>t</i>-distribusi pada derajat bebas $df = n - 2$
+                                dan $\alpha = 0.05$ (dua sisi). Platform TrendHidro menggunakan
+                                tabel <i>t</i> yang akurat hingga $df = 120$, dan pendekatan
+                                normal ($Z = 1.96$) untuk $df > 120$.</p>
+
+                            <h3>Step 5: Hitung Koefisien Korelasi ($r$)</h3>
+                            <div class="formula-box">
+                                $$r = \frac{S_{xy}}{\sqrt{S_{xx} \cdot S_{yy}}}$$
+                            </div>
+                            <p>$r$ berkisar antara −1 hingga +1. Tanda $r$ mengikuti tanda $\hat{\beta}$.
+                                $|r|$ mendekati 1 menunjukkan korelasi kuat antara waktu dan data.</p>
+
+                            <h2>Contoh Perhitungan Lengkap</h2>
+                            <p>Data yang sama (curah hujan tahunan dalam mm):</p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;line-height:1.8;">
+                                x (tahun ke-): [1, 2, 3, 4, 5]<br>
+                                y (curah hujan): [1200, 1350, 1280, 1420, 1510]<br>
+                                $\bar{x} = 3$, $\bar{y} = 1352$
                             </div>
 
-                            <h3>Step 2: Slope & Intercept</h3>
-                            <div class="formula-box">
-                                $$\hat{\beta} = \frac{S_{xy}}{S_{xx}}, \quad \hat{\alpha} = \bar{y} - \hat{\beta} \cdot
-                                \bar{x}$$
+                            <p><strong>Step 1 — Hitung komponen:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.85rem;line-height:1.8;">
+                                S<sub>xx</sub> = (1−3)² + (2−3)² + (3−3)² + (4−3)² + (5−3)²<br>
+                                &emsp;&emsp;&emsp;= 4 + 1 + 0 + 1 + 4 = <strong>10</strong><br><br>
+                                S<sub>xy</sub> = (1−3)(1200−1352) + (2−3)(1350−1352) + (3−3)(1280−1352) +
+                                (4−3)(1420−1352) + (5−3)(1510−1352)<br>
+                                &emsp;&emsp;&emsp;= (−2)(−152) + (−1)(−2) + (0)(−72) + (1)(68) + (2)(158)<br>
+                                &emsp;&emsp;&emsp;= 304 + 2 + 0 + 68 + 316 = <strong>690</strong>
                             </div>
 
-                            <h3>Step 3: Koefisien Determinasi ($R^2$)</h3>
-                            <div class="formula-box">
-                                $$R^2 = 1 - \frac{SS_{res}}{SS_{tot}} = 1 - \frac{\sum(y_i - \hat{y}_i)^2}{\sum(y_i -
-                                \bar{y})^2}$$
+                            <p><strong>Step 2 — Hitung slope dan intercept:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                                $\hat{\beta}$ = 690 / 10 = <strong>69.0 mm/tahun</strong><br>
+                                $\hat{\alpha}$ = 1352 − 69.0 × 3 = 1352 − 207 = <strong>1145</strong><br><br>
+                                <strong>Garis regresi:</strong> $\hat{y} = 1145 + 69.0 \times x$
                             </div>
 
-                            <h3>Step 4: Uji-t untuk Slope</h3>
-                            <div class="formula-box">
-                                $$t = \frac{\hat{\beta}}{SE(\hat{\beta})}, \quad SE(\hat{\beta}) =
-                                \sqrt{\frac{MSE}{S_{xx}}}, \quad MSE = \frac{SS_{res}}{n - 2}$$
+                            <p><strong>Step 3 — Hitung R²:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                                Nilai prediksi: $\hat{y}$ = [1214, 1283, 1352, 1421, 1490]<br>
+                                SS<sub>res</sub> = (1200−1214)² + (1350−1283)² + (1280−1352)² + (1420−1421)² + (1510−1490)²<br>
+                                &emsp;&emsp;&emsp;&emsp;= 196 + 4489 + 5184 + 1 + 400 = 10.270<br>
+                                SS<sub>tot</sub> = S<sub>yy</sub> = (1200−1352)² + (1350−1352)² + (1280−1352)² +
+                                (1420−1352)² + (1510−1352)²<br>
+                                &emsp;&emsp;&emsp;&emsp;= 23.104 + 4 + 5.184 + 4.624 + 24.964 = 57.880<br><br>
+                                <strong>R² = 1 − (10.270 / 57.880) = 0.823</strong>
                             </div>
 
-                            <h3>Interpretasi</h3>
+                            <p><strong>Step 4 — Uji-t:</strong></p>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.9rem;">
+                                MSE = 10.270 / 3 = 3.423,33<br>
+                                SE($\hat{\beta}$) = √(3.423,33 / 10) = √342,33 = 18,50<br>
+                                t = 69,0 / 18,50 = <strong>3,73</strong><br>
+                                t<sub>kritis</sub> (df=3, α=0,05) = <strong>3,182</strong>
+                            </div>
+
                             <div class="info-box">
-                                $\hat{\beta} > 0$ → <i>Trend</i> <strong>meningkat</strong><br>
-                                $\hat{\beta} < 0$ → <i>Trend</i> <strong>menurun</strong><br>
-                                    $\hat{\beta} = 0$ → <strong>Tidak ada <i>trend</i></strong>
+                                t = 3,73 &gt; t<sub>kritis</sub> = 3,182 → <strong>Signifikan</strong> pada α = 0,05<br>
+                                $\hat{\beta}$ = 69,0 &gt; 0 → <i>Trend</i> <strong>meningkat</strong><br>
+                                R² = 0,823 → Model menjelaskan 82,3% variasi data<br><br>
+                                <strong>Kesimpulan:</strong> Terdapat <i>trend</i> peningkatan curah hujan
+                                yang signifikan sebesar 69 mm/tahun, dengan kecocokan model yang baik (R² = 0,823).
+                                <em>Catatan: Pada contoh ini regresi linear mendeteksi signifikansi sementara
+                                Mann-Kendall tidak. Ini karena regresi linear memiliki <i>statistical power</i>
+                                lebih tinggi untuk data &lt; 10 titik — namun keandalannya bergantung pada
+                                terpenuhinya asumsi normalitas.</em>
+                            </div>
+
+                            <h2>Interpretasi $R^2$</h2>
+                            <table class="stat-table" style="max-width:400px;">
+                                <thead>
+                                    <tr><th>Nilai $R^2$</th><th>Interpretasi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>0.00 – 0.25</td><td>Kecocokan sangat lemah</td></tr>
+                                    <tr><td>0.25 – 0.50</td><td>Kecocokan lemah</td></tr>
+                                    <tr><td>0.50 – 0.75</td><td>Kecocokan sedang</td></tr>
+                                    <tr><td>0.75 – 0.90</td><td>Kecocokan kuat</td></tr>
+                                    <tr><td>0.90 – 1.00</td><td>Kecocokan sangat kuat</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h2>Asumsi dan Keterbatasan</h2>
+                            <div class="info-box" style="background:#FEF2F2;border-color:#FECACA;color:#991B1B;">
+                                <strong>Keterbatasan:</strong>
+                                <ul style="margin:4px 0 0 16px;">
+                                    <li>Sangat sensitif terhadap <i>outlier</i> — satu titik ekstrem
+                                        dapat mengubah slope secara drastis</li>
+                                    <li>Mengasumsikan hubungan linear — jika <i>trend</i> non-linear
+                                        (misalnya eksponensial atau musiman), hasil bisa menyesatkan</li>
+                                    <li>Membutuhkan asumsi normalitas residual untuk validitas uji-t</li>
+                                    <li>$R^2$ yang tinggi tidak selalu berarti model benar — bisa terjadi
+                                        <i>spurious regression</i> pada data runtut waktu</li>
+                                    <li>Untuk data hidrologi, asumsi homoskedastisitas sering dilanggar
+                                        (varians lebih tinggi di musim hujan)</li>
+                                </ul>
                             </div>
                         </div>
 
                         <!-- Format Data -->
                         <div class="doc-section" id="sec-format-data">
                             <h1>Format Data</h1>
-                            <h2>Data dari <i>Database</i> (Peta)</h2>
-                            <p>Data curah hujan harian disimpan di <a href="https://supabase.com"
-                                    target="_blank">Supabase</a>－penyedia
-                                berbagai layanan digital termasuk penyimpanan data berbasis
-                                <i>cloud</i>.
-                            </p>
+
+                            <h2>Data dari Database (Peta Interaktif)</h2>
+                            <p>Data curah hujan harian untuk Peta Interaktif dan Halaman Detail
+                                Stasiun disimpan di <a href="https://supabase.com" target="_blank">Supabase</a>,
+                                sebuah platform <i>database</i> berbasis PostgreSQL yang menyediakan
+                                layanan <i>cloud</i>.</p>
+
+                            <p>Struktur data di <i>database</i>:</p>
+                            <ul>
+                                <li><strong>Tabel <code>pos_hujan</code>:</strong> Data stasiun
+                                    (ID, nama, lokasi, koordinat, elevasi, pengelola)</li>
+                                <li><strong>Tabel <code>data_ch</code>:</strong> Data curah hujan
+                                    harian (ID stasiun, tanggal, nilai curah hujan dalam mm)</li>
+                            </ul>
 
                             <h2>Upload CSV/XLSX (Olah Data)</h2>
-                            <p>Format kolom yang diharapkan:</p>
-                            <table class="stat-table" style="max-width:400px;">
+                            <p>Format file yang diharapkan:</p>
+
+                            <h3>Struktur Kolom</h3>
+                            <table class="stat-table" style="max-width:500px;">
+                                <thead>
+                                    <tr><th>Posisi</th><th>Isi</th><th>Keterangan</th></tr>
+                                </thead>
                                 <tbody>
                                     <tr>
                                         <td style="font-weight:600;">Kolom 1</td>
-                                        <td>Tanggal (dd/mm/yy)</td>
+                                        <td>Tanggal</td>
+                                        <td>Format <code>dd/mm/yy</code>, <code>dd/mm/yyyy</code>,
+                                            atau ISO 8601</td>
                                     </tr>
                                     <tr>
                                         <td style="font-weight:600;">Kolom 2</td>
-                                        <td>Data (berupa angka)</td>
+                                        <td>Nilai data</td>
+                                        <td>Numerik, satuan mm (untuk curah hujan)</td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <p style="margin-top:12px;">Separator CSV yang didukung: koma (<code>,</code>) atau titik
-                                koma (<code>;</code>).</p>
+
+                            <h3>Contoh File CSV</h3>
+                            <div class="formula-box" style="font-family:monospace;font-size:0.85rem;line-height:1.6;">
+                                Tanggal,Curah Hujan<br>
+                                01/01/2020,12<br>
+                                02/01/2020,0<br>
+                                03/01/2020,5<br>
+                                04/01/2020,8<br>
+                                ...<br>
+                                31/12/2020,3
+                            </div>
+
+                            <h3>Contoh File Excel</h3>
+                            <table class="stat-table" style="max-width:400px;">
+                                <thead>
+                                    <tr><th>A (Tanggal)</th><th>B (Data)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>01/01/2020</td><td>12</td></tr>
+                                    <tr><td>02/01/2020</td><td>0</td></tr>
+                                    <tr><td>03/01/2020</td><td>5</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h3>Aturan Validasi</h3>
+                            <ul>
+                                <li><strong>Header:</strong> Baris pertama file (header) dilewati
+                                    secara otomatis</li>
+                                <li><strong>Data kosong:</strong> Baris dengan tanggal tidak valid
+                                    atau nilai non-numerik akan dilewati</li>
+                                <li><strong>Pembulatan:</strong> Nilai data dibulatkan ke bilangan
+                                    bulat terdekat</li>
+                                <li><strong>Separator CSV:</strong> Terdeteksi otomatis — koma
+                                    (<code>,</code>) atau titik koma (<code>;</code>)</li>
+                                <li><strong>Urutan:</strong> Data akan diurutkan berdasarkan tanggal
+                                    secara otomatis</li>
+                            </ul>
+
+                            <h2>Data yang Tidak Valid</h2>
+                            <p>Baris berikut akan <strong>dilewati</strong> (tidak dimasukkan dalam analisis):</p>
+                            <ul>
+                                <li>Baris dengan format tanggal tidak dikenal (misal: <code>13/13/2020</code>
+                                    — bulan 13 tidak valid)</li>
+                                <li>Baris dengan nilai data bukan angka (misal: <code>tidak ada</code>)</li>
+                                <li>Baris kosong</li>
+                            </ul>
+                        </div>
+
+                        <!-- Interpretasi Hasil -->
+                        <div class="doc-section" id="sec-interpretasi">
+                            <h1>Interpretasi Hasil</h1>
+
+                            <h2>Cara Membaca Output Analisis</h2>
+                            <p>TrendHidro menampilkan hasil dari ketiga metode secara berdampingan.
+                                Berikut panduan membaca setiap elemen output:</p>
+
+                            <h3>1. Arah <i>Trend</i></h3>
+                            <table class="stat-table" style="max-width:400px;">
+                                <tbody>
+                                    <tr><td style="color:#0B6E2F;font-weight:700;">Meningkat</td><td>Nilai data cenderung naik seiring waktu</td></tr>
+                                    <tr><td style="color:#991B1B;font-weight:700;">Menurun</td><td>Nilai data cenderung turun seiring waktu</td></tr>
+                                    <tr><td style="color:#6B7280;font-weight:700;">Tidak Ada <i>Trend</i></td><td>Tidak ada perubahan sistematis terdeteksi</td></tr>
+                                </tbody>
+                            </table>
+
+                            <h3>2. Signifikansi Statistik</h3>
+                            <p>Menunjukkan apakah <i>trend</i> yang terdeteksi cukup kuat secara
+                                statistik (bukan karena variasi acak):</p>
+                            <ul>
+                                <li><strong>Signifikan</strong> — Warna gelap. Ada bukti statistik
+                                    kuat bahwa <i>trend</i> benar-benar terjadi (p &lt; 0.05)</li>
+                                <li><strong>Tidak Signifikan</strong> — Warna terang. <i>Trend</i>
+                                    terdeteksi namun belum cukup bukti untuk menyimpulkan dengan
+                                    keyakinan 95% — bisa karena variasi acak atau data terlalu pendek</li>
+                            </ul>
+
+                            <h3>3. Perbandingan Antar Metode</h3>
+                            <table class="stat-table" style="max-width:600px;">
+                                <thead>
+                                    <tr><th>Skenario</th><th>Interpretasi</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Ketiga metode sepakat<br>(semua meningkat/menurun signifikan)</td>
+                                        <td><strong>Keyakinan tinggi</strong> — <i>Trend</i> sangat mungkin nyata</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mann-Kendall dan Sen's Slope sepakat,<br>Regresi Linear berbeda</td>
+                                        <td>Kemungkinan ada <i>outlier</i> yang mempengaruhi regresi linear.
+                                            Lebih percaya pada hasil non-parametrik</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hanya Regresi Linear yang signifikan<br>(MK dan SS tidak)</td>
+                                        <td>Data mungkin pendek (&lt; 10 titik). Regresi linear memiliki
+                                            <i>power</i> lebih tinggi pada sampel kecil, namun keandalannya
+                                            bergantung pada asumsi normalitas</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Semua tidak signifikan / tidak ada <i>trend</i></td>
+                                        <td>Tidak terdeteksi perubahan sistematis. Data mungkin terlalu
+                                            pendek atau variabilitas terlalu tinggi</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Metode menunjukkan arah<br><i>trend</i> yang bertentangan</td>
+                                        <td>Sangat jarang. Periksa data apakah ada pola non-linear
+                                            atau <i>outlier</i> ekstrem</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h3>4. Besaran <i>Trend</i></h3>
+                            <ul>
+                                <li><strong>Sen's Slope (Q<sub>med</sub>):</strong> Perubahan median
+                                    per satuan waktu (misal: mm/tahun). Lebih robust untuk interpretasi
+                                    besaran perubahan.</li>
+                                <li><strong>Slope Regresi Linear:</strong> Perubahan rata-rata per
+                                    satuan waktu. Dapat berbeda dari Sen's Slope jika ada <i>outlier</i>.</li>
+                                <li><strong>R² (Regresi Linear):</strong> Proporsi variasi data yang
+                                    dapat dijelaskan oleh waktu. Semakin mendekati 1, semakin baik
+                                    model linear cocok dengan data.</li>
+                            </ul>
+
+                            <h3>5. Ketersediaan Data</h3>
+                            <p>Persentase data yang tersedia pada periode analisis:</p>
+                            <ul>
+                                <li><strong>Baik (≥ 80%):</strong> Data lengkap, hasil analisis handal</li>
+                                <li><strong>Cukup (50–79%):</strong> Data cukup, interpretasi dengan hati-hati</li>
+                                <li><strong>Kurang (&lt; 50%):</strong> Data kurang, hasil mungkin
+                                    tidak representatif</li>
+                            </ul>
+                        </div>
+
+                        <!-- FAQ -->
+                        <div class="doc-section" id="sec-faq">
+                            <h1>FAQ — Pertanyaan Umum</h1>
+
+                            <h3>Apa perbedaan utama antara Mann-Kendall dan Regresi Linear?</h3>
+                            <p>Mann-Kendall adalah uji non-parametrik yang mendeteksi <i>trend</i>
+                                monoton (baik linear maupun tidak) tanpa asumsi distribusi normal.
+                                Regresi Linear adalah uji parametrik yang mengasumsikan hubungan
+                                linear dan residual normal. Mann-Kendall lebih robust terhadap
+                                <i>outlier</i>, sementara regresi linear memberikan $R^2$ dan
+                                lebih sensitif untuk sampel kecil.</p>
+
+                            <h3>Mengapa hasil Mann-Kendall dan Regresi Linear berbeda?</h3>
+                            <p>Perbedaan bisa terjadi karena: (1) adanya <i>outlier</i> yang
+                                mempengaruhi regresi linear, (2) hubungan non-linear yang tidak
+                                tertangkap regresi linear, (3) asumsi normalitas tidak terpenuhi,
+                                atau (4) sampel terlalu kecil. Dalam kasus perbedaan, hasil
+                                non-parametrik (Mann-Kendall / Sen's Slope) umumnya lebih
+                                <em>reliable</em> untuk data hidrologi.</p>
+
+                            <h3>Berapa minimal jumlah data yang diperlukan?</h3>
+                            <p>Platform memerlukan minimal <strong>3 titik data</strong> untuk
+                                menjalankan analisis. Namun, untuk hasil yang bermakna, direkomendasikan
+                                minimal <strong>10–15 tahun data tahunan</strong> (atau setara).
+                                World Meteorological Organization (WMO) merekomendasikan
+                                minimal <strong>30 tahun</strong> untuk analisis klimatologi.</p>
+
+                            <h3>Apa arti tingkat kepercayaan 95%?</h3>
+                            <p>Tingkat kepercayaan 95% ($\alpha = 0.05$) berarti ada 5% kemungkinan
+                                bahwa <i>trend</i> yang terdeteksi adalah <i>false positive</i>
+                                (kesalahan tipe I) — yaitu, kita menyimpulkan ada <i>trend</i>
+                                padahal sebenarnya tidak ada. Atau dengan kata lain, jika kita
+                                mengulangi studi 100 kali dengan data acak tanpa <i>trend</i>,
+                                sekitar 5 kali akan terdeteksi "signifikan" secara kebetulan.</p>
+
+                            <h3>Mengapa data perlu diagregasi (bulanan/tahunan/musiman)?</h3>
+                            <p>Data curah hujan harian memiliki variabilitas sangat tinggi
+                                (hujan deras sehari, kering berhari-hari). Analisis <i>trend</i>
+                                langsung pada data harian akan sulit mendeteksi pola jangka panjang
+                                karena <i>noise</i>-nya terlalu besar. Agregasi (penjumlahan atau
+                                rata-rata bulanan/tahunan) mengurangi <i>noise</i> dan memperkuat
+                                sinyal <i>trend</i>.</p>
+
+                            <h3>Apa arti tanda seru (⚠) pada marker peta?</h3>
+                            <p>Menandakan bahwa stasiun memiliki panjang data kurang dari 16 tahun.
+                                Hasil analisis untuk stasiun ini perlu diinterpretasi dengan hati-hati
+                                karena periode data pendek mengurangi keandalan uji statistik.</p>
+
+                            <h3>Apakah data saya aman saat diupload ke Olah Data?</h3>
+                            <p>Ya. Data Anda dikirim ke server hanya untuk diproses (perhitungan
+                                statistik) dan <strong>tidak disimpan</strong>. Setelah hasil
+                                ditampilkan di browser, data tidak dipertahankan di server.
+                                Namun, koneksi internet standar tetap memiliki risiko transmisi —
+                                jangan upload data yang bersifat rahasia jika tidak melalui
+                                koneksi HTTPS.</p>
+
+                            <h3>Bagaimana cara menangani data yang memiliki nilai hilang?</h3>
+                            <p>Baris dengan nilai kosong atau tidak valid akan dilewati secara
+                                otomatis. Untuk data yang diupload, pastikan hanya menyertakan
+                                data dengan tanggal dan nilai yang valid. Untuk data dari
+                                <i>database</i> (Peta Interaktif), nilai NULL sudah ditangani
+                                oleh sistem. Indikator Ketersediaan Data akan menunjukkan
+                                persentase kelengkapan data pada periode yang dipilih.</p>
+                        </div>
+
+                        <!-- Referensi -->
+                        <div class="doc-section" id="sec-referensi">
+                            <h1>Referensi</h1>
+
+                            <div style="font-size:0.9rem; line-height:1.8; color:#4B5563;">
+                                <p>Helsel, D.R. dan Hirsch, R.M. (2002). <em>Statistical Methods in Water Resources</em>.
+                                    Techniques of Water-Resources Investigations of the United States Geological Survey,
+                                    Book 4, Chapter A3. <a href="https://doi.org/10.3133/twri04A3"
+                                        target="_blank">doi:10.3133/twri04A3</a></p>
+
+                                <p>Kendall, M.G. (1975). <em>Rank Correlation Methods</em>. 4th ed. Charles Griffin,
+                                    London.</p>
+
+                                <p>Mann, H.B. (1945). Nonparametric tests against trend. <em>Econometrica</em>,
+                                    13(3): 245–259. <a href="https://doi.org/10.2307/1907187"
+                                        target="_blank">doi:10.2307/1907187</a></p>
+
+                                <p>Sen, P.K. (1968). Estimates of the regression coefficient based on Kendall's tau.
+                                    <em>Journal of the American Statistical Association</em>, 63(324): 1379–1389.
+                                    <a href="https://doi.org/10.1080/01621459.1968.10480934"
+                                        target="_blank">doi:10.1080/01621459.1968.10480934</a></p>
+
+                                <p>Theil, H. (1950). A rank-invariant method of linear and polynomial regression
+                                    analysis. <em>Indagationes Mathematicae</em>, 12: 85–91.</p>
+
+                                <p>World Meteorological Organization (2017). <em>Guidelines on the Calculation of
+                                        Climate Normals</em>. WMO-No. 1203. Geneva.</p>
+
+                                <p>Yue, S. dan Wang, C.Y. (2004). The Mann-Kendall test modified by effective
+                                    sample size to detect trend in serially correlated hydrological series.
+                                    <em>Water Resources Management</em>, 18(3): 201–218.
+                                    <a href="https://doi.org/10.1023/B:WARM.0000043140.61082.60"
+                                        target="_blank">doi:10.1023/B:WARM.0000043140.61082.60</a></p>
+                            </div>
+                        </div>
+
+                        <!-- Glosarium -->
+                        <div class="doc-section" id="sec-glosarium">
+                            <h1>Glosarium</h1>
+
+                            <table class="stat-table">
+                                <thead>
+                                    <tr><th style="width:160px;">Istilah</th><th>Arti</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>$\alpha$ (alpha)</td>
+                                        <td>Tingkat signifikansi — probabilitas kesalahan tipe I
+                                            (menolak $H_0$ yang benar). Di TrendHidro: 0.05</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Autokorelasi</td>
+                                        <td>Korelasi antara data dengan dirinya sendiri pada
+                                            <i>lag</i> waktu tertentu. Data hidrologi sering memiliki
+                                            autokorelasi karena pola musiman.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$H_0$, $H_1$</td>
+                                        <td>Hipotesis nol ($H_0$): tidak ada <i>trend</i>.
+                                            Hipotesis alternatif ($H_1$): ada <i>trend</i>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Intercept</i> ($\hat{\alpha}$)</td>
+                                        <td>Titik potong garis <i>trend</i> dengan sumbu Y — nilai
+                                            prediksi saat $x = 0$.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>IQR</td>
+                                        <td><i>Interquartile Range</i> — rentang antara kuartil
+                                            pertama (Q1) dan kuartil ketiga (Q3). Ukuran sebaran
+                                            yang robust terhadap <i>outlier</i>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Non-parametrik</td>
+                                        <td>Metode statistik yang tidak bergantung pada asumsi
+                                            distribusi data. Contoh: Mann-Kendall, Sen's Slope.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Outlier</i></td>
+                                        <td>Data yang terletak jauh dari data lainnya. Dalam
+                                            analisis <i>trend</i>, <i>outlier</i> dapat mengganggu
+                                            hasil regresi linear.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$p$<i>-value</i></td>
+                                        <td>Probabilitas mengamati data se-ekstrem yang teramati
+                                            jika $H_0$ benar. $p \le 0.05$ → signifikan.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Parametrik</td>
+                                        <td>Metode statistik yang memerlukan asumsi distribusi
+                                            tertentu (biasanya normal). Contoh: Regresi Linear.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$R^2$</td>
+                                        <td>Koefisien determinasi — proporsi variasi data yang
+                                            dijelaskan oleh model regresi. Rentang: 0–1.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Residual</td>
+                                        <td>Selisih antara nilai aktual ($y_i$) dan nilai prediksi
+                                            ($\hat{y}_i$): $e_i = y_i - \hat{y}_i$.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Robust</i></td>
+                                        <td>Ketahanan metode terhadap pelanggaran asumsi atau
+                                            keberadaan <i>outlier</i>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Slope</i> ($\hat{\beta}$)</td>
+                                        <td>Kemiringan garis <i>trend</i> — besarnya perubahan
+                                            data per satuan waktu (misal: mm/tahun).</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Statistical Power</i></td>
+                                        <td>Probabilitas uji statistik untuk mendeteksi <i>trend</i>
+                                            yang benar-benar ada. Semakin besar $n$, semakin tinggi <i>power</i>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Tied group</i></td>
+                                        <td>Kelompok data yang memiliki nilai yang sama persis.
+                                            Jika banyak <i>tied</i>, varians diestimasi lebih kecil.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i>Time series</i></td>
+                                        <td>Runtut waktu — data yang dikumpulkan secara berurutan
+                                            dalam interval waktu yang teratur.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Z<sub>kritis</sub></td>
+                                        <td>Nilai batas pada distribusi normal standar untuk menentukan
+                                            signifikansi. Pada $\alpha = 0.05$, $Z_{\text{kritis}} = \pm 1.96$.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <!-- Changelog -->
                         <div class="doc-section" id="sec-changelog">
                             <h1><i>Changelog</i></h1>
+                            <div class="changelog-item">
+                                <div class="changelog-date">Juni 2026</div>
+                                <div class="changelog-title">v1.2 — Dokumentasi Komprehensif</div>
+                                <div class="changelog-desc">
+                                    Dokumentasi diperluas secara menyeluruh: contoh perhitungan lengkap
+                                    dengan angka untuk setiap metode statistik, panduan interpretasi hasil,
+                                    tabel perbandingan antar metode, FAQ, glosarium isitilah teknis,
+                                    referensi akademik, detail arsitektur platform, serta penjelasan
+                                    asumsi dan keterbatasan setiap metode.
+                                </div>
+                            </div>
+                            <div class="changelog-item">
+                                <div class="changelog-date">Juni 2026</div>
+                                <div class="changelog-title">v1.1 — Penyempurnaan UI & Dokumentasi</div>
+                                <div class="changelog-desc">
+                                    Perbaikan tata letak toolbar dan kartu hasil analisis,
+                                    tampilan <i>trend</i> dengan kode warna signifikansi (gelap/terang),
+                                    diagram lingkaran data harian pada halaman detail,
+                                    indikator ketersediaan data (Baik/Cukup/Kurang) dengan badge,
+                                    area upload lebih besar pada halaman Olah Data,
+                                    dokumentasi metode diperbarui dengan interval kepercayaan dan uji-t.
+                                </div>
+                            </div>
                             <div class="changelog-item">
                                 <div class="changelog-date">Mei 2026</div>
                                 <div class="changelog-title">v1.0 — Rilis Awal</div>

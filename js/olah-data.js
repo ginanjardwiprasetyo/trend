@@ -34,6 +34,42 @@ function resetUpload() {
     document.getElementById('previewDataHeader').textContent = 'Data';
 }
 
+function toggleOlahMonth() {
+    const type = document.getElementById('olahDtType').value;
+    const mo = document.getElementById('olahMonth');
+    if (type === 'tahunan') {
+        mo.style.display = 'none';
+    } else if (type === 'musiman') {
+        mo.style.display = 'inline-block';
+        mo.innerHTML = `
+            <option value="1,2,3">Jan–Feb–Mar</option>
+            <option value="4,5,6">Apr–Mei–Jun</option>
+            <option value="7,8,9">Jul–Agus–Sep</option>
+            <option value="10,11,12">Okt–Nov–Des</option>
+        `;
+    } else {
+        mo.style.display = 'inline-block';
+        mo.innerHTML = `
+            <option value="all">Semua Bulan</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+        `;
+    }
+    // Trigger update on custom select if it exists
+    const evt = new Event('optionsChanged');
+    mo.dispatchEvent(evt);
+}
+
 // ====== FILE UPLOAD ======
 document.addEventListener('DOMContentLoaded', () => {
     const uploadZone = document.getElementById('uploadZone');
@@ -500,11 +536,14 @@ async function runOlahAnalysis() {
         if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
             const mk = mkRes.value;
             let mkColor = '#6B7280';
-            if (mk.trend.includes('Meningkat') && mk.trend.includes('Signifikan)') && !mk.trend.includes('Tidak')) mkColor = '#0B6E2F';
-            else if (mk.trend.includes('Meningkat')) mkColor = '#16A34A';
-            else if (mk.trend.includes('Menurun') && mk.trend.includes('Signifikan)') && !mk.trend.includes('Tidak')) mkColor = '#991B1B';
-            else if (mk.trend.includes('Menurun')) mkColor = '#DC2626';
-            document.getElementById('olahMkResult').innerHTML = `<i>Trend</i> <strong style="color:${mkColor}">${mk.trend.replace('Tren', '<i>Trend</i>')}</strong><br>S: ${fM(mk.S)}<br>Z-Score: ${fM(mk.Z)}`;
+            let tTrendMK = mk.trend === 'Tidak Ada Tren' ? 'tidak ada' : mk.trend;
+            if (tTrendMK.includes('Meningkat') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#0B6E2F';
+            else if (tTrendMK.includes('Meningkat')) mkColor = '#16A34A';
+            else if (tTrendMK.includes('Menurun') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#991B1B';
+            else if (tTrendMK.includes('Menurun')) mkColor = '#DC2626';
+            
+            const zKritis = 1.96;
+            document.getElementById('olahMkResult').innerHTML = `<i>Trend</i>: <strong style="color:${mkColor}">${tTrendMK}</strong><br>Z Uji: ${fM(mk.Z)}<br>Z Kritis: ±${zKritis}`;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
         }
@@ -513,7 +552,19 @@ async function runOlahAnalysis() {
         const ssRes = results[1];
         if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
             const ss = ssRes.value;
-            document.getElementById('olahSsResult').innerHTML = `<i>Trend</i> <strong>${ss.trend.replace('Tren', '<i>Trend</i>')}</strong><br>Slope: ${fM(ss.slope)}`;
+            let ssColor = '#6B7280';
+            let tTrendSS = ss.trend === 'Tidak Ada Tren' ? 'tidak ada' : ss.trend;
+            if (tTrendSS.includes('Meningkat') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#0B6E2F';
+            else if (tTrendSS.includes('Meningkat')) ssColor = '#16A34A';
+            else if (tTrendSS.includes('Menurun') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#991B1B';
+            else if (tTrendSS.includes('Menurun')) ssColor = '#DC2626';
+            
+            let boundsHtml = '';
+            if (ss.Qmin !== undefined && ss.Qmax !== undefined) {
+                boundsHtml = `<br>Q<sub>min</sub>: ${fM(ss.Qmin)}<br>Q<sub>max</sub>: ${fM(ss.Qmax)}`;
+            }
+            
+            document.getElementById('olahSsResult').innerHTML = `<i>Trend</i>: <strong style="color:${ssColor}">${tTrendSS}</strong><br>Q<sub>med</sub>: ${fM(ss.slope)}${boundsHtml}`;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
         }
@@ -522,7 +573,16 @@ async function runOlahAnalysis() {
         const lrRes = results[2];
         if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
             const lr = lrRes.value;
-            document.getElementById('olahLrResult').innerHTML = `<i>Trend</i> <strong>${lr.trend.replace('Tren', '<i>Trend</i>')}</strong><br>Slope: ${fM(lr.slope)}<br>R²: ${lr.rSquared}`;
+            let lrColor = '#6B7280';
+            let tTrendLR = lr.trend === 'Tidak Ada Tren' ? 'tidak ada' : lr.trend;
+            if (tTrendLR.includes('Meningkat') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#0B6E2F';
+            else if (tTrendLR.includes('Meningkat')) lrColor = '#16A34A';
+            else if (tTrendLR.includes('Menurun') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#991B1B';
+            else if (tTrendLR.includes('Menurun')) lrColor = '#DC2626';
+            
+            const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
+            const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
+            document.getElementById('olahLrResult').innerHTML = `<i>Trend</i>: <strong style="color:${lrColor}">${tTrendLR}</strong><br>t Uji: ${tUji}<br>t Kritis: ${tKrit}`;
 
             // Add trend line
             if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -692,19 +752,115 @@ function renderOlahAvailability(data, dtType, yFrom, yTo, mo) {
     }
 
     if (expectedCount <= 0) expectedCount = 1;
-    const pct = Math.min(100, (actualCount / expectedCount) * 100);
-
-    const barFill = document.getElementById('olahAvailBar');
-    barFill.style.width = `${pct}%`;
-
-    let color = '#EF4444'; // Kurang (<50%)
-    let label = 'Kurang';
-    if (pct >= 80) { color = '#16A34A'; label = 'Baik'; }
-    else if (pct >= 50) { color = '#F59E0B'; label = 'Cukup'; }
-
-    barFill.style.background = color;
-    document.getElementById('olahAvailPct').textContent = pct.toFixed(2) + '%';
-    document.getElementById('olahAvailPct').style.color = color;
-    document.getElementById('olahAvailLabel').textContent = label;
-    document.getElementById('olahAvailLabel').style.color = color;
+        const pct = Math.min(100, (actualCount / expectedCount) * 100);
+        const pctDisplay = pct.toFixed(2);
+        const barFill = document.getElementById('olahAvailBar');
+        barFill.style.width = `${pct}%`;
+        let color = '#EF4444'; let badgeBg = '#FEE2E2'; let badgeColor = '#991B1B'; let badgeText = 'Kurang';
+        if (pct >= 80) { color = '#16A34A'; badgeBg = '#DCFCE7'; badgeColor = '#166534'; badgeText = 'Baik'; }
+        else if (pct >= 50) { color = '#F59E0B'; badgeBg = '#FEF9C3'; badgeColor = '#854D0E'; badgeText = 'Cukup'; }
+        barFill.style.background = color;
+        const valEl = document.getElementById('olahAvailPct');
+        valEl.textContent = pctDisplay + '%';
+        valEl.style.color = color;
+        const labelEl = document.getElementById('olahAvailLabel');
+        labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
+        const badgeEl = document.getElementById('olahAvailBadge');
+        badgeEl.style.background = badgeBg;
+        badgeEl.style.color = badgeColor;
+        badgeEl.textContent = badgeText;
 }
+
+// ====== CUSTOM SELECT UI ======
+document.addEventListener('DOMContentLoaded', () => {
+    function setupCustomSelects() {
+        document.querySelectorAll('select.form-select').forEach(selectEl => {
+            if(selectEl.dataset.customized) return;
+            selectEl.dataset.customized = "true";
+            selectEl.style.display = 'none'; // Hide native select
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+            // Copy margin/width styles
+            wrapper.style.minWidth = selectEl.style.minWidth;
+            
+            const trigger = document.createElement('div');
+            trigger.className = 'custom-select-trigger';
+            const triggerText = document.createElement('span');
+            trigger.appendChild(triggerText);
+            trigger.innerHTML += `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+            
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'custom-select-options';
+            
+            wrapper.appendChild(trigger);
+            wrapper.appendChild(optionsContainer);
+            selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+            function renderOptions() {
+                // Cek visibilitas select asal
+                if (selectEl.style.display === 'none' && !selectEl.dataset.customized) {
+                    wrapper.style.display = 'none';
+                }
+
+                optionsContainer.innerHTML = '';
+                let selectedOption = selectEl.options[selectEl.selectedIndex] || selectEl.options[0];
+                if (selectedOption) {
+                    trigger.querySelector('span').textContent = selectedOption.textContent;
+                }
+
+                Array.from(selectEl.options).forEach(opt => {
+                    const optEl = document.createElement('div');
+                    optEl.className = 'custom-select-option' + (opt.selected ? ' selected' : '');
+                    optEl.textContent = opt.textContent;
+                    optEl.dataset.value = opt.value;
+                    
+                    optEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectEl.value = opt.value;
+                        selectEl.dispatchEvent(new Event('change'));
+                        wrapper.classList.remove('open');
+                        renderOptions();
+                    });
+                    optionsContainer.appendChild(optEl);
+                });
+            }
+            
+            renderOptions();
+
+            // Toggle dropdown
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close other open selects
+                document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                    if (w !== wrapper) w.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+            
+            // Watch for changes via JS
+            selectEl.addEventListener('change', renderOptions);
+            selectEl.addEventListener('optionsChanged', () => {
+                if (selectEl.id === 'olahMonth') {
+                    const dtType = document.getElementById('olahDtType').value;
+                    wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+                }
+                renderOptions();
+            });
+            
+            // Initial visibility check
+            if (selectEl.id === 'olahMonth') {
+                const dtType = document.getElementById('olahDtType').value;
+                wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+            }
+        });
+        
+        // Close dropdowns on outside click
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
+        });
+    }
+    
+    // Call custom setup
+    setupCustomSelects();
+});
