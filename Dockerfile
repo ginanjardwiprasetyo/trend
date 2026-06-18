@@ -17,7 +17,10 @@ RUN apt-get update && apt-get install -y \
 COPY . /var/www/html/
 
 # Berikan hak akses ke server web untuk mengakses (dan menulis) file
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod +x /var/www/html/start.sh
 
 # Ekspos port 80 untuk lalu lintas HTTP
 EXPOSE 80
+
+CMD ["/var/www/html/start.sh"]

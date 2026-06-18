@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: trend-fclf
+    runtime: docker
+    repo: https://github.com/ginanjardwiprasetyo/trend
+    plan: free
+    region: singapore
+    healthCheckPath: /
+    envVars:
+      - key: DB_PASS
+        sync: false
