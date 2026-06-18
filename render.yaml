@@ -3,8 +3,10 @@ services:
     name: trend-fclf
     runtime: docker
     repo: https://github.com/ginanjardwiprasetyo/trend
+    branch: main
     plan: free
     region: singapore
+    autoDeploy: false
     healthCheckPath: /
     envVars:
       - key: DB_PASS
