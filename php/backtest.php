@@ -45,7 +45,7 @@ if ($n < 3) {
 usort($data, function($a, $b) { return $a['year'] <=> $b['year']; });
 
 $values = array_column($data, 'value');
-$years = array_column($data, 'year');
+$years = range(0, $n - 1);
 
 // Always show sample rows for traceability
 $maxSampleRows = 10; // 5 awal + 5 akhir

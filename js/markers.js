@@ -23,23 +23,13 @@ function createTrendIcon(trend, completeness = 1.0) {
     let color, symbol;
     
     switch (trend) {
-        // Mann-Kendall: Signifikan (warna lebih pekat)
-        case 'Meningkat (Signifikan)':
-            color = '#0B6E2F';
-            symbol = '▲';
-            break;
-        case 'Menurun (Signifikan)':
-            color = '#991B1B';
-            symbol = '▼';
-            break;
-        // Mann-Kendall: Tidak Signifikan (warna biasa)
-        case 'Meningkat (Tidak Signifikan)':
         case 'Meningkat':
+        case 'Meningkat (Signifikan)':
             color = '#16A34A';
             symbol = '▲';
             break;
-        case 'Menurun (Tidak Signifikan)':
         case 'Menurun':
+        case 'Menurun (Signifikan)':
             color = '#DC2626';
             symbol = '▼';
             break;
@@ -153,10 +143,7 @@ function updateTrendMarkers(results) {
         const hasRange = (start !== null && start !== undefined && end !== null && end !== undefined);
         const dataLength = hasRange ? (end - start + 1) : 0;
 
-        // Filter Kualitas Data: Sembunyikan marker jika < 16 atau < 30 tahun dan filter aktif.
-        // Stasiun tanpa yearStart/yearEnd (dataLength = 0) tidak disembunyikan oleh filter
-        // karena tidak ada info panjang data yang valid.
-        if (hasRange && ((hide16 && dataLength < 16) || (hide30 && dataLength < 30))) {
+        if ((hide16 && dataLength < 16) || (hide30 && dataLength < 30)) {
             map.removeLayer(marker);
         } else {
             // Pastikan muncul kembali jika sebelumnya disembunyikan
@@ -194,8 +181,7 @@ function applyQualityFilter() {
         const hasRange = (start !== null && start !== undefined && end !== null && end !== undefined);
         const dataLength = hasRange ? (end - start + 1) : 0;
 
-        // Stasiun tanpa yearStart/yearEnd (dataLength = 0) tidak disembunyikan oleh filter
-        if (hasRange && ((hide16 && dataLength < 16) || (hide30 && dataLength < 30))) {
+        if ((hide16 && dataLength < 16) || (hide30 && dataLength < 30)) {
             map.removeLayer(marker);
         } else {
             if (!map.hasLayer(marker)) marker.addTo(map);

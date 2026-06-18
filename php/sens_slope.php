@@ -58,27 +58,11 @@ usort($data, function($a, $b) {
 
 // ====== HITUNG KEMIRINGAN ======
 $slopes = [];
-$totalPairs = ($n * ($n - 1)) / 2;
-$maxTargetPairs = 2000000; // Limit to 2 million pairs to save memory/time
-
-if ($totalPairs > $maxTargetPairs) {
-    // Randomized Sampling for very large datasets (e.g. 10+ years of daily data)
-    for ($k = 0; $k < $maxTargetPairs; $k++) {
-        $i = rand(0, $n - 2);
-        $j = rand($i + 1, $n - 1);
-        $dx = $data[$j]['year'] - $data[$i]['year'];
+for ($i = 0; $i < $n - 1; $i++) {
+    for ($j = $i + 1; $j < $n; $j++) {
+        $dx = $j - $i;
         if ($dx != 0) {
             $slopes[] = ($data[$j]['value'] - $data[$i]['value']) / $dx;
-        }
-    }
-} else {
-    // Full Iteration for smaller datasets
-    for ($i = 0; $i < $n - 1; $i++) {
-        for ($j = $i + 1; $j < $n; $j++) {
-            $dx = $data[$j]['year'] - $data[$i]['year'];
-            if ($dx != 0) {
-                $slopes[] = ($data[$j]['value'] - $data[$i]['value']) / $dx;
-            }
         }
     }
 }
@@ -96,7 +80,7 @@ if ($slopeCount === 0) {
 }
 
 // ====== HITUNG INTERCEPT ======
-$years = array_column($data, 'year');
+$years = range(0, $n - 1);
 $values = array_column($data, 'value');
 
 $intercepts = [];
@@ -134,7 +118,7 @@ $idxUpper = min($slopeCount - 1, floor($M2 + 1) - 1); // Approximation for (M2+1
 $Qmin = $slopes[$idxLower] ?? 0;
 $Qmax = $slopes[$idxUpper] ?? 0;
 
-// Signifikan jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
+// Signifikan, jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
 $significant = ($Qmin > 0) || ($Qmax < 0);
 
 $trend = 'Tidak Ada Tren';

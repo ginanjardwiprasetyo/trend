@@ -7,9 +7,9 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Olah Data Anda — TrendHidro</title>
     <meta name="description"
-        content="Upload dan analisis data runtut waktu hidrologi Anda sendiri menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di browser.">
+        content="Upload dan olah data runtut waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di browser.">
     <meta name="keywords"
-        content="upload data, analisis hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
+        content="upload data, olah data hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -489,12 +489,12 @@
                             <div id="olahSsResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Regresi</strong>
+                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Regresi Linear</strong>
                             <div id="olahLrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;">*Warna gelap menunjukkan
-                        signifikansi tingkat kepercayaan 95% (α = 0.05)</div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span
+                            style="color:#DC2626;">*</span> signifikan pada tingkat kepercayaan 95% (α = 0.05)</div>
                 </div>
 
                 <!-- Availability -->
@@ -503,16 +503,12 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                         </svg>
-                        Ketersediaan Data Periode Terpilih
+                        <span id="olahAvailTitle">Ketersediaan Data Periode Terpilih</span>
                     </h3>
                     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <span id="olahAvailPct"
                                 style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
-                            <div id="olahAvailBadge"
-                                style="padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; background:#F3F4F6; color:#6B7280;">
-                                —
-                            </div>
                         </div>
                         <div style="height:6px; background:#F1F5F9; border-radius:100px; overflow:hidden; width:100%;">
                             <div id="olahAvailBar"

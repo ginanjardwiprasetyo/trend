@@ -142,10 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.remove('active');
                 if (typeof currentMethod !== 'undefined') currentMethod = null;
 
-                // Sembunyikan filter kualitas data
-                const qWrapper = document.getElementById('qualityFilterWrapper');
-                if (qWrapper) qWrapper.classList.add('hidden');
-
                 if (typeof resetMarkerIcons === 'function') resetMarkerIcons();
             } else {
                 // Matikan semua metode lainnya (radio-behavior)
@@ -159,10 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.add('active');
                 if (typeof currentMethod !== 'undefined') currentMethod = method;
 
-                // Munculkan filter kualitas data
-                const qWrapper = document.getElementById('qualityFilterWrapper');
-                if (qWrapper) qWrapper.classList.remove('hidden');
-
                 if (typeof showLoading === 'function') showLoading(true, false); // Quiet mode
                 setTimeout(async () => {
                     if (typeof runAnalysis === 'function') await runAnalysis(method);
@@ -175,42 +167,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ====== HANDLE KLIK FILTER KUALITAS DATA ======
+    function activateQualityFilter(filterItem, toggleSwitch) {
+        // Matikan yang lain
+        [qualityToggle16Item, qualityToggle30Item].forEach(item => {
+            if (!item) return;
+            const sw = item.querySelector('.toggle-switch');
+            if (sw && sw !== toggleSwitch) {
+                sw.classList.remove('on');
+                item.style.borderColor = 'var(--color-border)';
+            }
+        });
+
+        // Aktifkan yang diklik
+        toggleSwitch.classList.add('on');
+        filterItem.style.borderColor = 'var(--color-primary)';
+
+        refreshAfterFilterChange();
+    }
+
     const qualityToggle16Item = document.getElementById('qualityToggle16Item');
     const toggleHide16 = document.getElementById('toggleHide16');
     const qualityToggle30Item = document.getElementById('qualityToggle30Item');
     const toggleHide30 = document.getElementById('toggleHide30');
-    
+
+    function refreshAfterFilterChange() {
+        if (typeof currentMethod !== 'undefined' && currentMethod) {
+            if (typeof runAnalysis === 'function') runAnalysis(currentMethod);
+        } else {
+            if (typeof applyQualityFilter === 'function') applyQualityFilter();
+        }
+        if (typeof showLegend === 'function') showLegend();
+    }
+
     if (qualityToggle16Item && toggleHide16) {
         qualityToggle16Item.addEventListener('click', (e) => {
-            const isFiltering = toggleHide16.classList.toggle('on');
-            if (isFiltering) qualityToggle16Item.style.borderColor = 'var(--color-primary)';
-            else qualityToggle16Item.style.borderColor = 'var(--color-border)';
-
-            // Re-run analysis to update markers with new filter
-            if (typeof currentMethod !== 'undefined' && currentMethod) {
-                if (typeof runAnalysis === 'function') runAnalysis(currentMethod);
+            e.stopPropagation();
+            if (toggleHide16.classList.contains('on')) {
+                toggleHide16.classList.remove('on');
+                qualityToggle16Item.style.borderColor = 'var(--color-border)';
+                refreshAfterFilterChange();
             } else {
-                // Even without a method, apply filter to station markers
-                if (typeof applyQualityFilter === 'function') applyQualityFilter();
+                activateQualityFilter(qualityToggle16Item, toggleHide16);
             }
-            // Update legend to show/hide warning icon
-            if (typeof showLegend === 'function') showLegend();
         });
     }
 
     if (qualityToggle30Item && toggleHide30) {
         qualityToggle30Item.addEventListener('click', (e) => {
-            const isFiltering = toggleHide30.classList.toggle('on');
-            if (isFiltering) qualityToggle30Item.style.borderColor = 'var(--color-primary)';
-            else qualityToggle30Item.style.borderColor = 'var(--color-border)';
-
-            // Re-run analysis to update markers with new filter
-            if (typeof currentMethod !== 'undefined' && currentMethod) {
-                if (typeof runAnalysis === 'function') runAnalysis(currentMethod);
+            e.stopPropagation();
+            if (toggleHide30.classList.contains('on')) {
+                toggleHide30.classList.remove('on');
+                qualityToggle30Item.style.borderColor = 'var(--color-border)';
+                refreshAfterFilterChange();
             } else {
-                if (typeof applyQualityFilter === 'function') applyQualityFilter();
+                activateQualityFilter(qualityToggle30Item, toggleHide30);
             }
-            if (typeof showLegend === 'function') showLegend();
         });
     }
 

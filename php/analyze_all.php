@@ -173,7 +173,7 @@ function calcSensSlope($data) {
     $slopes = [];
     for ($i = 0; $i < $n - 1; $i++) {
         for ($j = $i + 1; $j < $n; $j++) {
-            $dx = $data[$j]['year'] - $data[$i]['year'];
+            $dx = $j - $i;
             if ($dx != 0) {
                 $slopes[] = ($data[$j]['value'] - $data[$i]['value']) / $dx;
             }
@@ -234,7 +234,7 @@ function calcLinearRegression($data) {
     $n = count($data);
     if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'rSquared' => 0];
     
-    $x = array_column($data, 'year');
+    $x = range(0, $n - 1);
     $y = array_column($data, 'value');
     
     $sumX = array_sum($x);

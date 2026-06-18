@@ -161,7 +161,7 @@ if (empty($stationId)) {
         }
         .avail-year-grid {
             position: absolute;
-            bottom: calc(100% + 8px);
+            top: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
             background: #fff;
@@ -330,7 +330,7 @@ if (empty($stationId)) {
                             <div id="lrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;">*Warna gelap menunjukkan signifikansi tingkat kepercayaan 95% (α = 0.05)</div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span style="color:#DC2626;">*</span> signifikan pada tingkat kepercayaan 95% (α = 0.05)</div>
                 </div>
 
                 <!-- Ketersediaan Data Periode (kanan, 1/3) -->
@@ -343,17 +343,13 @@ if (empty($stationId)) {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                         </svg>
-                        Ketersediaan Data Periode Terpilih
+                        <span id="availPeriodTitle">Ketersediaan Data Periode Terpilih</span>
                     </h3>
 
                     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <span id="availPctValue"
                                 style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
-                            <div id="availPctBadge"
-                                style="padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; background:#F3F4F6; color:#6B7280;">
-                                —
-                            </div>
                         </div>
                         <div style="height:6px; background:#F1F5F9; border-radius:100px; overflow:hidden; width:100%;">
                             <div id="availBarFill"
@@ -725,6 +721,10 @@ if (empty($stationId)) {
             setCardLoading('statLoaderOverlay', true);
             setCardLoading('availPeriodLoaderOverlay', true);
 
+            // Update availability card title
+            const titleMap = { bulanan: 'Bulanan', tahunan: 'Tahunan', musiman: 'Bulanan' };
+            document.getElementById('availPeriodTitle').textContent = 'Ketersediaan Data ' + (titleMap[dtType] || 'Periode Terpilih');
+
             try {
                 let mo = document.getElementById('dtMonth').value;
                 if (dtType === 'tahunan') mo = 'all';
@@ -973,15 +973,15 @@ if (empty($stationId)) {
                 const mkRes = results[0];
                 if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
                     const mk = mkRes.value;
+                    const mkSig = mk.trend.includes('(Signifikan)');
+                    const tTrendMK = mkSig ? (mk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let mkColor = '#6B7280';
-                    let tTrendMK = mk.trend === 'Tidak Ada Tren' ? 'tidak ada' : mk.trend;
-                    if (tTrendMK.includes('Meningkat') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#0B6E2F';
-                    else if (tTrendMK.includes('Meningkat')) mkColor = '#16A34A';
-                    else if (tTrendMK.includes('Menurun') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#991B1B';
-                    else if (tTrendMK.includes('Menurun')) mkColor = '#DC2626';
+                    if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
+                    else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
                     
                     const zKritis = 1.96;
-                    document.getElementById('mkResult').innerHTML = `<i>Trend</i>: <strong style="color:${mkColor}">${tTrendMK}</strong><br>Z Uji: ${fM(mk.Z)}<br>Z Kritis: ±${zKritis}`;
+                    const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                    document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
                 } else {
                     document.getElementById('mkResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -990,19 +990,16 @@ if (empty($stationId)) {
                 const ssRes = results[1];
                 if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
                     const ss = ssRes.value;
+                    const ssSig = ss.trend.includes('(Signifikan)');
+                    const tTrendSS = ssSig ? (ss.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let ssColor = '#6B7280';
-                    let tTrendSS = ss.trend === 'Tidak Ada Tren' ? 'tidak ada' : ss.trend;
-                    if (tTrendSS.includes('Meningkat') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#0B6E2F';
-                    else if (tTrendSS.includes('Meningkat')) ssColor = '#16A34A';
-                    else if (tTrendSS.includes('Menurun') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#991B1B';
-                    else if (tTrendSS.includes('Menurun')) ssColor = '#DC2626';
+                    if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
+                    else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
                     
-                    let boundsHtml = '';
-                    if (ss.Qmin !== undefined && ss.Qmax !== undefined) {
-                        boundsHtml = `<br>Q<sub>min</sub>: ${fM(ss.Qmin)}<br>Q<sub>max</sub>: ${fM(ss.Qmax)}`;
-                    }
-                    
-                    document.getElementById('ssResult').innerHTML = `<i>Trend</i>: <strong style="color:${ssColor}">${tTrendSS}</strong><br>Q<sub>med</sub>: ${fM(ss.slope)}${boundsHtml}`;
+                    const qmedVal = fM(ss.slope) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                    const qminHtml = ss.Qmin !== undefined ? fM(ss.Qmin) : '—';
+                    const qmaxHtml = ss.Qmax !== undefined ? fM(ss.Qmax) : '—';
+                    document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
                 } else {
                     document.getElementById('ssResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -1011,16 +1008,17 @@ if (empty($stationId)) {
                 const lrRes = results[2];
                 if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
                     const lr = lrRes.value;
+                    const lrSig = lr.trend.includes('(Signifikan)');
+                    const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let lrColor = '#6B7280';
-                    let tTrendLR = lr.trend === 'Tidak Ada Tren' ? 'tidak ada' : lr.trend;
-                    if (tTrendLR.includes('Meningkat') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#0B6E2F';
-                    else if (tTrendLR.includes('Meningkat')) lrColor = '#16A34A';
-                    else if (tTrendLR.includes('Menurun') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#991B1B';
-                    else if (tTrendLR.includes('Menurun')) lrColor = '#DC2626';
+                    if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
+                    else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
                     
                     const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
                     const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
-                    document.getElementById('lrResult').innerHTML = `<i>Trend</i>: <strong style="color:${lrColor}">${tTrendLR}</strong><br>t Uji: ${tUji}<br>t Kritis: ${tKrit}`;
+                    const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(4)) : '—';
+                    const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope (b)</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
                     // Update main chart with trend line if available
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -1063,7 +1061,6 @@ if (empty($stationId)) {
             setCardLoading('availPeriodLoaderOverlay', false);
             const valEl = document.getElementById('availPctValue');
             const labelEl = document.getElementById('availPctLabel');
-            const badgeEl = document.getElementById('availPctBadge');
             const barFill = document.getElementById('availBarFill');
             const actualCount = tsData.length;
 
@@ -1097,18 +1094,14 @@ if (empty($stationId)) {
             barFill.style.width = `${pct}%`;
 
             // Color based on percentage
-            let color = '#EF4444'; // red < 50
-            let badgeBg = '#FEE2E2'; let badgeColor = '#991B1B'; let badgeText = 'Kurang';
-            if (pct >= 80) { color = '#16A34A'; badgeBg = '#DCFCE7'; badgeColor = '#166534'; badgeText = 'Baik'; }
-            else if (pct >= 50) { color = '#F59E0B'; badgeBg = '#FEF9C3'; badgeColor = '#854D0E'; badgeText = 'Cukup'; }
+            let color = '#EF4444';
+            if (pct >= 80) color = '#16A34A';
+            else if (pct >= 50) color = '#F59E0B';
 
             barFill.style.background = color;
             valEl.textContent = pctDisplay + '%';
             valEl.style.color = color;
             labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
-            badgeEl.style.background = badgeBg;
-            badgeEl.style.color = badgeColor;
-            badgeEl.textContent = badgeText;
         }
 
         async function loadAvailabilityYear() {
@@ -1195,6 +1188,7 @@ if (empty($stationId)) {
         }
 
         let isDailyPieChartActive = false;
+        let cachedPieData = null;
         async function toggleDailyPieChart() {
             isDailyPieChartActive = !isDailyPieChartActive;
             const btn = document.getElementById('btnTogglePie');
@@ -1214,85 +1208,89 @@ if (empty($stationId)) {
                 navControls.style.display = 'none';
                 pieWrapper.style.display = 'flex';
                 
-                setCardLoading('availLoaderOverlay', true);
-                try {
-                    const payload = {
-                        pos_id: STATION_ID,
-                        dataType: 'harian',
-                        yearFrom: minAvailYear,
-                        yearTo: maxAvailYear,
-                        month: 'all'
-                    };
-                    const res = await fetch('php/get_timeseries.php', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                    });
-                    const tsData = await res.json();
-                    
-                    const actualDataCount = tsData.length;
-                    let expectedDataCount = 0;
-                    for (let y = minAvailYear; y <= maxAvailYear; y++) {
-                        const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
-                        expectedDataCount += isLeap ? 366 : 365;
+                if (!cachedPieData) {
+                    setCardLoading('availLoaderOverlay', true);
+                    try {
+                        const payload = {
+                            pos_id: STATION_ID,
+                            dataType: 'harian',
+                            yearFrom: minAvailYear,
+                            yearTo: maxAvailYear,
+                            month: 'all'
+                        };
+                        const res = await fetch('php/get_timeseries.php', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                        });
+                        cachedPieData = await res.json();
+                    } catch (err) {
+                        console.error(err);
+                        document.getElementById('dailyPieSummary').innerHTML = "Gagal memuat pie chart.";
+                        setCardLoading('availLoaderOverlay', false);
+                        return;
                     }
-                    if (expectedDataCount === 0) expectedDataCount = 1;
-                    const missingCount = expectedDataCount - actualDataCount;
-                    const pct = ((actualDataCount / expectedDataCount) * 100).toFixed(2);
-                    
-                    document.getElementById('dailyPieSummary').innerHTML = `Dari rentang tahun <strong>${minAvailYear} — ${maxAvailYear}</strong>,<br>Data tersedia: <strong>${actualDataCount}</strong> hari (${pct}%)<br>Data hilang: <strong>${missingCount}</strong> hari`;
-                    
-                    const ctx = document.getElementById('dailyPieChart').getContext('2d');
-                    if (pieChartInstance) {
-                        pieChartInstance.destroy();
-                    }
-                    pieChartInstance = new Chart(ctx, {
-                        type: 'pie',
-                        data: {
-                            labels: ['Tersedia', 'Hilang'],
-                            datasets: [{
-                                data: [actualDataCount, missingCount],
-                                backgroundColor: ['#3B82F6', '#EF4444'],
-                                borderWidth: 2,
-                                borderColor: '#fff',
-                                hoverOffset: 8
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: { 
-                                        font: { family: 'Inter', size: 13, weight: '600' },
-                                        padding: 16,
-                                        usePointStyle: true,
-                                        pointStyle: 'circle'
-                                    }
-                                },
-                                tooltip: {
-                                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                                    padding: 12,
-                                    titleFont: { family: 'Inter', size: 13, weight: '600' },
-                                    bodyFont: { family: 'Inter', size: 12 },
-                                    cornerRadius: 8,
-                                    displayColors: true,
-                                    boxPadding: 4
+                }
+                
+                const tsData = cachedPieData;
+                const actualDataCount = tsData.length;
+                let expectedDataCount = 0;
+                for (let y = minAvailYear; y <= maxAvailYear; y++) {
+                    const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+                    expectedDataCount += isLeap ? 366 : 365;
+                }
+                if (expectedDataCount === 0) expectedDataCount = 1;
+                const missingCount = expectedDataCount - actualDataCount;
+                const pct = ((actualDataCount / expectedDataCount) * 100).toFixed(2);
+                
+                document.getElementById('dailyPieSummary').innerHTML = `Dari rentang tahun <strong>${minAvailYear} — ${maxAvailYear}</strong>,<br>Data tersedia: <strong>${actualDataCount}</strong> hari (${pct}%)<br>Data hilang: <strong>${missingCount}</strong> hari`;
+                
+                const ctx = document.getElementById('dailyPieChart').getContext('2d');
+                if (pieChartInstance) {
+                    pieChartInstance.destroy();
+                }
+                pieChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Tersedia', 'Hilang'],
+                        datasets: [{
+                            data: [actualDataCount, missingCount],
+                            backgroundColor: ['#3B82F6', '#EF4444'],
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { 
+                                    font: { family: 'Inter', size: 13, weight: '600' },
+                                    padding: 16,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
                                 }
                             },
-                            animation: {
-                                animateRotate: true,
-                                animateScale: true,
-                                duration: 600,
-                                easing: 'easeOutQuart'
+                            tooltip: {
+                                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                                padding: 12,
+                                titleFont: { family: 'Inter', size: 13, weight: '600' },
+                                bodyFont: { family: 'Inter', size: 12 },
+                                cornerRadius: 8,
+                                displayColors: true,
+                                boxPadding: 4
                             }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            animateScale: true,
+                            duration: 600,
+                            easing: 'easeOutQuart'
                         }
-                    });
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('dailyPieSummary').innerHTML = "Gagal memuat pie chart.";
-                } finally {
-                    setCardLoading('availLoaderOverlay', false);
-                }
+                    }
+                });
+                setCardLoading('availLoaderOverlay', false);
             } else {
                 btnText.textContent = "Tampilkan Ringkasan (Pie Chart)";
                 btnIcon.innerHTML = '<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 3v9l4 2"/>';

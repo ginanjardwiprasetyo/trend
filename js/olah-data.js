@@ -513,6 +513,10 @@ async function runOlahAnalysis() {
     // Stats
     renderOlahStats(aggregatedData, dtType, yFrom, yTo, mo);
 
+    // Update availability card title
+    const titleMap = { bulanan: 'Bulanan', tahunan: 'Tahunan', musiman: 'Bulanan' };
+    document.getElementById('olahAvailTitle').textContent = 'Ketersediaan Data ' + (titleMap[dtType] || 'Periode Terpilih');
+
     // Availability
     renderOlahAvailability(aggregatedData, dtType, yFrom, yTo, mo);
 
@@ -535,15 +539,15 @@ async function runOlahAnalysis() {
         const mkRes = results[0];
         if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
             const mk = mkRes.value;
+            const mkSig = mk.trend.includes('(Signifikan)');
+            const tTrendMK = mkSig ? (mk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let mkColor = '#6B7280';
-            let tTrendMK = mk.trend === 'Tidak Ada Tren' ? 'tidak ada' : mk.trend;
-            if (tTrendMK.includes('Meningkat') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#0B6E2F';
-            else if (tTrendMK.includes('Meningkat')) mkColor = '#16A34A';
-            else if (tTrendMK.includes('Menurun') && tTrendMK.includes('Signifikan)') && !tTrendMK.includes('Tidak')) mkColor = '#991B1B';
-            else if (tTrendMK.includes('Menurun')) mkColor = '#DC2626';
+            if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
+            else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
             
             const zKritis = 1.96;
-            document.getElementById('olahMkResult').innerHTML = `<i>Trend</i>: <strong style="color:${mkColor}">${tTrendMK}</strong><br>Z Uji: ${fM(mk.Z)}<br>Z Kritis: ±${zKritis}`;
+            const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
         }
@@ -552,19 +556,16 @@ async function runOlahAnalysis() {
         const ssRes = results[1];
         if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
             const ss = ssRes.value;
+            const ssSig = ss.trend.includes('(Signifikan)');
+            const tTrendSS = ssSig ? (ss.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let ssColor = '#6B7280';
-            let tTrendSS = ss.trend === 'Tidak Ada Tren' ? 'tidak ada' : ss.trend;
-            if (tTrendSS.includes('Meningkat') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#0B6E2F';
-            else if (tTrendSS.includes('Meningkat')) ssColor = '#16A34A';
-            else if (tTrendSS.includes('Menurun') && tTrendSS.includes('Signifikan)') && !tTrendSS.includes('Tidak')) ssColor = '#991B1B';
-            else if (tTrendSS.includes('Menurun')) ssColor = '#DC2626';
+            if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
+            else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
             
-            let boundsHtml = '';
-            if (ss.Qmin !== undefined && ss.Qmax !== undefined) {
-                boundsHtml = `<br>Q<sub>min</sub>: ${fM(ss.Qmin)}<br>Q<sub>max</sub>: ${fM(ss.Qmax)}`;
-            }
-            
-            document.getElementById('olahSsResult').innerHTML = `<i>Trend</i>: <strong style="color:${ssColor}">${tTrendSS}</strong><br>Q<sub>med</sub>: ${fM(ss.slope)}${boundsHtml}`;
+            const qmedVal = fM(ss.slope) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            const qminHtml = ss.Qmin !== undefined ? fM(ss.Qmin) : '—';
+            const qmaxHtml = ss.Qmax !== undefined ? fM(ss.Qmax) : '—';
+            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
         }
@@ -573,16 +574,17 @@ async function runOlahAnalysis() {
         const lrRes = results[2];
         if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
             const lr = lrRes.value;
+            const lrSig = lr.trend.includes('(Signifikan)');
+            const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let lrColor = '#6B7280';
-            let tTrendLR = lr.trend === 'Tidak Ada Tren' ? 'tidak ada' : lr.trend;
-            if (tTrendLR.includes('Meningkat') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#0B6E2F';
-            else if (tTrendLR.includes('Meningkat')) lrColor = '#16A34A';
-            else if (tTrendLR.includes('Menurun') && tTrendLR.includes('Signifikan)') && !tTrendLR.includes('Tidak')) lrColor = '#991B1B';
-            else if (tTrendLR.includes('Menurun')) lrColor = '#DC2626';
+            if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
+            else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
             
+            const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(4)) : '—';
             const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
             const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
-            document.getElementById('olahLrResult').innerHTML = `<i>Trend</i>: <strong style="color:${lrColor}">${tTrendLR}</strong><br>t Uji: ${tUji}<br>t Kritis: ${tKrit}`;
+            const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope (b)</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -756,19 +758,15 @@ function renderOlahAvailability(data, dtType, yFrom, yTo, mo) {
         const pctDisplay = pct.toFixed(2);
         const barFill = document.getElementById('olahAvailBar');
         barFill.style.width = `${pct}%`;
-        let color = '#EF4444'; let badgeBg = '#FEE2E2'; let badgeColor = '#991B1B'; let badgeText = 'Kurang';
-        if (pct >= 80) { color = '#16A34A'; badgeBg = '#DCFCE7'; badgeColor = '#166534'; badgeText = 'Baik'; }
-        else if (pct >= 50) { color = '#F59E0B'; badgeBg = '#FEF9C3'; badgeColor = '#854D0E'; badgeText = 'Cukup'; }
+        let color = '#EF4444';
+        if (pct >= 80) color = '#16A34A';
+        else if (pct >= 50) color = '#F59E0B';
         barFill.style.background = color;
         const valEl = document.getElementById('olahAvailPct');
         valEl.textContent = pctDisplay + '%';
         valEl.style.color = color;
         const labelEl = document.getElementById('olahAvailLabel');
         labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
-        const badgeEl = document.getElementById('olahAvailBadge');
-        badgeEl.style.background = badgeBg;
-        badgeEl.style.color = badgeColor;
-        badgeEl.textContent = badgeText;
 }
 
 // ====== CUSTOM SELECT UI ======

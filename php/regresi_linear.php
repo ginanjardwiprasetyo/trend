@@ -58,7 +58,7 @@ usort($data, function($a, $b) {
     return $a['year'] <=> $b['year'];
 });
 
-$x = array_column($data, 'year');
+$x = array_map(function($d) { return (float)$d['year']; }, $data);
 $y = array_column($data, 'value');
 
 // ====== HITUNG LEAST SQUARES SECARA MANUAL ======

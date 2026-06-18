@@ -309,6 +309,10 @@ function showLoading(show, isFull = true) {
 async function fetchAnalytics(params = null, isInitial = false) {
     if (!currentDASData) return;
 
+    // Aktifkan loader Opsi Tampilan (membaca data periode stasiun)
+    const qualityLoader = document.getElementById('qualityLoader');
+    if (qualityLoader) qualityLoader.classList.add('active');
+
     // Tampilkan loader: sidebar-only untuk interaksi parameter agar tidak memblokir UI
     if (params === null && !isInitial) {
         showLoading(true, false); // Gunakan non-blocking loader
@@ -321,7 +325,10 @@ async function fetchAnalytics(params = null, isInitial = false) {
     const { dataType, aggregation, yearFrom, yearTo } = params || getCurrentParams();
 
     // Pastikan valid
-    if (!yearFrom || !yearTo || yearFrom > yearTo) return;
+    if (!yearFrom || !yearTo || yearFrom > yearTo) {
+        if (qualityLoader) qualityLoader.classList.remove('active');
+        return;
+    }
 
     try {
         const payload = { dataType, aggregation, yearFrom, yearTo, month: params?.month || getCurrentParams().month };
@@ -361,6 +368,8 @@ async function fetchAnalytics(params = null, isInitial = false) {
             showLoading(false);
         }
 
+        if (qualityLoader) qualityLoader.classList.remove('active');
+
         // --- LOGIKA BACKGROUND CHAIN ---
         // Jika pemanggilan ini adalah pemanggilan awal (params === null),
         // jalankan background fetch untuk skala lainnya secara sekuensial agar tidak membebani server
@@ -378,6 +387,7 @@ async function fetchAnalytics(params = null, isInitial = false) {
         if (isInitial) {
             showLoading(false);
         }
+        if (qualityLoader) qualityLoader.classList.remove('active');
     }
 }
 
@@ -432,13 +442,21 @@ function showLegend(method = null) {
     const activeMethod = method || currentMethod;
     if (!activeMethod) return;
 
-    // Item Legend umum (Kualitas Data)
-    const t16 = document.getElementById('toggleHide16');
-    const hide16 = t16 ? t16.classList.contains('on') : false;
-
     let qualityLegend = '';
-    // Hanya munculkan legenda "Data < 16 tahun" jika filternya NONAKTIF (data masih tampil di peta)
-    if (!hide16) {
+    // Cek apakah ada stasiun visible di peta dengan data < 16 tahun
+    let hasShortData = false;
+    if (typeof stationMarkers !== 'undefined') {
+        for (const marker of stationMarkers) {
+            if (map && map.hasLayer(marker)) {
+                const s = marker.stationData;
+                if (s.yearStart && s.yearEnd && (s.yearEnd - s.yearStart + 1) < 16) {
+                    hasShortData = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (hasShortData) {
         qualityLegend = `
             <div class="legend-divider" style="height:1px; background:var(--color-border); margin:4px 0;"></div>
             <div class="legend-item">
@@ -450,13 +468,10 @@ function showLegend(method = null) {
         `;
     }
 
-    // Semua metode sekarang punya signifikansi
     legendBox.innerHTML = `
-        <div class="legend-item"><span class="legend-icon" style="color:#0B6E2F;">▲</span><span>Meningkat (Signifikan)</span></div>
-        <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span>Meningkat (Tidak Signifikan)</span></div>
-        <div class="legend-item"><span class="legend-icon" style="color:#991B1B;">▼</span><span>Menurun (Signifikan)</span></div>
-        <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span>Menurun (Tidak Signifikan)</span></div>
-        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span><i>Trend</i> Meningkat</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span><i>Trend</i> Menurun</span></div>
+        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada <i>Trend</i></span></div>
         ${qualityLegend}
     `;
 
