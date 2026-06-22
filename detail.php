@@ -280,7 +280,7 @@ if (empty($stationId)) {
                     <div class="spinner"></div>
                     <span class="loader-label">Memuat Grafik...</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
                     <h3 style="margin: 0;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 3v18h18" />
@@ -330,7 +330,7 @@ if (empty($stationId)) {
                             <div id="lrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span style="color:#DC2626;">*</span> signifikan pada tingkat kepercayaan 95% (α = 0.05)</div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span style="color:#DC2626;">*</span> signifikan berdasarkan tingkat kepercayaan 95% (α = 0.05)</div>
                 </div>
 
                 <!-- Ketersediaan Data Periode (kanan, 1/3) -->
@@ -846,6 +846,7 @@ if (empty($stationId)) {
                             enabled: true,
                             position: 'nearest',
                             external: null,
+                            filter: (item) => item.dataset.label !== 'Garis Regresi',
                             callbacks: {
                                 title: (context) => {
                                     const idx = context[0].dataIndex;
@@ -981,7 +982,7 @@ if (empty($stationId)) {
                     
                     const zKritis = 1.96;
                     const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
+                    document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
                 } else {
                     document.getElementById('mkResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -1018,7 +1019,7 @@ if (empty($stationId)) {
                     const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
                     const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(4)) : '—';
                     const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope (b)</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
                     // Update main chart with trend line if available
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {

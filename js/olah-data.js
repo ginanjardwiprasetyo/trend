@@ -35,12 +35,10 @@ function resetUpload() {
 }
 
 function toggleOlahMonth() {
-    const type = document.getElementById('olahDtType').value;
+    const dtType = document.getElementById('olahDtType').value;
     const mo = document.getElementById('olahMonth');
-    if (type === 'tahunan') {
-        mo.style.display = 'none';
-    } else if (type === 'musiman') {
-        mo.style.display = 'inline-block';
+    mo.style.display = 'none';
+    if (dtType === 'musiman') {
         mo.innerHTML = `
             <option value="1,2,3">Jan–Feb–Mar</option>
             <option value="4,5,6">Apr–Mei–Jun</option>
@@ -48,7 +46,6 @@ function toggleOlahMonth() {
             <option value="10,11,12">Okt–Nov–Des</option>
         `;
     } else {
-        mo.style.display = 'inline-block';
         mo.innerHTML = `
             <option value="all">Semua Bulan</option>
             <option value="1">Januari</option>
@@ -65,7 +62,6 @@ function toggleOlahMonth() {
             <option value="12">Desember</option>
         `;
     }
-    // Trigger update on custom select if it exists
     const evt = new Event('optionsChanged');
     mo.dispatchEvent(evt);
 }
@@ -356,43 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ====== TOGGLE MONTH SELECT ======
-function toggleOlahMonth() {
-    const dtType = document.getElementById('olahDtType').value;
-    const mo = document.getElementById('olahMonth');
-
-    if (dtType === 'tahunan') {
-        mo.style.display = 'none';
-    } else if (dtType === 'musiman') {
-        mo.style.display = 'inline-block';
-        mo.innerHTML = `
-            <option value="1,2,3">Jan–Feb–Mar</option>
-            <option value="4,5,6">Apr–Mei–Jun</option>
-            <option value="7,8,9">Jul–Agus–Sep</option>
-            <option value="10,11,12">Okt–Nov–Des</option>
-        `;
-    } else {
-        mo.style.display = 'inline-block';
-        mo.innerHTML = `
-            <option value="all">Semua Bulan</option>
-            <option value="1">Januari</option>
-            <option value="2">Februari</option>
-            <option value="3">Maret</option>
-            <option value="4">April</option>
-            <option value="5">Mei</option>
-            <option value="6">Juni</option>
-            <option value="7">Juli</option>
-            <option value="8">Agustus</option>
-            <option value="9">September</option>
-            <option value="10">Oktober</option>
-            <option value="11">November</option>
-            <option value="12">Desember</option>
-        `;
-    }
-}
-
 // ====== AGGREGATE DATA ======
-function aggregateData(dtType, monthFilter, yFrom, yTo) {
+function aggregateData(dtType, monthFilter, yFrom, yTo, aggMode) {
+    aggMode = aggMode || 'kumulatif';
+
     // Filter raw data by year range
     let filtered = rawData.filter(d => {
         const y = d.date.getFullYear();
@@ -408,45 +371,44 @@ function aggregateData(dtType, monthFilter, yFrom, yTo) {
         filtered = filtered.filter(d => months.includes(d.date.getMonth() + 1));
     }
 
+    const reduceValues = (arr) => {
+        if (aggMode === 'min') return Math.round(Math.min(...arr));
+        if (aggMode === 'maks') return Math.round(Math.max(...arr));
+        if (aggMode === 'rerata') return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+        return Math.round(arr.reduce((a, b) => a + b, 0));
+    };
+
     if (dtType === 'tahunan') {
         const yearMap = {};
-        const countMap = {};
         filtered.forEach(d => {
             const y = d.date.getFullYear();
-            if (!yearMap[y]) { yearMap[y] = 0; countMap[y] = 0; }
-            yearMap[y] += d.value;
-            countMap[y]++;
+            if (!yearMap[y]) yearMap[y] = [];
+            yearMap[y].push(d.value);
         });
-        
-        // Pilih fungsi agregasi yang sesuai (sementara default AVG/SUM, kita gunakan SUM untuk kesederhanaan,
-        // namun aslinya harus membaca mode dari input user. Karena olah-data.html mungkin belum ada opsi agregasi,
-        // biarkan tetap sederhana). Untuk saat ini user upload data tahunan biasanya 1 data per tahun.
-        return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: Math.round(yearMap[y]) }));
+        return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: reduceValues(yearMap[y]) }));
     }
 
     if (dtType === 'bulanan') {
         if (monthFilter === 'all') {
-            // Monthly encoding
             const monthMap = {};
             filtered.forEach(d => {
                 const y = d.date.getFullYear();
-                const m = d.date.getMonth(); // 0-indexed
+                const m = d.date.getMonth();
                 const key = `${y}-${m}`;
-                if (!monthMap[key]) monthMap[key] = { year: y, month: m, total: 0 };
-                monthMap[key].total += d.value;
+                if (!monthMap[key]) monthMap[key] = { year: y, month: m, values: [] };
+                monthMap[key].values.push(d.value);
             });
             return Object.values(monthMap)
                 .sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month)
-                .map(d => ({ year: d.year + (d.month / 12), value: Math.round(d.total) }));
+                .map(d => ({ year: d.year + (d.month / 12), value: reduceValues(d.values) }));
         } else {
-            // Single month
             const yearMap = {};
             filtered.forEach(d => {
                 const y = d.date.getFullYear();
-                if (!yearMap[y]) yearMap[y] = 0;
-                yearMap[y] += d.value;
+                if (!yearMap[y]) yearMap[y] = [];
+                yearMap[y].push(d.value);
             });
-            return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: Math.round(yearMap[y]) }));
+            return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: reduceValues(yearMap[y]) }));
         }
     }
 
@@ -454,10 +416,10 @@ function aggregateData(dtType, monthFilter, yFrom, yTo) {
         const yearMap = {};
         filtered.forEach(d => {
             const y = d.date.getFullYear();
-            if (!yearMap[y]) yearMap[y] = 0;
-            yearMap[y] += d.value;
+            if (!yearMap[y]) yearMap[y] = [];
+            yearMap[y].push(d.value);
         });
-        return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: Math.round(yearMap[y]) }));
+        return Object.keys(yearMap).sort().map(y => ({ year: parseFloat(y), value: reduceValues(yearMap[y]) }));
     }
 
     return [];
@@ -486,6 +448,7 @@ async function runOlahAnalysis() {
     const dtType = document.getElementById('olahDtType').value;
     let mo = document.getElementById('olahMonth').value;
     if (dtType === 'tahunan') mo = 'all';
+    const agg = document.getElementById('olahAgg').value;
     const yFrom = parseInt(document.getElementById('olahYFrom').value);
     const yTo = parseInt(document.getElementById('olahYTo').value);
 
@@ -498,7 +461,7 @@ async function runOlahAnalysis() {
     document.getElementById('btnOlahRun').disabled = true;
     document.getElementById('resultsSection').classList.add('show');
 
-    aggregatedData = aggregateData(dtType, mo, yFrom, yTo);
+    aggregatedData = aggregateData(dtType, mo, yFrom, yTo, agg);
 
     if (aggregatedData.length === 0) {
         alert('Tidak ada data untuk periode yang dipilih.');
@@ -547,7 +510,7 @@ async function runOlahAnalysis() {
             
             const zKritis = 1.96;
             const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
         }
@@ -584,7 +547,7 @@ async function runOlahAnalysis() {
             const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
             const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
             const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope (b)</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -664,6 +627,7 @@ function renderOlahChart(data, dtType) {
                 tooltip: {
                     enabled: true,
                     position: 'nearest',
+                    filter: (item) => item.dataset.label !== 'Garis Regresi Linear',
                     callbacks: {
                         title: (context) => {
                             const idx = context[0].dataIndex;
@@ -839,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Watch for changes via JS
             selectEl.addEventListener('change', renderOptions);
             selectEl.addEventListener('optionsChanged', () => {
-                if (selectEl.id === 'olahMonth') {
+                if (selectEl.id === 'olahMonth' || selectEl.id === 'olahAgg') {
                     const dtType = document.getElementById('olahDtType').value;
                     wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
                 }
@@ -847,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             // Initial visibility check
-            if (selectEl.id === 'olahMonth') {
+            if (selectEl.id === 'olahMonth' || selectEl.id === 'olahAgg') {
                 const dtType = document.getElementById('olahDtType').value;
                 wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
             }

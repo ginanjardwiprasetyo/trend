@@ -83,9 +83,10 @@ try {
             }
         }
         if (abs($lat) < 0.1 && abs($lon) < 0.1) continue;
-        
+
         $pos_id = isset($st['pos_id']) ? $st['pos_id'] : (isset($st['id']) ? $st['id'] : 'unknown');
         $nama = (isset($st['nama_pos']) && !empty($st['nama_pos'])) ? $st['nama_pos'] : $pos_id;
+        if (stripos($nama, 'Klimatologi') !== false) continue;
         $lokasi = (isset($st['lokasi']) && !empty($st['lokasi'])) ? $st['lokasi'] : '-';
         
         $st_stats = isset($stats[$pos_id]) ? $stats[$pos_id] : [

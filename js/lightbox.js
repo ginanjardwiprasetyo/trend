@@ -7,6 +7,19 @@
 function openLightbox(stationData) {
     const overlay = document.getElementById('lightboxOverlay');
 
+    // Reset confirm mode jika sebelumnya aktif
+    const cs = document.getElementById('confirmSection');
+    if (cs) {
+        cs.style.display = 'none';
+        Array.from(document.getElementById('lightboxBody').children).forEach(el => {
+            if (el.id !== 'confirmSection') el.style.display = '';
+        });
+        document.getElementById('lightboxCloseBtn').style.display = '';
+        document.getElementById('lightboxDetailBtn').style.display = '';
+        document.getElementById('confirmNo').style.display = 'none';
+        document.getElementById('confirmYes').style.display = 'none';
+    }
+
     // Helper untul format minus typografi
     const fM = (val) => val === undefined || val === null ? '—' : String(val).replace('-', '−');
 
@@ -112,19 +125,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    const confirmSection = document.getElementById('confirmSection');
+    const lightboxBody = document.getElementById('lightboxBody');
+    const lightboxFooter = document.getElementById('lightboxFooter');
+    let isConfirmMode = false;
+
+    function openDetailPage(stationId, params) {
+        const dtType = params.dataType || 'tahunan';
+        const agg = params.aggregation || 'rerata';
+        const mo = params.month || 'all';
+        const yF = params.yearFrom || '';
+        const yT = params.yearTo || '';
+        window.open(`detail?id=${stationId}&dtType=${dtType}&agg=${agg}&mo=${mo}&yF=${yF}&yT=${yT}`, '_blank');
+    }
+
+    function setConfirmMode(enable, msg) {
+        isConfirmMode = enable;
+        Array.from(lightboxBody.children).forEach(el => {
+            if (el.id !== 'confirmSection') {
+                el.style.display = enable ? 'none' : '';
+            }
+        });
+        confirmSection.style.display = enable ? 'block' : 'none';
+        if (enable && msg) {
+            document.getElementById('confirmTitle').textContent = 'Perhatian';
+            document.getElementById('confirmMessage').innerHTML = msg;
+        }
+        document.getElementById('lightboxCloseBtn').style.display = enable ? 'none' : '';
+        detailBtn.style.display = enable ? 'none' : '';
+        confirmNo.style.display = enable ? '' : 'none';
+        confirmYes.style.display = enable ? '' : 'none';
+    }
+
+    confirmYes.addEventListener('click', () => {
+        const stationId = detailBtn.dataset.stationId;
+        if (stationId) {
+            const params = typeof getCurrentParams === 'function' ? getCurrentParams() : {};
+            openDetailPage(stationId, params);
+        }
+        setConfirmMode(false);
+    });
+
+    confirmNo.addEventListener('click', closeLightbox);
+
     // Tombol Detail → halaman detail (Bawa Paremeter Filter)
     detailBtn.addEventListener('click', () => {
         const stationId = detailBtn.dataset.stationId;
-        if (stationId) {
-            // Ambil filter yang sedang aktif dari variabel globals / DOM
-            const params = typeof getCurrentParams === 'function' ? getCurrentParams() : {};
-            const dtType = params.dataType || 'tahunan';
-            const agg = params.aggregation || 'rerata';
-            const mo = params.month || 'all';
-            const yF = params.yearFrom || '';
-            const yT = params.yearTo || '';
+        if (!stationId) return;
 
-            window.open(`detail?id=${stationId}&dtType=${dtType}&agg=${agg}&mo=${mo}&yF=${yF}&yT=${yT}`, '_blank');
+        const params = typeof getCurrentParams === 'function' ? getCurrentParams() : {};
+
+        // Cari data stasiun
+        let years = 0;
+        let dataAvail = false;
+        if (typeof currentDASData !== 'undefined' && currentDASData && currentDASData.features) {
+            const feat = currentDASData.features.find(f => f.properties.id === stationId);
+            if (feat) {
+                const p = feat.properties;
+                if (p.yearStart && p.yearEnd) {
+                    years = p.yearEnd - p.yearStart + 1;
+                    dataAvail = true;
+                }
+            }
+        }
+
+        if (dataAvail && years < 16) {
+            setConfirmMode(true,
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Analisis tren dengan data kurang dari 16 tahun mungkin kurang <i>reliable</i>. Tetap lakukan pengolahan <i>trend</i> data runtut waktu?`
+            );
+        } else if (!dataAvail) {
+            setConfirmMode(true,
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Tetap lakukan pengolahan <i>trend</i> data runtut waktu?`
+            );
+        } else {
+            openDetailPage(stationId, params);
         }
     });
 });

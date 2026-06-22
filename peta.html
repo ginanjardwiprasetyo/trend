@@ -261,8 +261,22 @@
                     <span class="field-label">Panjang Data</span>
                     <span class="field-value" id="lbLength">—</span>
                 </div>
+                <div id="confirmSection" style="display:none; padding: 24px 16px; grid-column: 1 / -1;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;">
+                        <div style="width:48px; height:48px; border-radius:50%; background:#FEF3C7; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p style="margin:0 0 4px; font-size:1rem; font-weight:700; color:#1F2937;" id="confirmTitle">Perhatian</p>
+                            <p style="margin:0; color:#6B7280; line-height:1.6; font-size:0.9rem;" id="confirmMessage"></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="lightbox-footer">
+            <div class="lightbox-footer" id="lightboxFooter">
                 <button class="btn btn-secondary" id="lightboxCloseBtn">Tutup</button>
                 <button class="btn btn-primary" id="lightboxDetailBtn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -270,6 +284,8 @@
                     </svg>
                     Detail
                 </button>
+                <button class="btn btn-secondary" id="confirmNo" style="display:none;">Tidak</button>
+                <button class="btn btn-primary" id="confirmYes" style="display:none;">Ya, Tetap Buka</button>
             </div>
         </div>
     </div>
