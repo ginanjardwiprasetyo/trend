@@ -921,6 +921,113 @@ if (empty($stationId)) {
                 : `Tidak`;
         }
 
+        // ====== JS Statistical Functions (Client-side computation avoids server timeout) ======
+
+        function normalCDF(x) {
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+            const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x) / Math.sqrt(2);
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1.0 + sign * y);
+        }
+
+        function getCriticalZ(alpha) {
+            if (alpha === 0.05) return 1.96;
+            if (alpha === 0.01) return 2.576;
+            if (alpha === 0.10) return 1.645;
+            return 1.96;
+        }
+
+        function getCriticalT(df, alpha) {
+            if (df <= 0) return 1.96;
+            if (df >= 120) return getCriticalZ(alpha);
+            const tbl = {1:12.706,2:4.303,3:3.182,4:2.776,5:2.571,6:2.447,7:2.365,8:2.306,9:2.262,10:2.228,11:2.201,12:2.179,13:2.160,14:2.145,15:2.131,16:2.120,17:2.110,18:2.101,19:2.093,20:2.086,21:2.080,22:2.074,23:2.069,24:2.064,25:2.060,26:2.056,27:2.052,28:2.048,29:2.045,30:2.042,35:2.030,40:2.021,45:2.014,50:2.009,60:2.000,70:1.994,80:1.990,90:1.987,100:1.984,120:1.980};
+            if (tbl[df]) return tbl[df];
+            const keys = Object.keys(tbl).map(Number).sort((a,b)=>a-b);
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (df > keys[i] && df < keys[i+1]) {
+                    const f = (df - keys[i]) / (keys[i+1] - keys[i]);
+                    return tbl[keys[i]] + f * (tbl[keys[i+1]] - tbl[keys[i]]);
+                }
+            }
+            return 1.96;
+        }
+
+        function calcMannKendallBaseJS(values) {
+            const n = values.length;
+            if (n < 3) return { S: 0, varS: 0, Z: 0, pValue: 1 };
+            let S = 0;
+            for (let k = 0; k < n - 1; k++)
+                for (let j = k + 1; j < n; j++) {
+                    const d = values[j] - values[k];
+                    if (d > 0) S += 1; else if (d < 0) S -= 1;
+                }
+            const cnt = {};
+            values.forEach(v => { const k = String(v); cnt[k] = (cnt[k]||0) + 1; });
+            let tSum = 0;
+            Object.values(cnt).forEach(c => { if (c > 1) tSum += c * (c-1) * (2*c+5); });
+            const varS = (n * (n-1) * (2*n+5) - tSum) / 18;
+            let Z = 0;
+            if (S > 0) Z = (S - 1) / Math.sqrt(varS);
+            else if (S < 0) Z = (S + 1) / Math.sqrt(varS);
+            return { S, varS, Z, pValue: 2 * (1 - normalCDF(Math.abs(Z))) };
+        }
+
+        function computeSenSlope(dataArray) {
+            const n = dataArray.length;
+            const slopes = [];
+            for (let i = 0; i < n - 1; i++)
+                for (let j = i + 1; j < n; j++) {
+                    const dx = j - i;
+                    if (dx !== 0) slopes.push((dataArray[j].value - dataArray[i].value) / dx);
+                }
+            slopes.sort((a,b)=>a-b);
+            const sc = slopes.length;
+            if (sc === 0) return null;
+            const senSlope = sc % 2 === 0 ? (slopes[sc/2-1] + slopes[sc/2]) / 2 : slopes[Math.floor(sc/2)];
+            const vals = dataArray.map(d => d.value);
+            const intercepts = vals.map((v,i) => v - senSlope * i);
+            intercepts.sort((a,b)=>a-b);
+            const inter = n % 2 === 0 ? (intercepts[n/2-1] + intercepts[n/2]) / 2 : intercepts[Math.floor(n/2)];
+            const mk = calcMannKendallBaseJS(vals);
+            const zC = getCriticalZ(0.05);
+            const Ca = zC * Math.sqrt(mk.varS);
+            const M1 = (sc - Ca) / 2, M2 = (sc + Ca) / 2;
+            const iL = Math.max(0, Math.floor(M1)-1), iU = Math.min(sc-1, Math.floor(M2+1)-1);
+            const Qmin = slopes[iL]||0, Qmax = slopes[iU]||0;
+            const sig = (Qmin > 0) || (Qmax < 0);
+            let trend = 'Tidak Ada Trend';
+            if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun';
+            if (trend !== 'Tidak Ada Trend') trend += sig ? ' (Signifikan)' : ' (Tidak Signifikan)';
+            return { slope: senSlope, intercept: inter, S: mk.S, Z: mk.Z, pValue: mk.pValue, Qmin, Qmax, significant: sig, trend, n, slopeCount: sc };
+        }
+
+        function computeLinearRegression(dataArray) {
+            const n = dataArray.length;
+            const x = Array.from({length:n}, (_,i)=>i);
+            const y = dataArray.map(d=>d.value);
+            const mX = x.reduce((a,b)=>a+b,0)/n, mY = y.reduce((a,b)=>a+b,0)/n;
+            let Sxx=0, Syy=0, Sxy=0;
+            for (let i=0;i<n;i++) { const dx=x[i]-mX, dy=y[i]-mY; Sxx+=dx*dx; Syy+=dy*dy; Sxy+=dx*dy; }
+            const slope = Sxx !== 0 ? Sxy/Sxx : 0;
+            const intercept = mY - slope * mX;
+            let SSres=0;
+            for (let i=0;i<n;i++) { const yP = slope*x[i]+intercept; SSres += Math.pow(y[i]-yP,2); }
+            const rSq = Syy > 0 ? 1 - SSres/Syy : 0;
+            const df = Math.max(1, n-2);
+            let tStat=0, pVal=1;
+            if (n>2 && Sxx>0) { const MSE=SSres/df; const SE=Math.sqrt(MSE/Sxx); tStat = SE>0 ? slope/SE : 0; pVal = 2*(1-normalCDF(Math.abs(tStat))); }
+            const tCrit = getCriticalT(df, 0.05);
+            const sig = Math.abs(tStat) > tCrit;
+            let trend = 'Tidak Ada Trend';
+            if (slope > 0) trend = 'Meningkat'; else if (slope < 0) trend = 'Menurun';
+            if (trend !== 'Tidak Ada Trend') trend += sig ? ' (Signifikan)' : ' (Tidak Signifikan)';
+            const r = rSq >= 0 ? Math.sqrt(rSq) : 0;
+            return { slope, intercept, rSquared: rSq, r: slope<0?-r:r, tStatistic: tStat, tCritical: tCrit, pValue: pVal, significant: sig, trend, n, meanX: mX, meanY: mY };
+        }
+
         async function computeTrendsBackground(dataArray) {
             if (dataArray.length < 3) {
                 setCardLoading('trendLoaderOverlay', false);
@@ -930,89 +1037,68 @@ if (empty($stationId)) {
                 return;
             }
 
-            // Reset results to loading state
             document.getElementById('mkResult').innerHTML = "Menghitung...";
             document.getElementById('ssResult').innerHTML = "Menghitung...";
             document.getElementById('lrResult').innerHTML = "Menghitung...";
 
+            await new Promise(r => setTimeout(r, 50)); // allow UI to update
+
             try {
-                // Execute all calculations in parallel to prevent blocking
-                const results = await Promise.allSettled([
-                    fetch('php/mann_kendall.php', { method: 'POST', body: JSON.stringify({ data: dataArray }) }).then(r => r.json()),
-                    fetch('php/sens_slope.php', { method: 'POST', body: JSON.stringify({ data: dataArray }) }).then(r => r.json()),
-                    fetch('php/regresi_linear.php', { method: 'POST', body: JSON.stringify({ data: dataArray }) }).then(r => r.json())
-                ]);
+                const vals = dataArray.map(d => d.value);
 
-                // 1. Process Mann-Kendall
-                const mkRes = results[0];
-                if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
-                    const mk = mkRes.value;
-                    const mkSig = mk.trend.includes('(Signifikan)');
-                    const tTrendMK = mkSig ? (mk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
-                    let mkColor = '#6B7280';
-                    if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
-                    else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
-                    
-            const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
-            const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
-                } else {
-                    document.getElementById('mkResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
-                }
+                // 1. Mann-Kendall
+                const mk = calcMannKendallBaseJS(vals);
+                const mkSig = Math.abs(mk.Z) > getCriticalZ(0.05);
+                const tTrendMK = mkSig ? (mk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
+                let mkColor = '#6B7280';
+                if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
+                else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
+                const zKritis = 1.96;
+                const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
 
-                // 2. Process Sen's Slope
-                const ssRes = results[1];
-                if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
-                    const ss = ssRes.value;
+                await new Promise(r => setTimeout(r, 10));
+
+                // 2. Sen's Slope
+                const ss = computeSenSlope(dataArray);
+                if (ss) {
                     const ssSig = ss.trend.includes('(Signifikan)');
                     const tTrendSS = ssSig ? (ss.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let ssColor = '#6B7280';
                     if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
                     else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
-                    
                     const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
                     const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
                     document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
                 } else {
-                    document.getElementById('ssResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
+                    document.getElementById('ssResult').innerHTML = `Gagal menghitung`;
                 }
 
-                // 3. Process Linear Regression
-                const lrRes = results[2];
-                if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
-                    const lr = lrRes.value;
+                await new Promise(r => setTimeout(r, 10));
+
+                // 3. Linear Regression
+                const lr = computeLinearRegression(dataArray);
+                if (lr) {
                     const lrSig = lr.trend.includes('(Signifikan)');
                     const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let lrColor = '#6B7280';
                     if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
                     else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
-                    
                     const tUji = lr.tStatistic !== undefined ? fM(Number(lr.tStatistic).toFixed(3)) : '—';
                     const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
                     const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
                     const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
-                    // Update main chart with trend line if available
+                    // Update chart with trend line
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
-                        let trendDataPts = dataArray.map((d, index) => {
-                            return lr.intercept + (lr.slope * index);
-                        });
-
-                        // Remove existing trend line if any
+                        const trendDataPts = dataArray.map((d, index) => lr.intercept + (lr.slope * index));
                         chartInstance.data.datasets = chartInstance.data.datasets.filter(ds => ds.label !== 'Garis Regresi');
-
                         chartInstance.data.datasets.push({
-                            type: 'line',
-                            label: 'Garis Regresi',
-                            data: trendDataPts,
-                            borderColor: '#DC2626',
-                            borderWidth: 2,
-                            tension: 0,
-                            pointRadius: 0,
-                            fill: false,
-                            order: -1 // Ensure it's on top
+                            type: 'line', label: 'Garis Regresi', data: trendDataPts,
+                            borderColor: '#DC2626', borderWidth: 2, tension: 0,
+                            pointRadius: 0, fill: false, order: -1
                         });
                         chartInstance.update();
                     }
