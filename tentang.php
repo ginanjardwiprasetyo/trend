@@ -257,37 +257,7 @@
     <div class="orb orb-2"></div>
 
     <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-left:4px;">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" class="active" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- HEADER -->
     <div class="about-header">
@@ -343,7 +313,7 @@
             <!-- Main Content -->
             <div class="profile-main">
                 <div class="info-card">
-                    <h2>Identitas Pengembang</h2>
+                    <h2>Identitas Diri</h2>
 
                     <div class="field-group">
                         <div class="field-label">Nama Lengkap</div>
@@ -354,6 +324,12 @@
                         <div class="field-label">Program Studi</div>
                         <div class="field-value">Magister Teknik Sipil</div>
                         <div class="field-subtext">Departemen Teknik Sipil dan Lingkungan</div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-label">ORCID</div>
+                        <div class="field-subtext"><a href="https://orcid.org/0000-0002-6766-0391" target="_blank"
+                                style="color:#2563EB;">https://orcid.org/0000-0002-6766-0391</a></div>
                     </div>
 
                 </div>
@@ -372,21 +348,19 @@
                     </div>
                 </div>
 
-                <div class="info-card">
-                    <h2>Tujuan Penelitian</h2>
+                <!-- <div class="info-card">
+                    <h2>Publikasi</h2>
                     <p style="color: #4B5563; line-height: 1.6; font-size: 0.95rem;">
-                        Penjelasan diisi kemudian..
+                        Dalam proses..
                     </p>
-                </div>
+                </div> -->
             </div>
 
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer class="landing-footer">
-        <p>&copy; 2026 TrendHidro — Platform Olah Data Runtut Waktu</p>
-    </footer>
+    <?php include 'footer.php'; ?>
 
 </body>
 

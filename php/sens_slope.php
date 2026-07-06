@@ -46,7 +46,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Tren'
+        'trend' => 'Tidak Ada Trend'
     ]);
     exit;
 }
@@ -96,7 +96,7 @@ if ($n % 2 === 0) {
 
 require_once __DIR__ . '/lib/stats.php';
 
-// ====== TENTUKAN TREN ======
+// ====== TENTUKAN TREND ======
 // Gunakan Mann-Kendall S untuk signifikansi
 $mk = calcMannKendallBase($values, $n);
 $S = $mk['S'];
@@ -104,10 +104,10 @@ $Z = $mk['Z'];
 $pValue = $mk['pValue'];
 $alpha = 0.05;
 
-// ====== TENTUKAN TREN ======
+// ====== TENTUKAN TREND ======
 // Hitung Confidence Interval 95% (alpha = 0.05)
-// Z_{1-alpha/2} = Z_0.975 = 1.96
-$C_alpha = 1.96 * sqrt($mk['varS']);
+$zCrit = getCriticalZ(0.05);
+$C_alpha = $zCrit * sqrt($mk['varS']);
 $M1 = ($slopeCount - $C_alpha) / 2;
 $M2 = ($slopeCount + $C_alpha) / 2;
 
@@ -121,14 +121,14 @@ $Qmax = $slopes[$idxUpper] ?? 0;
 // Signifikan, jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
 $significant = ($Qmin > 0) || ($Qmax < 0);
 
-$trend = 'Tidak Ada Tren';
+$trend = 'Tidak Ada Trend';
 if ($senSlope > 0) {
     $trend = 'Meningkat';
 } elseif ($senSlope < 0) {
     $trend = 'Menurun';
 }
 
-if ($trend !== 'Tidak Ada Tren') {
+if ($trend !== 'Tidak Ada Trend') {
     $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 

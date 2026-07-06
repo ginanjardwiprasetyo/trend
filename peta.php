@@ -61,34 +61,7 @@
     </div>
 
     <!-- ====== NAVBAR ====== -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn active" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta" class="active">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- ====== PETA ====== -->
     <div id="map"></div>
@@ -100,7 +73,7 @@
             <!-- Pilih Wilayah Sungai -->
             <div class="control-group">
                 <label class="control-label" for="dasSelect">Wilayah Sungai</label>
-                <select class="form-select" id="dasSelect">
+                <select class="form-select" id="dasSelect" disabled>
                     <option value="bbwsbs">WS Bengawan Solo</option>
                 </select>
             </div>
@@ -238,7 +211,7 @@
                     <span class="field-value" id="lbLocation">—</span>
                 </div>
                 <div class="lightbox-field">
-                    <span class="field-label" id="lbTrendLabel">Nilai Tren</span>
+                    <span class="field-label" id="lbTrendLabel">Nilai Trend</span>
                     <span class="field-value" id="lbTrendValue">—</span>
                 </div>
                 <div class="lightbox-field">
@@ -296,6 +269,8 @@
     <script src="js/sidebar.js?v=8"></script>
     <script src="js/markers.js?v=5"></script>
     <script src="js/lightbox.js?v=5"></script>
+
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>

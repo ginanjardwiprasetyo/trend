@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Olah Data Anda — TrendHidro</title>
     <meta name="description"
-        content="Upload dan olah data runtut waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di browser.">
+        content="Upload dan olah data runtut waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di peramban.">
     <meta name="keywords"
         content="upload data, olah data hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
 
@@ -15,10 +15,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <!-- Flaticon Icons -->
-    <link rel="stylesheet"
-        href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-
     <!-- SheetJS for Excel parsing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <!-- Chart.js -->
@@ -160,8 +156,15 @@
         }
 
         .preview-scroll {
-            max-height: 400px;
             overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .accordion-content {
+            height: 350px;
+            display: flex;
+            flex-direction: column;
         }
 
         .preview-table {
@@ -173,8 +176,8 @@
 
         .preview-table th {
             background: #F3F4F6;
-            padding: 12px 16px;
-            font-size: 0.8rem;
+            padding: 8px 12px;
+            font-size: 0.75rem;
             color: #4B5563;
             font-weight: 600;
             text-transform: uppercase;
@@ -186,9 +189,10 @@
         }
 
         .preview-table td {
-            padding: 10px 16px;
+            padding: 5px 12px;
             border-bottom: 1px solid #F3F4F6;
             color: #1F2937;
+            font-size: 0.82rem;
         }
 
         .preview-table tbody tr:hover {
@@ -223,6 +227,31 @@
             font-weight: 600;
             color: var(--color-text-secondary);
             min-width: max-content;
+        }
+
+        .period-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: capitalize;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .period-badge.period-harian {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .period-badge.period-bulanan {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .period-badge.period-tahunan {
+            background: #FEF3C7;
+            color: #92400E;
         }
 
         /* Results Section */
@@ -301,47 +330,16 @@
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-left:4px;">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- CONTENT -->
     <div class="olah-container">
         <div class="olah-header">
             <div>
-                <h1><i class="fi fi-rr-chart-histogram" style="color:var(--color-primary); margin-right:8px;"></i>Olah
+                <h1><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle; flex-shrink:0;"><path d="M3 20h18"/><path d="M6 16l4-6 4 4 6-8"/><circle cx="6" cy="16" r="1.5" fill="var(--color-primary)"/><circle cx="10" cy="10" r="1.5" fill="var(--color-primary)"/><circle cx="14" cy="14" r="1.5" fill="var(--color-primary)"/><circle cx="20" cy="6" r="1.5" fill="var(--color-primary)"/></svg>Olah
                     Data Anda</h1>
                 <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung <i>trend</i> data runtut waktu langsung di
-                    <i>browser</i> Anda.
+                    peramban Anda.
                 </p>
             </div>
         </div>
@@ -372,7 +370,7 @@
                             <rect x="3" y="3" width="18" height="18" rx="2" />
                             <path d="M3 9h18M9 3v18" />
                         </svg>
-                        Preview Data <span id="previewCount"
+                        Pralihat Data <span id="previewCount"
                             style="font-weight:400; font-size:0.8rem; color:#6B7280; margin-left:8px;">—</span>
                     </h4>
                     <div style="display:flex; align-items:center; gap:12px;">
@@ -390,7 +388,7 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Tanggal</th>
+                                    <th id="previewDateHeader">Tanggal</th>
                                     <th id="previewDataHeader">Data</th>
                                 </tr>
                             </thead>
@@ -451,6 +449,8 @@
                 </button>
                 <div id="olahSpinner" class="spinner"
                     style="display:none; width:22px; height:22px; border-width:2.5px;"></div>
+                <span id="inputPeriodBadge" class="period-badge period-harian" style="margin-left:auto;">Data
+                    Harian</span>
             </div>
         </div>
 
@@ -468,10 +468,12 @@
                     </h3>
                     <div style="display:flex; gap:12px; font-size:0.8rem; font-weight:600; color:#4B5563;">
                         <span style="display:flex; align-items:center; gap:4px;">
-                            <span style="width:16px; height:3px; background:#3B82F6; border-radius:2px;"></span> Nilai Data
+                            <span style="width:16px; height:3px; background:#3B82F6; border-radius:2px;"></span> Nilai
+                            Data
                         </span>
                         <span style="display:flex; align-items:center; gap:4px;">
-                            <span style="width:16px; height:3px; background:#DC2626; border-radius:2px;"></span> Garis Regresi
+                            <span style="width:16px; height:3px; background:#DC2626; border-radius:2px;"></span> Garis
+                            Regresi
                         </span>
                     </div>
                 </div>
@@ -611,11 +613,9 @@
             </div>
         </div>
 
-        <footer
-            style="margin-top:auto; padding: 24px 0 8px; text-align:center; font-size:0.8rem; color:#9CA3AF; border-top:1px solid #E5E7EB;">
-            &copy; 2026 TrendHidro. Platform Olah Data Runtut Waktu.
-        </footer>
     </div>
+
+    <?php include 'footer.php'; ?>
 
     <script src="js/olah-data.js"></script>
 

@@ -3,9 +3,29 @@
  * Modal inspeksi data stasiun
  */
 
+// ====== TRACKING UNTUK LIVE UPDATE PANJANG DATA ======
+let currentLightboxStationId = null;
+
+function updateLightboxLength(stationId) {
+    if (currentLightboxStationId !== stationId) return;
+    if (!currentDASData || !currentDASData.features) return;
+    const feat = currentDASData.features.find(f => f.properties.id === stationId);
+    if (!feat) return;
+    const p = feat.properties;
+    if (p.yearStart && p.yearEnd) {
+        document.getElementById('lbRange').textContent = `${p.yearStart}—${p.yearEnd}`;
+        document.getElementById('lbLength').textContent = `${p.yearEnd - p.yearStart + 1} tahun`;
+        document.getElementById('lightboxDetailBtn').disabled = false;
+    }
+}
+
 // ====== BUKA LIGHTBOX ======
 function openLightbox(stationData) {
     const overlay = document.getElementById('lightboxOverlay');
+    const detailBtn = document.getElementById('lightboxDetailBtn');
+
+    currentLightboxStationId = stationData.id;
+    detailBtn.disabled = true;
 
     // Reset confirm mode jika sebelumnya aktif
     const cs = document.getElementById('confirmSection');
@@ -15,7 +35,7 @@ function openLightbox(stationData) {
             if (el.id !== 'confirmSection') el.style.display = '';
         });
         document.getElementById('lightboxCloseBtn').style.display = '';
-        document.getElementById('lightboxDetailBtn').style.display = '';
+        detailBtn.style.display = '';
         document.getElementById('confirmNo').style.display = 'none';
         document.getElementById('confirmYes').style.display = 'none';
     }
@@ -33,16 +53,17 @@ function openLightbox(stationData) {
     if (yearStart && yearEnd) {
         document.getElementById('lbRange').textContent = `${yearStart}—${yearEnd}`;
         document.getElementById('lbLength').textContent = `${yearEnd - yearStart + 1} tahun`;
+        detailBtn.disabled = false;
     } else {
-        document.getElementById('lbRange').textContent = 'Tidak tersedia';
-        document.getElementById('lbLength').textContent = '—';
+        document.getElementById('lbRange').textContent = 'Menghitung...';
+        document.getElementById('lbLength').textContent = 'Menghitung...';
     }
 
-    // Nilai Tren (Jika metode aktif)
+    // Nilai Trend (Jika metode aktif)
     const trendLabel = document.getElementById('lbTrendLabel');
     const trendValue = document.getElementById('lbTrendValue');
 
-    trendLabel.textContent = "Nilai Tren";
+    trendLabel.textContent = "Nilai Trend";
     trendValue.textContent = "—";
 
     if (typeof currentMethod !== 'undefined' && currentMethod && stationData.trendData) {
@@ -97,6 +118,7 @@ function openLightbox(stationData) {
 
 // ====== TUTUP LIGHTBOX ======
 function closeLightbox() {
+    currentLightboxStationId = null;
     document.getElementById('lightboxOverlay').classList.remove('active');
 }
 

@@ -80,7 +80,9 @@ async function loadDAS(dasName) {
                 }
             }).addTo(map);
 
-            map.fitBounds(dasLayer.getBounds(), { padding: [50, 50] });
+            map.fitBounds(dasLayer.getBounds(), { padding: [50, 50], animate: false });
+            // Geser peta ke kiri agar tidak terhalang sidebar kanan (~340px)
+            map.panBy([180, 0], { animate: false });
         }
 
         // 2. Fetch Stasiun LITE (hanya tabel pos_hujan, skip query berat data_ch)
@@ -159,6 +161,11 @@ async function fetchStationStats() {
 
             // Update dropdown tahun dengan data riil
             populateYearDropdowns(currentDASData.features);
+
+            // Live update panjang data di lightbox jika sedang terbuka
+            if (typeof updateLightboxLength === 'function' && typeof currentLightboxStationId !== 'undefined' && currentLightboxStationId) {
+                updateLightboxLength(currentLightboxStationId);
+            }
         }
     } catch (e) {
         console.error('Background stats fetch gagal:', e);

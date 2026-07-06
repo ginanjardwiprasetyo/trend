@@ -134,7 +134,8 @@ if ($S > 0) {
 }
 
 $absZ = abs($Z);
-$significant = $absZ > 1.96;
+$zCrit = getCriticalZ(0.05);
+$significant = $absZ > $zCrit;
 
 // Count positive and negative signs
 $positiveCount = 0; $negativeCount = 0; $tieCount = 0;
@@ -147,9 +148,9 @@ for ($k = 0; $k < $n - 1; $k++) {
     }
 }
 
-$mkTrend = 'Tidak Ada Tren';
-if ($Z > 1.96) $mkTrend = 'Meningkat (Signifikan)';
-elseif ($Z < -1.96) $mkTrend = 'Menurun (Signifikan)';
+$mkTrend = 'Tidak Ada Trend';
+if ($Z > $zCrit) $mkTrend = 'Meningkat (Signifikan)';
+elseif ($Z < -$zCrit) $mkTrend = 'Menurun (Signifikan)';
 elseif ($Z > 0) $mkTrend = 'Meningkat (Tidak Signifikan)';
 elseif ($Z < 0) $mkTrend = 'Menurun (Tidak Signifikan)';
 
@@ -176,7 +177,7 @@ $mkResult = [
     'Z_formula_numeric' => $Z_formula_numeric,
     'Z' => round($Z, 4),
     'abs_Z' => round($absZ, 4),
-    'threshold' => 1.96,
+    'threshold' => round($zCrit, 4),
     'alpha' => 0.05,
     'significant' => $significant,
     'trend' => $mkTrend
@@ -312,7 +313,7 @@ if ($n <= $maxSampleRows) {
 }
 unset($allIntercepts);
 
-$C_alpha = 1.96 * sqrt($varS);
+$C_alpha = getCriticalZ(0.05) * sqrt($varS);
 $M1 = ($slopeCount - $C_alpha) / 2;
 $M2 = ($slopeCount + $C_alpha) / 2;
 
@@ -324,14 +325,14 @@ $Qmax = $slopes[$idxUpper] ?? 0;
 
 $ssSignificant = ($Qmin > 0) || ($Qmax < 0);
 
-$ssTrend = 'Tidak Ada Tren';
+$ssTrend = 'Tidak Ada Trend';
 if ($senSlope > 0) {
     $ssTrend = 'Meningkat';
 } elseif ($senSlope < 0) {
     $ssTrend = 'Menurun';
 }
 
-if ($ssTrend !== 'Tidak Ada Tren') {
+if ($ssTrend !== 'Tidak Ada Trend') {
     $ssTrend .= $ssSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 
@@ -442,14 +443,14 @@ if ($n > 2 && $Sxx > 0) {
 
 $tSignificant = abs($tStat) > $tCritical;
 
-$lrTrend = 'Tidak Ada Tren';
+$lrTrend = 'Tidak Ada Trend';
 if ($lrSlope > 0) {
     $lrTrend = 'Meningkat';
 } elseif ($lrSlope < 0) {
     $lrTrend = 'Menurun';
 }
 
-if ($lrTrend !== 'Tidak Ada Tren') {
+if ($lrTrend !== 'Tidak Ada Trend') {
     $lrTrend .= $tSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 

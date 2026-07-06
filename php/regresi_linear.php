@@ -48,7 +48,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Tren'
+        'trend' => 'Tidak Ada Trend'
     ]);
     exit;
 }
@@ -58,7 +58,7 @@ usort($data, function($a, $b) {
     return $a['year'] <=> $b['year'];
 });
 
-$x = array_map(function($d) { return (float)$d['year']; }, $data);
+$x = range(0, $n - 1);
 $y = array_column($data, 'value');
 
 // ====== HITUNG LEAST SQUARES SECARA MANUAL ======
@@ -97,7 +97,6 @@ $rSquared = ($SStot > 0) ? 1 - ($SSres / $SStot) : 0;
 $SE = 0;
 $tStat = 0;
 $pValue = 1;
-$tCritical = 1.96;
 $df = max(1, $n - 2);
 
 if ($n > 2 && $Sxx > 0) {
@@ -114,15 +113,15 @@ $alpha = 0.05;
 $tCritical = getCriticalT($df, $alpha);
 $significant = abs($tStat) > $tCritical;
 
-// ====== TENTUKAN TREN ======
-$trend = 'Tidak Ada Tren';
+// ====== TENTUKAN TREND ======
+$trend = 'Tidak Ada Trend';
 if ($slope > 0) {
     $trend = 'Meningkat';
 } elseif ($slope < 0) {
     $trend = 'Menurun';
 }
 
-if ($trend !== 'Tidak Ada Tren') {
+if ($trend !== 'Tidak Ada Trend') {
     $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 

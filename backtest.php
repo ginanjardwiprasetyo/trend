@@ -138,34 +138,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data">Ketersediaan Data</a></li>
-            <li><a href="dok">Dokumentasi</a></li>
-            <li><a href="tentang">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <div class="bt-container">
         <div class="bt-header">
@@ -514,7 +487,7 @@
                 <div class="sub-step-desc">Bandingkan |Z| dengan nilai kritis Z<sub>α/2</sub> = ${mk.threshold} (two-tailed test, tingkat kepercayaan 95%).</div>
                 <div class="step-formula">|Z| = |${mk.Z}| = ${mk.abs_Z}</div>
                 <div class="step-substitution">${mk.abs_Z} ${sig ? '>' : '≤'} ${mk.threshold} → <strong>${sig ? 'Tolak H₀ (Signifikan)' : 'Gagal tolak H₀ (Tidak Signifikan)'}</strong></div>
-                <div class="step-info"><span class="step-info-icon">${sig ? '⚡' : '💡'}</span><span>${sig ? 'Karena |Z| > 1.96, tren yang terdeteksi bersifat signifikan secara statistik pada level α = 0.05.' : 'Karena |Z| ≤ 1.96, tidak cukup bukti untuk menyatakan tren signifikan pada level α = 0.05.'}</span></div>
+                <div class="step-info"><span class="step-info-icon">${sig ? '⚡' : '💡'}</span><span>${sig ? 'Karena |Z| > ' + mk.threshold + ', tren yang terdeteksi bersifat signifikan secara statistik pada level α = 0.05.' : 'Karena |Z| ≤ ' + mk.threshold + ', tidak cukup bukti untuk menyatakan tren signifikan pada level α = 0.05.'}</span></div>
             </div>`;
 
             const trendColor = mk.trend.includes('Meningkat') ? '#16A34A' : (mk.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
@@ -595,7 +568,7 @@
 
             // Result
             const trendColor = ss.trend.includes('Meningkat') ? '#16A34A' : (ss.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
-            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Sen's Slope: Tren <span style="color:${trendColor}"><strong>${ss.trend}</strong></span> — ${ss.equation}</div>`;
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Sen's Slope: Trend <span style="color:${trendColor}"><strong>${ss.trend}</strong></span> — ${ss.equation}</div>`;
             el.innerHTML = html;
         }
 
@@ -694,9 +667,11 @@
 
             // Result
             const trendColor = lr.trend.includes('Meningkat') ? '#16A34A' : (lr.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
-            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Regresi Linear: Tren <span style="color:${trendColor}"><strong>${lr.trend}</strong></span> — ${lr.equation}, R² = ${lr.rSquared}</div>`;
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Regresi Linear: Trend <span style="color:${trendColor}"><strong>${lr.trend}</strong></span> — ${lr.equation}, R² = ${lr.rSquared}</div>`;
             el.innerHTML = html;
         }
     </script>
+
+    <?php include 'footer.php'; ?>
 </body>
 </html>

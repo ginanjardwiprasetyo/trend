@@ -53,15 +53,15 @@ function fetchTimeseriesData($input) {
     elseif ($agregasi === 'min') $aggFunc = 'MIN';
     
     if ($dataType === 'tahunan' || $dataType === 'musiman') {
-        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as x, $aggFunc(ROUND(rain::numeric, 0)) as y FROM data_ch WHERE $where GROUP BY x ORDER BY x";
+        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as x, $aggFunc(rain::numeric) as y FROM data_ch WHERE $where GROUP BY x ORDER BY x";
         $stmt = $conn->prepare($sql);
     } 
     elseif ($dataType === 'bulanan') {
-        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(MONTH FROM tanggal::date) as mo, $aggFunc(ROUND(rain::numeric, 0)) as y FROM data_ch WHERE $where GROUP BY yr, mo ORDER BY yr, mo";
+        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(MONTH FROM tanggal::date) as mo, $aggFunc(rain::numeric) as y FROM data_ch WHERE $where GROUP BY yr, mo ORDER BY yr, mo";
         $stmt = $conn->prepare($sql);
     }
     else { // harian
-        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(DOY FROM tanggal::date) as dy, ROUND(rain::numeric, 0) as y FROM data_ch WHERE $where ORDER BY tanggal::date";
+        $sql = "SELECT EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(DOY FROM tanggal::date) as dy, rain::numeric as y FROM data_ch WHERE $where ORDER BY tanggal::date";
         $stmt = $conn->prepare($sql);
     }
 
@@ -78,7 +78,7 @@ function fetchTimeseriesData($input) {
         }
         $data[] = [
             'year' => (float)$x,
-            'value' => round((float)$row['y'], 0)
+            'value' => (float)$row['y']
         ];
     }
     

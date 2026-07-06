@@ -372,7 +372,29 @@
             letter-spacing: 0.05em;
         }
 
-        /* --- Footer --- */
+        /* --- Multi-Select with Search --- */
+        .ms-container { position:relative; width:100%; }
+        .ms-trigger { display:flex; align-items:center; gap:6px; padding:8px 12px; border:1.5px solid #E5E7EB; border-radius:8px; background:#fff; cursor:pointer; transition:border-color .2s; min-height:42px; }
+        .ms-trigger:focus-within, .ms-trigger:hover { border-color:#2563EB; box-shadow:0 0 0 3px rgba(37,99,235,0.15); }
+        .ms-tags { flex:1; display:flex; flex-wrap:wrap; gap:4px; }
+        .ms-tag { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; background:#EFF6FF; color:#1E40AF; font-size:0.78rem; font-weight:600; border-radius:4px; border:1px solid #BFDBFE; }
+        .ms-tag-remove { cursor:pointer; font-size:0.9rem; line-height:1; color:#1E40AF; opacity:0.6; }
+        .ms-tag-remove:hover { opacity:1; }
+        .ms-placeholder { color:#9CA3AF; font-size:0.85rem; }
+        .ms-chevron { width:16px; height:16px; color:#6B7280; flex-shrink:0; transition:transform .2s; }
+        .ms-container.open .ms-chevron { transform:rotate(180deg); }
+        .ms-dropdown { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid #E2E8F0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.1); z-index:100; max-height:260px; flex-direction:column; overflow:hidden; }
+        .ms-container.open .ms-dropdown { display:flex; }
+        .ms-search-wrap { padding:8px; border-bottom:1px solid #F1F5F9; }
+        .ms-search { width:100%; padding:8px 10px; border:1px solid #E2E8F0; border-radius:6px; font-size:0.82rem; outline:none; box-sizing:border-box; }
+        .ms-search:focus { border-color:#2563EB; }
+        .ms-options { overflow-y:auto; flex:1; }
+        .ms-opt { display:flex; align-items:center; gap:8px; padding:8px 12px; font-size:0.85rem; color:#334155; cursor:pointer; }
+        .ms-opt:hover { background:#F8FAFC; }
+        .ms-opt.selected { background:#EFF6FF; color:#1E40AF; font-weight:600; }
+        .ms-opt input[type="checkbox"] { accent-color:#2563EB; margin:0; flex-shrink:0; }
+        .ms-hidden { display:none; }
+
         .landing-footer {
             position: relative;
             z-index: 1;
@@ -380,8 +402,7 @@
             padding: 24px;
             font-size: 0.82rem;
             color: #9CA3AF;
-            border-top: 1px solid rgba(226, 232, 240, 0.8);
-            margin-top: 40px;
+            border-top: 1px solid #E5E7EB;
         }
     </style>
 </head>
@@ -392,37 +413,7 @@
     <div class="orb orb-2"></div>
 
     <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-left:4px;">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- CONTENT -->
     <div class="rekap-container">
@@ -444,6 +435,7 @@
             <button class="tab-btn active" onclick="switchTab('tab-ringkasan', this)">Ringkasan & Basis Data</button>
             <button class="tab-btn" onclick="switchTab('tab-tren', this)">Olahan Trend Curah Hujan</button>
             <button class="tab-btn" onclick="switchTab('tab-deskriptif', this)">Statistik Deskriptif</button>
+            <button class="tab-btn" onclick="switchTab('tab-per-stasiun', this)">Olahan Per Stasiun</button>
         </div>
 
         <!-- ==================== TAB 1: RINGKASAN & BASIS DATA ==================== -->
@@ -596,7 +588,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Tampilan Tren</label>
+                        <label class="filter-label">Tampilan Trend</label>
                         <select class="form-select-premium" id="trenDisplayStyle" onchange="handleTrenDisplayChange()">
                             <option value="sign">Tanda (+/−/*)</option>
                             <option value="icon">Ikon Panah (▲/▼)</option>
@@ -633,9 +625,9 @@
                             <tr>
                                 <th>No</th>
                                 <th>Stasiun</th>
-                                <th id="th-mk">Z-Score (MK)</th>
-                                <th id="th-ss">Sen's Slope</th>
-                                <th id="th-lr">Slope Regresi</th>
+                                <th id="th-mk">MK (Z<sub>uji</sub>)</th>
+                                <th id="th-ss">SS (Q<sub>med</sub>)</th>
+                                <th id="th-lr">RL (t<sub>uji</sub>)</th>
                             </tr>
                         </thead>
                         <tbody id="trenTableBody">
@@ -654,7 +646,85 @@
             </div>
         </div>
 
-        <!-- ==================== TAB 3: STATISTIK DESKRIPTIF ==================== -->
+        <!-- ==================== TAB 3: OLAHAN PER STASIUN ==================== -->
+        <div id="tab-per-stasiun" class="tab-content">
+            <div class="glass-panel">
+                <h2 class="section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    Olahan Trend Per Stasiun — Semua Tipe Data
+                </h2>
+
+                <div class="filter-panel">
+                    <div class="filter-group" style="grid-column: 1 / -1;">
+                        <label class="filter-label">Pilih Stasiun</label>
+                        <div class="ms-container" id="psMsContainer">
+                            <div class="ms-trigger" id="psMsTrigger" tabindex="0">
+                                <div class="ms-tags" id="psMsTags"><span class="ms-placeholder">Pilih stasiun...</span></div>
+                                <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                            <div class="ms-dropdown" id="psMsDropdown">
+                                <div class="ms-search-wrap"><input class="ms-search" id="psMsSearch" type="text" placeholder="Cari stasiun..."></div>
+                                <div class="ms-options" id="psMsOptions"></div>
+                            </div>
+                            <select class="form-select-premium" id="psStationSelect" multiple style="display:none;"></select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tahun Mulai</label>
+                        <select class="form-select-premium" id="psYearFrom" onchange="applyPerStasiunFilters()">
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tahun Selesai</label>
+                        <select class="form-select-premium" id="psYearTo" onchange="applyPerStasiunFilters()">
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tampilan Trend</label>
+                        <select class="form-select-premium" id="psDisplayStyle" onchange="handlePerStasiunDisplayChange()">
+                            <option value="sign">Tanda (+/−/*)</option>
+                            <option value="icon">Ikon Panah (▲/▼)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="justify-content: flex-end; align-items: flex-end;">
+                        <button class="export-btn" onclick="exportToExcel('per-stasiun-table', 'Tabel_Olahan_Per_Stasiun')" style="width: 100%;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                            Unduh Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="premium-table" id="per-stasiun-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Stasiun</th>
+                                <th>Jenis Data</th>
+                                <th id="ps-th-mk">MK (Z<sub>uji</sub>)</th>
+                                <th id="ps-th-ss">SS (Q<sub>med</sub>)</th>
+                                <th id="ps-th-lr">RL (t<sub>uji</sub>)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="perStasiunTableBody">
+                            <tr>
+                                <td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">
+                                    Pilih minimal satu stasiun untuk melihat hasil olahan.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="psLegendContainer" style="margin-top: 16px;"></div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 4: STATISTIK DESKRIPTIF ==================== -->
         <div id="tab-deskriptif" class="tab-content">
             <div class="glass-panel">
                 <h2 class="section-title">
@@ -718,9 +788,7 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="landing-footer" style="position: relative; z-index: 1; margin-top: 40px;">
-        © 2026 TrendHidro — Platform Olah Data Runtut Waktu
-    </footer>
+    <?php include 'footer.php'; ?>
 
     <script>
         let stationsData = [];
@@ -732,6 +800,8 @@
         let minYearGlobal = 1980;
         let maxYearGlobal = 2025;
         let activeTrenResults = null;
+        let activePerStasiunResults = null;
+        let perStasiunTypes = ['Kumulatif Bulanan', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'JFM', 'AMJ', 'JAS', 'OND', 'Tahunan'];
 
         // Switch Tabs
         function switchTab(tabId, btn) {
@@ -765,6 +835,8 @@
                 });
 
                 populateYearSelects();
+                populatePerStasiunYearSelects();
+                populatePerStasiunStationSelect();
                 renderSummaryTable();
                 renderDetailTable();
                 renderDeskriptifTable();
@@ -806,7 +878,7 @@
             // Stasiun dengan kelengkapan > 50%
             const completenessGe50 = stationsData.filter(s => s.completeness > 50).length;
 
-            // Kategori durasi berdasarkan tahun terakhir ke tahun paling awal dari data yg ada
+            // Kategori durasi
             const durationGe30 = stationsData.filter(s => {
                 if (s.yearStart === null) return false;
                 const len = s.yearEnd - s.yearStart + 1;
@@ -820,9 +892,13 @@
             }).length;
 
             const durationLt16 = stationsData.filter(s => {
-                if (s.yearStart === null) return false;
-                const len = s.yearEnd - s.yearStart + 1;
+                const len = s.yearStart !== null ? (s.yearEnd - s.yearStart + 1) : 0;
                 return len < 16;
+            }).length;
+
+            const durationLt30 = stationsData.filter(s => {
+                const len = s.yearStart !== null ? (s.yearEnd - s.yearStart + 1) : 0;
+                return len < 30;
             }).length;
 
             const tbody = document.getElementById('summaryTableBody');
@@ -843,17 +919,21 @@
                     <td style="text-align:left; font-weight:700; color:#1E3A8A;">Stasiun dengan Tingkat Kelengkapan Data &gt; 50%</td>
                     <td style="font-weight:800; color:#1E3A8A;">${completenessGe50} Stasiun</td>
                 </tr>
-                <tr style="background:#F8FAFC;">
-                    <td style="text-align:left; font-weight:700; color:#334155;">Stasiun dengan Panjang Data &ge; 30 Tahun</td>
-                    <td style="font-weight:800; color:#334155;">${durationGe30} Stasiun</td>
+                <tr style="background:#F0FDF4;">
+                    <td style="text-align:left; font-weight:700; color:#166534;">Stasiun dengan Panjang Data &ge; 30 Tahun</td>
+                    <td style="font-weight:800; color:#166534;">${durationGe30} Stasiun</td>
                 </tr>
                 <tr style="background:#F8FAFC;">
                     <td style="text-align:left; font-weight:700; color:#334155;">Stasiun dengan Panjang Data &ge; 16 Tahun</td>
                     <td style="font-weight:800; color:#334155;">${durationGe16} Stasiun</td>
                 </tr>
-                <tr style="background:#F8FAFC;">
-                    <td style="text-align:left; font-weight:700; color:#334155;">Stasiun dengan Panjang Data &lt; 16 Tahun</td>
-                    <td style="font-weight:800; color:#334155;">${durationLt16} Stasiun</td>
+                <tr style="background:#FEF2F2;">
+                    <td style="text-align:left; font-weight:700; color:#991B1B;">Stasiun dengan Panjang Data &lt; 16 Tahun</td>
+                    <td style="font-weight:800; color:#991B1B;">${durationLt16} Stasiun</td>
+                </tr>
+                <tr style="background:#FFF7ED;">
+                    <td style="text-align:left; font-weight:700; color:#9A3412;">Stasiun dengan Panjang Data &lt; 30 Tahun</td>
+                    <td style="font-weight:800; color:#9A3412;">${durationLt30} Stasiun</td>
                 </tr>
             `;
         }
@@ -1134,8 +1214,8 @@
             const unit = getSlopeUnit();
             const thSs = document.getElementById('th-ss');
             const thLr = document.getElementById('th-lr');
-            if (thSs) thSs.textContent = `Sen's Slope ${unit}`;
-            if (thLr) thLr.textContent = `Slope Regresi ${unit}`;
+            if (thSs) thSs.innerHTML = `SS (Q<sub>med</sub>) ${unit}`;
+            if (thLr) thLr.innerHTML = `RL (t<sub>uji</sub>)`;
 
             stationsData.forEach(st => {
                 const trenResult = activeTrenResults[st.id];
@@ -1159,7 +1239,7 @@
 
                 const mkCell = formatTrendVal(mk.Z, mk.trend, displayStyle, true);
                 const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, true);
-                const lrCell = formatTrendVal(lr.slope, lr.trend || '', displayStyle, true);
+                const lrCell = formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true);
 
                 tr.innerHTML = `
                     <td style="color:#64748B; font-weight:600;">${counter++}</td>
@@ -1196,17 +1276,263 @@
             } else {
                 container.innerHTML = `
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 18px; background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.84rem; color: #475569;">
-                        <div style="font-weight: 700; color: #334155; width: 100%; margin-bottom: 2px;">Keterangan Ikon Arah Tren:</div>
+                        <div style="font-weight: 700; color: #334155; width: 100%; margin-bottom: 2px;">Keterangan Ikon Arah Trend:</div>
                         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#0B6E2F; font-weight:bold;">▲</span> Meningkat (Signifikan)</span>
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#16A34A; font-weight:bold;">▲</span> Meningkat</span>
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#991B1B; font-weight:bold;">▼</span> Menurun (Signifikan)</span>
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#DC2626; font-weight:bold;">▼</span> Menurun</span>
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#94A3B8; font-weight:bold;">•</span> Tidak Ada Tren</span>
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#94A3B8; font-weight:bold;">•</span> Tidak Ada Trend</span>
                         </div>
                         <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Warna gelap menunjukkan signifikansi (α = 0.05).</div>
                     </div>
                 `;
+            }
+        }
+
+        // ====== PER STASIUN (Tabel Semua Tipe) ======
+        function populatePerStasiunStationSelect() {
+            const sel = document.getElementById('psStationSelect');
+            if (!sel) return;
+            sel.innerHTML = '';
+            stationsData.forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st.id;
+                opt.textContent = 'Pos ' + st.name;
+                sel.appendChild(opt);
+            });
+            initMultiSelect('psStationSelect', 'psMsContainer', 'psMsTrigger', 'psMsTags', 'psMsDropdown', 'psMsOptions', 'psMsSearch', handlePerStasiunStationChange);
+        }
+
+        function getSelectedPerStasiunStations() {
+            const sel = document.getElementById('psStationSelect');
+            return Array.from(sel.selectedOptions).map(opt => opt.value);
+        }
+
+        function handlePerStasiunStationChange() {
+            const selected = getSelectedPerStasiunStations();
+            if (selected.length === 0) {
+                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                return;
+            }
+            if (activePerStasiunResults) {
+                renderPerStasiunTable();
+            } else {
+                loadPerStasiunAnalysis();
+            }
+        }
+
+        function initMultiSelect(nativeId, containerId, triggerId, tagsId, dropdownId, optionsId, searchId, onChange) {
+            const sel = document.getElementById(nativeId);
+            const container = document.getElementById(containerId);
+            const trigger = document.getElementById(triggerId);
+            const tagsEl = document.getElementById(tagsId);
+            const dropdown = document.getElementById(dropdownId);
+            const optionsEl = document.getElementById(optionsId);
+            const search = document.getElementById(searchId);
+
+            function renderTags() {
+                const selected = Array.from(sel.selectedOptions);
+                if (selected.length === 0) {
+                    tagsEl.innerHTML = '<span class="ms-placeholder">Pilih stasiun...</span>';
+                    return;
+                }
+                tagsEl.innerHTML = '';
+                selected.forEach(opt => {
+                    const tag = document.createElement('span');
+                    tag.className = 'ms-tag';
+                    tag.innerHTML = `${opt.textContent} <span class="ms-tag-remove" data-value="${opt.value}">&times;</span>`;
+                    tag.querySelector('.ms-tag-remove').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        opt.selected = false;
+                        renderTags();
+                        renderOptions();
+                        if (onChange) onChange();
+                    });
+                    tagsEl.appendChild(tag);
+                });
+            }
+
+            function renderOptions(filter) {
+                optionsEl.innerHTML = '';
+                const f = (filter || '').toLowerCase();
+                Array.from(sel.options).forEach(opt => {
+                    if (f && !opt.textContent.toLowerCase().includes(f)) return;
+                    const div = document.createElement('div');
+                    div.className = 'ms-opt' + (opt.selected ? ' selected' : '');
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.checked = opt.selected;
+                    cb.addEventListener('change', () => {
+                        opt.selected = cb.checked;
+                        renderTags();
+                        if (onChange) onChange();
+                    });
+                    div.appendChild(cb);
+                    div.appendChild(document.createTextNode(opt.textContent));
+                    div.addEventListener('click', (e) => {
+                        if (e.target !== cb) {
+                            cb.checked = !cb.checked;
+                            cb.dispatchEvent(new Event('change'));
+                        }
+                    });
+                    optionsEl.appendChild(div);
+                });
+            }
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                container.classList.toggle('open');
+                if (container.classList.contains('open')) {
+                    search.value = '';
+                    renderOptions('');
+                    search.focus();
+                }
+            });
+
+            search.addEventListener('input', () => renderOptions(search.value));
+
+            renderTags();
+            renderOptions('');
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target)) container.classList.remove('open');
+            });
+        }
+
+        function populatePerStasiunYearSelects() {
+            const fromSelect = document.getElementById('psYearFrom');
+            const toSelect = document.getElementById('psYearTo');
+            if (!fromSelect || !toSelect) return;
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+            for (let y = minYearGlobal; y <= maxYearGlobal; y++) {
+                const optF = document.createElement('option');
+                optF.value = y; optF.innerText = y;
+                if (y === minYearGlobal) optF.selected = true;
+                fromSelect.appendChild(optF);
+                const optT = document.createElement('option');
+                optT.value = y; optT.innerText = y;
+                if (y === maxYearGlobal) optT.selected = true;
+                toSelect.appendChild(optT);
+            }
+        }
+
+        async function loadPerStasiunAnalysis() {
+            const tbody = document.getElementById('perStasiunTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="table-loading"><div class="spinner-rekap"></div>Menghitung trend untuk seluruh tipe data...</td></tr>';
+
+            const yrFrom = parseInt(document.getElementById('psYearFrom').value) || minYearGlobal;
+            const yrTo = parseInt(document.getElementById('psYearTo').value) || maxYearGlobal;
+
+            try {
+                const response = await fetch('php/analyze_all_types.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ yearFrom: yrFrom, yearTo: yrTo })
+                });
+                const resData = await response.json();
+                if (!resData.success) throw new Error(resData.message);
+                activePerStasiunResults = resData.results;
+                renderPerStasiunTable();
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px;">Gagal memuat olahan per stasiun.</td></tr>';
+            }
+        }
+
+        function renderPerStasiunTable() {
+            const tbody = document.getElementById('perStasiunTableBody');
+            tbody.innerHTML = '';
+            const displayStyle = document.getElementById('psDisplayStyle') ? document.getElementById('psDisplayStyle').value : 'sign';
+            const selectedIds = getSelectedPerStasiunStations();
+
+            if (selectedIds.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                return;
+            }
+
+            let counter = 1;
+
+            stationsData.forEach(st => {
+                if (!selectedIds.includes(st.id)) return;
+                const stResults = activePerStasiunResults[st.id];
+                if (!stResults) return;
+
+                perStasiunTypes.forEach(typeName => {
+                    const tr = document.createElement('tr');
+                    const typeRes = stResults[typeName];
+                    if (!typeRes) return;
+
+                    const mk = typeRes.mk || {};
+                    const ss = typeRes.ss || {};
+                    const lr = typeRes.lr || {};
+
+                    const mkCell = formatTrendVal(mk.Z, mk.trend || '', displayStyle, true);
+                    const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, true);
+                    const lrCell = formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true);
+
+                    tr.innerHTML = `
+                        <td style="color:#64748B; font-weight:600;">${counter++}</td>
+                        <td style="font-weight:700; color:#1E293B;">Pos ${st.name}</td>
+                        <td style="font-weight:600; color:#4B5563;">${typeName}</td>
+                        <td style="font-weight:600;">${mkCell}</td>
+                        <td style="font-weight:600; color:#2563EB;">${ssCell}</td>
+                        <td style="font-weight:600; color:#7C3AED;">${lrCell}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+
+            if (counter === 1) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; color:#6B7280;">Tidak ada data tersedia.</td></tr>';
+            }
+
+            updatePerStasiunLegend(displayStyle);
+        }
+
+        function updatePerStasiunLegend(displayStyle) {
+            const container = document.getElementById('psLegendContainer');
+            if (!container) return;
+            const content = document.querySelector('#trenLegendContainer');
+            if (content) {
+                container.innerHTML = content.innerHTML;
+            }
+        }
+
+        function handlePerStasiunDisplayChange() {
+            const selected = getSelectedPerStasiunStations();
+            if (selected.length === 0) {
+                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                return;
+            }
+            if (activePerStasiunResults) {
+                renderPerStasiunTable();
+            }
+        }
+
+        function applyPerStasiunFilters() {
+            const selected = getSelectedPerStasiunStations();
+            if (selected.length === 0) {
+                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                return;
+            }
+            const yrFrom = parseInt(document.getElementById('psYearFrom').value);
+            const yrTo = parseInt(document.getElementById('psYearTo').value);
+            if (yrFrom > yrTo) {
+                alert("Tahun Mulai tidak boleh lebih besar dari Tahun Selesai!");
+                return;
+            }
+            const prevYrFrom = activePerStasiunResults ? window._psYrFrom : null;
+            const prevYrTo = activePerStasiunResults ? window._psYrTo : null;
+            if (yrFrom !== prevYrFrom || yrTo !== prevYrTo) {
+                activePerStasiunResults = null;
+                window._psYrFrom = yrFrom;
+                window._psYrTo = yrTo;
+                loadPerStasiunAnalysis();
+            } else if (activePerStasiunResults) {
+                renderPerStasiunTable();
             }
         }
 
@@ -1243,11 +1569,40 @@
             // Clone table to prevent modifying the original DOM table view
             const clone = table.cloneNode(true);
 
-            // Remove any pagination elements or dynamic buttons inside the cloned table if any
-            // For detail-table, pagination is outside the table, so table_to_book works perfectly!
+            // Clean up cells in the clone to extract numeric values without * or icons
+            const rows = clone.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    
+                    // Skip header row cells
+                    if (cell.tagName.toLowerCase() === 'th') continue;
 
-            // Generate workbook
-            const wb = XLSX.utils.table_to_book(clone, { raw: true });
+                    let text = cell.innerText || cell.textContent;
+                    // Remove symbols: *, ▲, ▼, •
+                    text = text.replace(/[*▲▼•]/g, '').trim();
+
+                    // If it starts with '+', remove it so it's parsed as normal positive number
+                    if (text.startsWith('+')) {
+                        text = text.substring(1);
+                    }
+
+                    // Replace Indonesian comma decimal with dot just in case
+                    text = text.replace(',', '.');
+
+                    // If it is a valid numeric string, replace cell content with a parsed number
+                    if (text !== '' && !isNaN(Number(text))) {
+                        cell.innerText = Number(text);
+                        // Tell SheetJS it is a number type cell
+                        cell.setAttribute('data-t', 'n');
+                        cell.setAttribute('t', 'n');
+                    }
+                }
+            }
+
+            // Generate workbook (raw: false allows SheetJS to parse element data types)
+            const wb = XLSX.utils.table_to_book(clone, { raw: false });
 
             // Trigger download
             XLSX.writeFile(wb, filename + '.xlsx');

@@ -1,3 +1,5 @@
 .env
 config/key/
 *.txt
+.DS_Store
+php/php_error.log

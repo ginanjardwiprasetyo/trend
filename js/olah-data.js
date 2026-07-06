@@ -7,6 +7,7 @@
 let rawData = [];       // All parsed daily records: [{date: Date, value: Number}]
 let aggregatedData = []; // Aggregated for analysis: [{year: Number, value: Number}]
 let olahChart = null;
+let inputPeriod = 'harian'; // 'harian' | 'bulanan' | 'tahunan' — auto-detected after upload
 
 const fM = (val) => val === undefined || val === null || val === '—' ? '—' : String(val).replace('-', '−');
 
@@ -20,6 +21,7 @@ function togglePreviewAccordion() {
 
 function resetUpload() {
     rawData = [];
+    inputPeriod = 'harian';
     document.getElementById('fileInput').value = '';
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('configSection').classList.remove('show');
@@ -31,6 +33,7 @@ function resetUpload() {
     document.getElementById('previewAccordionContent').classList.remove('show');
     
     // Reset headers
+    document.getElementById('previewDateHeader').textContent = 'Tanggal';
     document.getElementById('previewDataHeader').textContent = 'Data';
 }
 
@@ -62,8 +65,25 @@ function toggleOlahMonth() {
             <option value="12">Desember</option>
         `;
     }
+    syncAggVisibility();
     const evt = new Event('optionsChanged');
     mo.dispatchEvent(evt);
+}
+
+// ====== INPUT PERIOD DETECTION ======
+function detectInputPeriod(rawStrs) {
+    let hasDaily = false, hasMonthly = false, hasAnnual = false;
+    for (const s of rawStrs) {
+        const t = s.trim();
+        if (/^\d{4}$/.test(t)) { hasAnnual = true; continue; }
+        if (/^\d{4}-\d{1,2}$/.test(t) || /^\d{1,2}\/\d{4}$/.test(t) || /^[a-zA-Z]{3,}\s+\d{4}$/.test(t)) { hasMonthly = true; continue; }
+        if (/\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}/.test(t) || /^\d{4}-\d{1,2}-\d{1,2}/.test(t)) { hasDaily = true; continue; }
+        hasDaily = true; // fallback
+    }
+    if (hasDaily) return 'harian';
+    if (hasMonthly) return 'bulanan';
+    if (hasAnnual) return 'tahunan';
+    return 'harian';
 }
 
 // ====== FILE UPLOAD ======
@@ -128,11 +148,13 @@ function parseCSV(file) {
         const rows = lines.slice(1); // skip header
 
         rawData = [];
+        const rawStrs = [];
         rows.forEach(line => {
             const parts = line.split(sep).map(s => s.trim().replace(/^"|"$/g, ''));
             if (parts.length >= 2) {
+                rawStrs.push(parts[0]);
                 const dateVal = parseFlexDate(parts[0]);
-                const value = Math.round(parseFloat(parts[1].replace(',', '.')));
+                const value = parseFloat(parts[1].replace(',', '.'));
                 if (dateVal && !isNaN(value)) {
                     rawData.push({ date: dateVal, value: value });
                 }
@@ -144,6 +166,7 @@ function parseCSV(file) {
             return;
         }
 
+        inputPeriod = detectInputPeriod(rawStrs);
         rawData.sort((a, b) => a.date - b.date);
         onDataParsed();
     };
@@ -167,11 +190,13 @@ function parseExcel(file) {
             }
 
             rawData = [];
+            const rawStrs = [];
             for (let i = 1; i < json.length; i++) {
                 const row = json[i];
                 if (row.length >= 2) {
+                    rawStrs.push(String(row[0]));
                     const dateVal = parseFlexDate(String(row[0]));
-                    const value = Math.round(parseFloat(String(row[1]).replace(',', '.')));
+                    const value = parseFloat(String(row[1]).replace(',', '.'));
                     if (dateVal && !isNaN(value)) {
                         rawData.push({ date: dateVal, value: value });
                     }
@@ -183,6 +208,7 @@ function parseExcel(file) {
                 return;
             }
 
+            inputPeriod = detectInputPeriod(rawStrs);
             rawData.sort((a, b) => a.date - b.date);
             onDataParsed();
         } catch (err) {
@@ -198,7 +224,35 @@ function parseFlexDate(str) {
     if (!str) return null;
     str = str.trim();
 
-    // Try dd/mm/yy or dd/mm/yyyy
+    // Annual: YYYY (4 digit)
+    const yearMatch = str.match(/^(\d{4})$/);
+    if (yearMatch) {
+        return new Date(parseInt(yearMatch[1]), 0, 1);
+    }
+
+    // Monthly: YYYY-MM
+    const ymMatch = str.match(/^(\d{4})-(\d{1,2})$/);
+    if (ymMatch) {
+        return new Date(parseInt(ymMatch[1]), parseInt(ymMatch[2]) - 1, 1);
+    }
+
+    // Monthly: MM/YYYY
+    const myMatch = str.match(/^(\d{1,2})\/(\d{4})$/);
+    if (myMatch) {
+        return new Date(parseInt(myMatch[2]), parseInt(myMatch[1]) - 1, 1);
+    }
+
+    // Monthly: Mon YYYY or Month YYYY
+    const txtMatch = str.match(/^([a-zA-Z]{3,})\s+(\d{4})$/);
+    if (txtMatch) {
+        const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        const idx = months.indexOf(txtMatch[1].toLowerCase().substring(0, 3));
+        if (idx >= 0) {
+            return new Date(parseInt(txtMatch[2]), idx, 1);
+        }
+    }
+
+    // Daily: dd/mm/yy or dd/mm/yyyy
     const slashMatch = str.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
     if (slashMatch) {
         let day = parseInt(slashMatch[1]);
@@ -210,7 +264,7 @@ function parseFlexDate(str) {
         }
     }
 
-    // Try yyyy-mm-dd (ISO)
+    // Daily: yyyy-mm-dd (ISO)
     const isoMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (isoMatch) {
         return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
@@ -223,6 +277,43 @@ function parseFlexDate(str) {
     return null;
 }
 
+// ====== UI ADJUSTMENT BASED ON INPUT PERIOD ======
+function adjustUIBasedOnPeriod() {
+    const dtType = document.getElementById('olahDtType');
+    const aggWrap = document.getElementById('olahAgg').nextElementSibling;
+    const monthWrap = document.getElementById('olahMonth').nextElementSibling;
+
+    // Reset all options to enabled first
+    Array.from(dtType.options).forEach(o => o.disabled = false);
+    if (aggWrap) aggWrap.style.display = '';
+    if (monthWrap) monthWrap.style.display = '';
+
+    if (inputPeriod === 'tahunan') {
+        // Only 'tahunan' is allowed
+        dtType.value = 'tahunan';
+        Array.from(dtType.options).forEach(o => {
+            if (o.value !== 'tahunan') o.disabled = true;
+        });
+        if (aggWrap) aggWrap.style.display = 'none';
+        if (monthWrap) monthWrap.style.display = 'none';
+    }
+
+    // Refresh custom select UI
+    dtType.dispatchEvent(new Event('change'));
+    syncAggVisibility();
+    document.getElementById('olahMonth').dispatchEvent(new Event('optionsChanged'));
+    document.getElementById('olahAgg').dispatchEvent(new Event('optionsChanged'));
+}
+
+function syncAggVisibility() {
+    const dtType = document.getElementById('olahDtType').value;
+    const aggWrap = document.getElementById('olahAgg').nextElementSibling;
+    if (!aggWrap) return;
+    // Aggregation hidden only when: input is annual, OR (input is monthly AND dtType is bulanan)
+    const hideAgg = inputPeriod === 'tahunan' || (inputPeriod === 'bulanan' && dtType === 'bulanan');
+    aggWrap.style.display = hideAgg ? 'none' : '';
+}
+
 // ====== ON DATA PARSED ======
 function onDataParsed() {
     // Hide upload zone
@@ -231,17 +322,43 @@ function onDataParsed() {
     // Show config section
     document.getElementById('configSection').classList.add('show');
 
+    // Update period indicator
+    const badge = document.getElementById('inputPeriodBadge');
+    const labels = { harian: 'Harian', bulanan: 'Bulanan', tahunan: 'Tahunan' };
+    if (badge) {
+        badge.textContent = 'Data ' + (labels[inputPeriod] || 'Harian');
+        badge.className = 'period-badge period-' + inputPeriod;
+    }
+
+    // Adjust UI controls based on detected period
+    adjustUIBasedOnPeriod();
+
     // Auto-open accordion
     document.getElementById('previewAccordionHeader').classList.add('active');
     document.getElementById('previewAccordionContent').classList.add('show');
 
-    // Preview table (all rows with scroll, limit display rows to first few for speed)
+    // Preview table
     const previewBody = document.getElementById('previewBody');
     previewBody.innerHTML = '';
-    const displayLimit = Math.min(rawData.length, 20); // Only render 20 to DOM for performance
+
+    // Update preview header based on input period
+    const dateHeader = document.getElementById('previewDateHeader');
+    const headerLabels = { harian: 'Tanggal', bulanan: 'Periode', tahunan: 'Tahun' };
+    if (dateHeader) {
+        dateHeader.textContent = headerLabels[inputPeriod] || 'Tanggal';
+    }
+
+    const displayLimit = Math.min(rawData.length, 20);
     for (let i = 0; i < displayLimit; i++) {
         const d = rawData[i];
-        const dateStr = `${d.date.getDate().toString().padStart(2, '0')}/${(d.date.getMonth() + 1).toString().padStart(2, '0')}/${d.date.getFullYear()}`;
+        let dateStr;
+        if (inputPeriod === 'tahunan') {
+            dateStr = String(d.date.getFullYear());
+        } else if (inputPeriod === 'bulanan') {
+            dateStr = `${(d.date.getMonth() + 1).toString().padStart(2, '0')}/${d.date.getFullYear()}`;
+        } else {
+            dateStr = `${d.date.getDate().toString().padStart(2, '0')}/${(d.date.getMonth() + 1).toString().padStart(2, '0')}/${d.date.getFullYear()}`;
+        }
         previewBody.innerHTML += `<tr><td>${i + 1}</td><td>${dateStr}</td><td>${d.value}</td></tr>`;
     }
 
@@ -372,10 +489,10 @@ function aggregateData(dtType, monthFilter, yFrom, yTo, aggMode) {
     }
 
     const reduceValues = (arr) => {
-        if (aggMode === 'min') return Math.round(Math.min(...arr));
-        if (aggMode === 'maks') return Math.round(Math.max(...arr));
-        if (aggMode === 'rerata') return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
-        return Math.round(arr.reduce((a, b) => a + b, 0));
+        if (aggMode === 'min') return Math.min(...arr);
+        if (aggMode === 'maks') return Math.max(...arr);
+        if (aggMode === 'rerata') return arr.reduce((a, b) => a + b, 0) / arr.length;
+        return arr.reduce((a, b) => a + b, 0);
     };
 
     if (dtType === 'tahunan') {
@@ -448,7 +565,7 @@ async function runOlahAnalysis() {
     const dtType = document.getElementById('olahDtType').value;
     let mo = document.getElementById('olahMonth').value;
     if (dtType === 'tahunan') mo = 'all';
-    const agg = document.getElementById('olahAgg').value;
+    const agg = (inputPeriod === 'tahunan' || (inputPeriod === 'bulanan' && dtType === 'bulanan')) ? 'kumulatif' : document.getElementById('olahAgg').value;
     const yFrom = parseInt(document.getElementById('olahYFrom').value);
     const yTo = parseInt(document.getElementById('olahYTo').value);
 
@@ -508,9 +625,9 @@ async function runOlahAnalysis() {
             if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
             else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
             
-            const zKritis = 1.96;
-            const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
+            const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
+            const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
         }
@@ -525,9 +642,9 @@ async function runOlahAnalysis() {
             if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
             else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
             
-            const qmedVal = fM(ss.slope) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            const qminHtml = ss.Qmin !== undefined ? fM(ss.Qmin) : '—';
-            const qmaxHtml = ss.Qmax !== undefined ? fM(ss.Qmax) : '—';
+            const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
+            const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
             document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
@@ -543,15 +660,15 @@ async function runOlahAnalysis() {
             if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
             else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
             
-            const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(4)) : '—';
-            const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
-            const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
+            const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
+            const tUji = lr.tStatistic !== undefined ? fM(Number(lr.tStatistic).toFixed(3)) : '—';
+            const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
             const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
             document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
-                const trendPts = aggregatedData.map(d => lr.intercept + (lr.slope * d.year));
+                const trendPts = aggregatedData.map((d, index) => lr.intercept + (lr.slope * index));
                 olahChart.data.datasets = olahChart.data.datasets.filter(ds => ds.label !== 'Garis Regresi Linear');
                 olahChart.data.datasets.push({
                     type: 'line', label: 'Garis Regresi Linear',
@@ -773,17 +890,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 Array.from(selectEl.options).forEach(opt => {
                     const optEl = document.createElement('div');
-                    optEl.className = 'custom-select-option' + (opt.selected ? ' selected' : '');
+                    optEl.className = 'custom-select-option' + (opt.selected ? ' selected' : '') + (opt.disabled ? ' disabled' : '');
                     optEl.textContent = opt.textContent;
                     optEl.dataset.value = opt.value;
                     
-                    optEl.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        selectEl.value = opt.value;
-                        selectEl.dispatchEvent(new Event('change'));
-                        wrapper.classList.remove('open');
-                        renderOptions();
-                    });
+                    if (!opt.disabled) {
+                        optEl.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            selectEl.value = opt.value;
+                            selectEl.dispatchEvent(new Event('change'));
+                            wrapper.classList.remove('open');
+                            renderOptions();
+                        });
+                    }
                     optionsContainer.appendChild(optEl);
                 });
             }
@@ -803,17 +922,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // Watch for changes via JS
             selectEl.addEventListener('change', renderOptions);
             selectEl.addEventListener('optionsChanged', () => {
-                if (selectEl.id === 'olahMonth' || selectEl.id === 'olahAgg') {
-                    const dtType = document.getElementById('olahDtType').value;
-                    wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+                if (selectEl.id === 'olahAgg') {
+                    syncAggVisibility();
+                } else if (selectEl.id === 'olahMonth') {
+                    const dtVal = document.getElementById('olahDtType').value;
+                    wrapper.style.display = (dtVal === 'tahunan' || inputPeriod === 'tahunan') ? 'none' : 'inline-block';
                 }
                 renderOptions();
             });
             
             // Initial visibility check
-            if (selectEl.id === 'olahMonth' || selectEl.id === 'olahAgg') {
-                const dtType = document.getElementById('olahDtType').value;
-                wrapper.style.display = dtType === 'tahunan' ? 'none' : 'inline-block';
+            if (selectEl.id === 'olahAgg') {
+                syncAggVisibility();
+            } else if (selectEl.id === 'olahMonth') {
+                const dtVal = document.getElementById('olahDtType').value;
+                wrapper.style.display = (dtVal === 'tahunan' || inputPeriod === 'tahunan') ? 'none' : 'inline-block';
             }
         });
         

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Cek Ketersediaan Data — TrendHidro</title>
+    <title>Data — TrendHidro</title>
     <meta name="description"
         content="Jelajahi ketersediaan data hidrologi harian dan bulanan dari berbagai stasiun di Indonesia. Cek kelengkapan data dan temukan celah data dengan mudah.">
     <meta name="keywords"
@@ -342,43 +342,13 @@
     </div>
 
     <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-left:4px;">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data" class="active">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- CONTENT -->
     <div class="data-container">
         <div class="data-header">
-            <h1>Ketersediaan Data Curah Hujan</h1>
-            <p>Tinjau ketersediaan data curah hujan harian dari semua stasiun.</p>
+            <h1>Data Curah Hujan</h1>
+            <p>Tinjau ketersediaan dan unduh data curah hujan harian dari berbagai stasiun di WS Bengawan Solo.</p>
         </div>
 
         <div class="data-table-wrap">
@@ -404,6 +374,12 @@
                 <!-- Pagination rendered here -->
             </div>
         </div>
+
+        <p style="font-size:0.8rem; color:#9CA3AF; line-height:1.6; margin:4px 0 0;"><strong
+                style="color:#6B7280;">Sumber:</strong> BBWS Bengawan Solo (<a href="https://hidrologi.bbws-bsolo.net"
+                target="_blank" style="color:#6B7280;">hidrologi.bbws-bsolo.net</a>). Persentase kelengkapan dihitung
+            dari data curah hujan <strong>harian</strong> terhadap total hari dalam rentang tahun data tiap
+            stasiun.</p>
     </div>
 
     <!-- DIALOG MISSING DATES -->
@@ -536,11 +512,14 @@
                     <td style="white-space: nowrap;">${yearRange}</td>
                     <td><span class="${badgeClass}">${pctDisplay}%</span></td>
                     <td>
-                        <button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem; background:#DBEAFE; color:#1D4ED8; border:none;" 
-                            onclick="openMissDialog('${st.id}')">
-                            <svg style="width:14px; height:14px; display:inline; margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> 
-                            Cek Data
-                        </button>
+                        <div style="display:flex; justify-content:center; gap:8px;">
+                            <button class="btn btn-secondary" style="padding:6px 10px; background:#DBEAFE; color:#1D4ED8; border:none; border-radius:6px; cursor:pointer;" title="Cek Ketersediaan Data" onclick="openMissDialog('${st.id}')">
+                                <svg style="width:16px; height:16px; display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> 
+                            </button>
+                            <button class="btn btn-secondary" style="padding:6px 10px; background:#D1FAE5; color:#059669; border:none; border-radius:6px; cursor:pointer;" title="Download Data CSV" onclick="downloadCSV('${st.id}')">
+                                <svg style="width:16px; height:16px; display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -598,6 +577,10 @@
             renderTable();
             renderPagination();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function downloadCSV(posId) {
+            window.location.href = `php/export_csv.php?pos_id=${posId}`;
         }
 
         // ============================
@@ -701,6 +684,8 @@
             }
         }
     </script>
+
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>

@@ -75,11 +75,11 @@ try {
     
     // Query Bulk
     if ($dataType === 'tahunan' || $dataType === 'musiman') {
-        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as x, $aggFunc(ROUND(rain::numeric, 0)) as y FROM data_ch WHERE $where GROUP BY pos_id, EXTRACT(YEAR FROM tanggal::date) ORDER BY pos_id, x";
+        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as x, $aggFunc(rain::numeric) as y FROM data_ch WHERE $where GROUP BY pos_id, EXTRACT(YEAR FROM tanggal::date) ORDER BY pos_id, x";
     } elseif ($dataType === 'bulanan') {
-        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(MONTH FROM tanggal::date) as mo, $aggFunc(ROUND(rain::numeric, 0)) as y FROM data_ch WHERE $where GROUP BY pos_id, yr, mo ORDER BY pos_id, yr, mo";
+        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(MONTH FROM tanggal::date) as mo, $aggFunc(rain::numeric) as y FROM data_ch WHERE $where GROUP BY pos_id, yr, mo ORDER BY pos_id, yr, mo";
     } else {
-        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(DOY FROM tanggal::date) as dy, ROUND(rain::numeric, 0) as y FROM data_ch WHERE $where ORDER BY pos_id, tanggal::date";
+        $sql = "SELECT pos_id, EXTRACT(YEAR FROM tanggal::date) as yr, EXTRACT(DOY FROM tanggal::date) as dy, rain::numeric as y FROM data_ch WHERE $where ORDER BY pos_id, tanggal::date";
     }
     
     $stmt = $conn->prepare($sql);
@@ -103,7 +103,7 @@ try {
         
         $stationsData[$pos_id][] = [
             'year' => (float)$x,
-            'value' => round((float)$row['y'], 0) // Pembulatan angka 0 desimal hanya berlaku untuk data di database
+            'value' => (float)$row['y'] // Menggunakan nilai riil desimal untuk keakuratan statistik
         ];
     }
 } catch (Exception $e) {
@@ -114,7 +114,7 @@ try {
 // Fungsi-fungsi Hitung
 function calcMannKendall($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'S' => 0, 'Z' => 0, 'pValue' => 1];
+    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'S' => 0, 'Z' => 0, 'pValue' => 1];
     
     $values = array_column($data, 'value');
     $S = 0;
@@ -142,12 +142,13 @@ function calcMannKendall($data) {
     
     $pValue = 2 * (1 - normalCDF(abs($Z)));
     
-    $trend = 'Tidak Ada Tren';
+    $trend = 'Tidak Ada Trend';
     $significant = false;
-    if ($Z > 1.96) {
+    $zCrit = getCriticalZ(0.05);
+    if ($Z > $zCrit) {
         $trend = 'Meningkat (Signifikan)';
         $significant = true;
-    } elseif ($Z < -1.96) {
+    } elseif ($Z < -$zCrit) {
         $trend = 'Menurun (Signifikan)';
         $significant = true;
     } elseif ($Z > 0) {
@@ -168,7 +169,7 @@ function calcMannKendall($data) {
 
 function calcSensSlope($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0];
     
     $slopes = [];
     for ($i = 0; $i < $n - 1; $i++) {
@@ -180,7 +181,7 @@ function calcSensSlope($data) {
         }
     }
     
-    if (empty($slopes)) return ['trend' => 'Tidak Ada Tren', 'slope' => 0];
+    if (empty($slopes)) return ['trend' => 'Tidak Ada Trend', 'slope' => 0];
     
     sort($slopes);
     $count = count($slopes);
@@ -197,7 +198,7 @@ function calcSensSlope($data) {
     $mk = calcMannKendallBase($values, $n);
     $varS = $mk['varS'];
     
-    $C_alpha = 1.96 * sqrt($varS);
+    $C_alpha = getCriticalZ(0.05) * sqrt($varS);
     $M1 = ($count - $C_alpha) / 2;
     $M2 = ($count + $C_alpha) / 2;
     
@@ -210,14 +211,14 @@ function calcSensSlope($data) {
     // Signifikan jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
     $significant = ($Qmin > 0) || ($Qmax < 0);
     
-    $trend = 'Tidak Ada Tren';
+    $trend = 'Tidak Ada Trend';
     if ($medianSlope > 0) {
         $trend = 'Meningkat';
     } elseif ($medianSlope < 0) {
         $trend = 'Menurun';
     }
     
-    if ($trend !== 'Tidak Ada Tren') {
+    if ($trend !== 'Tidak Ada Trend') {
         $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
     }
     
@@ -232,7 +233,7 @@ function calcSensSlope($data) {
 
 function calcLinearRegression($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'rSquared' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'rSquared' => 0];
     
     $x = range(0, $n - 1);
     $y = array_column($data, 'value');
@@ -270,26 +271,24 @@ function calcLinearRegression($data) {
     // ====== UJI SIGNIFIKANSI (t-test) ======
     $df = max(1, $n - 2);
     $tStat = 0;
-    $tCritical = 1.96;
+    $tCritical = getCriticalT($df, 0.05);
     $significant = false;
     
     if ($n > 2 && $Sxx > 0) {
         $MSE = $SSres / $df;
         $stdErrSlope = sqrt($MSE / $Sxx);
         $tStat = ($stdErrSlope > 0) ? $slope / $stdErrSlope : 0;
-        // Pendekatan normal distribution: t-kritis ±1.96 untuk df besar / n besar
-        // Untuk akurasi pada df kecil, idealnya gunakan tabel t. Di sini kita gunakan 1.96 untuk konsistensi dengan MK.
-        $significant = abs($tStat) > 1.96;
+        $significant = abs($tStat) > $tCritical;
     }
     
-    $trend = 'Tidak Ada Tren';
+    $trend = 'Tidak Ada Trend';
     if ($slope > 0) {
         $trend = 'Meningkat';
     } elseif ($slope < 0) {
         $trend = 'Menurun';
     }
     
-    if ($trend !== 'Tidak Ada Tren') {
+    if ($trend !== 'Tidak Ada Trend') {
         $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
     }
     

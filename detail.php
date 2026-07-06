@@ -180,40 +180,9 @@ if (empty($stationId)) {
     </style>
 </head>
 
-<body style="overflow-y: auto; height: auto;">
+<body style="overflow-y: auto; height: auto; background: #F3F4F6;">
 
-    <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-        <a href="./" class="navbar-brand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 7v10" />
-                <path d="M9 10l3-3 3 3" />
-                <path d="M9 14l3 3 3-3" />
-            </svg>
-            <span>TrendHidro</span>
-        </a>
-        <ul class="navbar-nav">
-            <li><a href="./" id="nav-beranda">Beranda</a></li>
-            <li class="nav-dropdown">
-                <button class="nav-drop-btn" id="nav-fitur">
-                    Fitur
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        style="margin-left:4px;">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
-                <div class="nav-drop-content">
-                    <a href="peta">Peta Interaktif</a>
-                    <a href="olah-data">Olah Data Anda</a>
-                </div>
-            </li>
-            <li><a href="data" id="nav-data">Ketersediaan Data</a></li>
-            <li><a href="dok" id="nav-docs">Dokumentasi</a></li>
-            <li><a href="tentang" id="nav-about">Tentang</a></li>
-        </ul>
-    </nav>
+    <?php include 'navbar.php'; ?>
 
     <!-- KONTEN -->
     <div class="detail-container">
@@ -234,6 +203,12 @@ if (empty($stationId)) {
                     <option value="tahunan">Tahunan</option>
                     <option value="musiman">Musiman</option>
                 </select>
+                
+                <select id="dtAgg" class="form-select" style="min-width:110px; flex-shrink:0;">
+                    <option value="kumulatif" selected>Kumulatif</option>
+                    <option value="maks">Maks</option>
+                    <option value="rerata">Rerata</option>
+                </select>
                 <select id="dtMonth" class="form-select" style="min-width:165px; flex-shrink:0;">
                     <option value="all">Semua Bulan</option>
                     <option value="1">Januari</option>
@@ -249,8 +224,6 @@ if (empty($stationId)) {
                     <option value="11">November</option>
                     <option value="12">Desember</option>
                 </select>
-                <!-- Agregasi dihilangkan sesuai request -->
-                <input type="hidden" id="dtAgg" value="kumulatif">
 <label style="font-size:0.9rem; font-weight:600; color:#4B5563; min-width:max-content; flex-shrink:0; display:flex; align-items:center; margin-left:auto;">Rentang
                     Tahun:</label>
                 <div class="year-picker-wrapper" style="width: auto; min-width: 230px; flex-shrink:0; height:42px;">
@@ -302,9 +275,9 @@ if (empty($stationId)) {
                 </div>
             </div>
 
-            <!-- Rekap Perhitungan Tren + Ketersediaan Data Periode -->
+            <!-- Rekap Perhitungan Trend + Ketersediaan Data Periode -->
             <div style="grid-column: 1 / -1; display: flex; gap: 20px; flex-wrap: wrap;">
-                <!-- Rekap Tren (kiri, 2/3) -->
+                <!-- Rekap Trend (kiri, 2/3) -->
                 <div class="detail-card" style="flex: 2; min-width: 400px;">
                     <div class="card-loader active" id="trendLoaderOverlay">
                         <div class="spinner"></div>
@@ -980,9 +953,9 @@ if (empty($stationId)) {
                     if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
                     else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
                     
-                    const zKritis = 1.96;
-                    const zUjiVal = fM(mk.Z) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${zKritis}</td></tr></table>`;
+            const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
+            const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
                 } else {
                     document.getElementById('mkResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
                 }
@@ -997,9 +970,9 @@ if (empty($stationId)) {
                     if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
                     else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
                     
-                    const qmedVal = fM(ss.slope) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    const qminHtml = ss.Qmin !== undefined ? fM(ss.Qmin) : '—';
-                    const qmaxHtml = ss.Qmax !== undefined ? fM(ss.Qmax) : '—';
+                    const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                    const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
+                    const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
                     document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
                 } else {
                     document.getElementById('ssResult').innerHTML = `Gagal menghitung (Data terlalu besar atau timeout)`;
@@ -1015,16 +988,16 @@ if (empty($stationId)) {
                     if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
                     else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
                     
-                    const tUji = lr.tStatistic !== undefined ? fM(lr.tStatistic) : '—';
-                    const tKrit = lr.tCritical !== undefined ? `±${fM(lr.tCritical)}` : '—';
-                    const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(4)) : '—';
+                    const tUji = lr.tStatistic !== undefined ? fM(Number(lr.tStatistic).toFixed(3)) : '—';
+                    const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
+                    const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
                     const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
                     // Update main chart with trend line if available
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
-                        let trendDataPts = dataArray.map((d) => {
-                            return lr.intercept + (lr.slope * d.year);
+                        let trendDataPts = dataArray.map((d, index) => {
+                            return lr.intercept + (lr.slope * index);
                         });
 
                         // Remove existing trend line if any
@@ -1532,6 +1505,8 @@ if (empty($stationId)) {
         }
         setupCustomSelects();
     </script>
+
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>

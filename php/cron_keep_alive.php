@@ -1,7 +1,7 @@
 <?php
 /**
  * Cron Job Keep Alive - Supabase
- * TrendHidro - Aplikasi Pemetaan Tren Hidrologi
+ * TrendHidro - Aplikasi Pemetaan Trend Hidrologi
  * 
  * Jalankan file ini secara periodik menggunakan Cron Job di hosting Anda (misal: 1x seminggu)
  * untuk mencegah Supabase Free-Tier di-pause otomatis karena tidak ada aktivitas selama 7 hari.

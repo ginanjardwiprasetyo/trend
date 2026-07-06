@@ -46,7 +46,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Tren'
+        'trend' => 'Tidak Ada Trend'
     ]);
     exit;
 }
@@ -66,16 +66,16 @@ $varS = $mk['varS'];
 $Z = $mk['Z'];
 $pValue = $mk['pValue'];
 
-// ====== TENTUKAN TREN ======
-// Z > 1.96: Meningkat (Signifikan), Z < -1.96: Menurun (Signifikan)
-// 0 < Z <= 1.96: Meningkat (Tidak Signifikan), -1.96 <= Z < 0: Menurun (Tidak Signifikan)
-// Z = 0: Tidak Ada Tren
-$trend = 'Tidak Ada Tren';
+$alpha = 0.05;
+$zCritical = getCriticalZ($alpha);
+
+// ====== TENTUKAN TREND ======
+$trend = 'Tidak Ada Trend';
 $significant = false;
-if ($Z > 1.96) {
+if ($Z > $zCritical) {
     $trend = 'Meningkat (Signifikan)';
     $significant = true;
-} elseif ($Z < -1.96) {
+} elseif ($Z < -$zCritical) {
     $trend = 'Menurun (Signifikan)';
     $significant = true;
 } elseif ($Z > 0) {
@@ -91,8 +91,9 @@ echo json_encode([
     'varS' => round($varS, 3),
     'Z' => round($Z, 3),
     'pValue' => round($pValue, 3),
-    'alpha' => 0.05,
+    'alpha' => $alpha,
     'significant' => $significant,
     'trend' => $trend,
-    'n' => $n
+    'n' => $n,
+    'zCritical' => round($zCritical, 4)
 ]);
