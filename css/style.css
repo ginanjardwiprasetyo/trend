@@ -57,6 +57,10 @@ i, em {
     margin: 0 0.05em;
 }
 
+.year-grid-content.p-2 {
+    padding: 0.5rem;
+}
+
 /* --- Accordion for Preview --- */
 .accordion-header {
     display: flex;

@@ -3,7 +3,8 @@
  * TrendHidro - Fungsi Statistik Umum
  */
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+$autoload = __DIR__ . '/../../vendor/autoload.php';
+if (file_exists($autoload)) require_once $autoload;
 
 use MathPHP\Probability\Distribution\Continuous\StudentT;
 use MathPHP\Probability\Distribution\Continuous\Normal;
@@ -75,25 +76,31 @@ function calcMannKendallBase($values, $n) {
  */
 function getCriticalT($df, $alpha = 0.05) {
     if ($df <= 0) return 1.96;
-    try {
-        $t = new StudentT($df);
-        return $t->inverse2Tails($alpha);
-    } catch (\Exception $e) {
-        return 1.96;
+    if (class_exists('MathPHP\Probability\Distribution\Continuous\StudentT')) {
+        try {
+            $t = new StudentT($df);
+            return $t->inverse2Tails($alpha);
+        } catch (\Throwable $e) {}
     }
+    $table = [1=>12.706,2=>4.303,3=>3.182,4=>2.776,5=>2.571,6=>2.447,7=>2.365,8=>2.306,9=>2.262,10=>2.228,
+        11=>2.201,12=>2.179,13=>2.160,14=>2.145,15=>2.131,16=>2.120,17=>2.110,18=>2.101,19=>2.093,20=>2.086,
+        21=>2.080,22=>2.074,23=>2.069,24=>2.064,25=>2.060,26=>2.056,27=>2.052,28=>2.048,29=>2.045,30=>2.042];
+    if ($df <= 30) return $table[$df] ?? 1.96;
+    if ($df <= 60) return 1.671;
+    if ($df <= 120) return 1.658;
+    return 1.96;
 }
 
-/**
- * Fungsi untuk mendapatkan nilai kritis distribusi Z normal (two-tailed)
- * Menggunakan math-php Normal distribution
- */
 function getCriticalZ($alpha = 0.05) {
-    try {
-        $n = new Normal(0, 1);
-        return $n->inverse(1 - $alpha / 2);
-    } catch (\Exception $e) {
-        return 1.96;
+    if (class_exists('MathPHP\Probability\Distribution\Continuous\Normal')) {
+        try {
+            $n = new Normal(0, 1);
+            return $n->inverse(1 - $alpha / 2);
+        } catch (\Throwable $e) {}
     }
+    if ($alpha == 0.01) return 2.576;
+    if ($alpha == 0.10) return 1.645;
+    return 1.96;
 }
 
 /**
