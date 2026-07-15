@@ -549,6 +549,68 @@ function aggregateData(dtType, monthFilter, yFrom, yTo, aggMode) {
     return [];
 }
 
+// ====== LINEAR REGRESSION (Client-side) ======
+function calcLinearRegressionJS(dataArray) {
+    const n = dataArray.length;
+    if (n < 3) return { error: true, message: 'Minimal 3 data' };
+
+    const x = dataArray.map((_, i) => i);
+    const y = dataArray.map(d => d.value);
+    const meanX = x.reduce((a, b) => a + b, 0) / n;
+    const meanY = y.reduce((a, b) => a + b, 0) / n;
+
+    let Sxx = 0, Syy = 0, Sxy = 0;
+    for (let i = 0; i < n; i++) {
+        const dx = x[i] - meanX;
+        const dy = y[i] - meanY;
+        Sxx += dx * dx;
+        Syy += dy * dy;
+        Sxy += dx * dy;
+    }
+
+    const slope = Sxx !== 0 ? Sxy / Sxx : 0;
+    const intercept = meanY - slope * meanX;
+
+    let SSres = 0;
+    for (let i = 0; i < n; i++) {
+        const yPred = slope * x[i] + intercept;
+        SSres += (y[i] - yPred) ** 2;
+    }
+
+    const rSquared = Syy > 0 ? 1 - SSres / Syy : 0;
+    const df = Math.max(1, n - 2);
+    let tStatistic = 0, tCritical = 1.96, pValue = 1;
+
+    if (n > 2 && Sxx > 0) {
+        const MSE = SSres / df;
+        const SE = Math.sqrt(MSE / Sxx);
+        tStatistic = SE > 0 ? slope / SE : 0;
+        pValue = 2 * (1 - normalCDF(Math.abs(tStatistic)));
+        tCritical = getCriticalT_JSOlah(df, 0.05);
+    }
+
+    const significant = Math.abs(tStatistic) > tCritical;
+    let trend = 'Tidak Ada Trend';
+    if (significant) trend = slope > 0 ? 'Meningkat' : 'Menurun';
+
+    const r = (rSquared >= 0) ? Math.sqrt(rSquared) : 0;
+    return { slope, intercept, rSquared, r: slope < 0 ? -r : r, tStatistic, tCritical, pValue, significant, trend, n };
+}
+
+function getCriticalT_JSOlah(df, alpha) {
+    if (df <= 0) return 1.96;
+    if (df === 1) return 12.706;
+    if (df === 2) return 4.303;
+    if (df === 3) return 3.182;
+    if (df === 4) return 2.776;
+    if (df === 5) return 2.571;
+    if (df <= 10) return [0, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228][df];
+    if (df <= 30) return [0, 2.042, 2.021, 2.000, 1.980, 1.960, 1.943, 1.927, 1.912, 1.898, 1.885, 1.873, 1.862, 1.852, 1.842, 1.833, 1.825, 1.818, 1.811, 1.804, 1.798, 1.792, 1.786, 1.781, 1.776, 1.771, 1.766, 1.761, 1.757, 1.753, 1.749][df - 10];
+    if (df <= 60) return 1.671;
+    if (df <= 120) return 1.658;
+    return 1.96;
+}
+
 // ====== RUN ANALYSIS ======
 async function runOlahAnalysis() {
     if (rawData.length === 0) {
@@ -614,8 +676,7 @@ async function runOlahAnalysis() {
     try {
         const results = await Promise.allSettled([
             fetch('php/mann_kendall.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: aggregatedData }) }).then(r => r.json()),
-            fetch('php/sens_slope.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: aggregatedData }) }).then(r => r.json()),
-            fetch('php/regresi_linear.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: aggregatedData }) }).then(r => r.json())
+            fetch('php/sens_slope.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: aggregatedData }) }).then(r => r.json())
         ]);
 
         // Mann-Kendall
@@ -657,24 +718,23 @@ async function runOlahAnalysis() {
             cachedRegularSS = 'Gagal menghitung';
         }
 
-        // Linear Regression
-        const lrRes = results[2];
-        if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
-            const lr = lrRes.value;
+        // Linear Regression (client-side — no backend needed)
+        const lr = calcLinearRegressionJS(aggregatedData);
+        if (!lr.error) {
             const lrSig = lr.significant;
             const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let lrColor = '#6B7280';
             if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
             else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
 
-            const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
-            const tUji = lr.tStatistic !== undefined ? fM(Number(lr.tStatistic).toFixed(3)) : '—';
-            const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
+            const slopeLR = fM(Number(lr.slope).toFixed(3));
+            const tUji = fM(Number(lr.tStatistic).toFixed(3));
+            const tKrit = `±${fM(Number(lr.tCritical).toFixed(3))}`;
             const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
             document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
-            if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
+            if (olahChart) {
                 const trendPts = aggregatedData.map((d, index) => lr.intercept + (lr.slope * index));
                 olahChart.data.datasets = olahChart.data.datasets.filter(ds => ds.label !== 'Garis Regresi Linear');
                 olahChart.data.datasets.push({
