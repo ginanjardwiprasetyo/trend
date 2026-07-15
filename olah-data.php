@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 
+<!-- =O= Anchored Summary =O=
+  v1  Dasar: toolbar, accordion preview, olah data analysis.
+  v2  Toolbar order: btn "Olah Data" & spinner dipindah sebelum year-picker agar sejajar label "Pilih Data".
+  v3  Dropdown direction dinamis: saat preview accordion terbuka → menu/select custom ke atas; saat tertutup → ke bawah.
+      Mekanisme: CSS class `preview-open` pd #configSection dikontrol via togglePreviewAccordion() dan JS binding.
+      Hapus `grid-up` dari HTML year-grid, ganti dg CSS .config-section.preview-open .year-grid.
+  =O= Anchored Summary =O= -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -165,6 +173,14 @@
             height: 350px;
             display: flex;
             flex-direction: column;
+            border: 0;
+        }
+
+        .accordion-content.show {
+            border: 1px solid var(--color-border);
+            border-top: none;
+            border-bottom-left-radius: var(--radius-panel);
+            border-bottom-right-radius: var(--radius-panel);
         }
 
         .preview-table {
@@ -190,7 +206,7 @@
 
         .preview-table td {
             padding: 5px 12px;
-            border-bottom: 1px solid #F3F4F6;
+            border-bottom: 1px solid #E5E7EB;
             color: #1F2937;
             font-size: 0.82rem;
         }
@@ -320,6 +336,63 @@
             display: flex;
         }
 
+        /* Dropdowns ke bawah secara default */
+        /* Saat preview terbuka, dropdowns & year-grid ke atas */
+        .config-section.preview-open .olah-toolbar .custom-select-options {
+            top: auto;
+            bottom: calc(100% + 6px);
+            transform: translateY(8px);
+        }
+        .config-section.preview-open .olah-toolbar .custom-select-wrapper.open .custom-select-options {
+            transform: translateY(0);
+        }
+        .config-section.preview-open .olah-toolbar .year-grid {
+            top: auto;
+            bottom: calc(100% + 8px);
+        }
+
+        #olahSeasonalToggleWrap .toggle-slider {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: #D1D5DB;
+            border-radius: 100px;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        #olahSeasonalToggleWrap .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            top: 2px;
+            left: 2px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        }
+        #olahSeasonalToggleWrap:hover .toggle-slider {
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(124,58,237,0.12);
+        }
+        #olahSeasonalToggle:checked ~ .toggle-slider {
+            background: #7C3AED;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+        }
+        #olahSeasonalToggle:checked ~ .toggle-slider::after {
+            transform: translateX(18px);
+        }
+        #olahSeasonalToggleWrap:has(#olahSeasonalToggle:checked):hover .toggle-slider {
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 0 0 3px rgba(124,58,237,0.2);
+        }
+        .trend-result {
+            transition: opacity 0.2s ease;
+        }
+        .trend-result.fading {
+            opacity: 0;
+        }
+
         @media (max-width: 768px) {
             .result-grid {
                 grid-template-columns: 1fr;
@@ -433,12 +506,12 @@
                 <div class="year-picker-wrapper" style="width: auto; min-width: 220px;">
                     <div class="year-picker" id="pickerFrom">
                         <button type="button" class="year-display" id="displayFrom">1980</button>
-                        <div class="year-grid grid-up hidden" id="gridFrom"></div>
+                        <div class="year-grid hidden" id="gridFrom"></div>
                     </div>
                     <div class="year-sep">—</div>
                     <div class="year-picker" id="pickerTo">
                         <button type="button" class="year-display" id="displayTo">2025</button>
-                        <div class="year-grid grid-up hidden" id="gridTo"></div>
+                        <div class="year-grid hidden" id="gridTo"></div>
                     </div>
                     <input type="hidden" id="olahYFrom" value="1980">
                     <input type="hidden" id="olahYTo" value="2025">
@@ -449,6 +522,7 @@
                 </button>
                 <div id="olahSpinner" class="spinner"
                     style="display:none; width:22px; height:22px; border-width:2.5px;"></div>
+                    
                 <span id="inputPeriodBadge" class="period-badge period-harian" style="margin-left:auto;">Data
                     Harian</span>
             </div>
@@ -491,20 +565,27 @@
                         <span style="font-size:0.8rem; font-weight:600; color:var(--color-primary);">Menghitung
                             <i>Trend</i>...</span>
                     </div>
-                    <h3>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 6l-9.5 9.5-5-5L1 18" />
-                        </svg>
-                        Rekapitulasi <i>Trend</i> Data Runtut Waktu
+                    <h3 style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                                <path d="M23 6l-9.5 9.5-5-5L1 18" />
+                            </svg>
+                            Rekapitulasi <i>Trend</i> Data Runtut Waktu
+                        </span>
+                        <label id="olahSeasonalToggleWrap" style="display:none; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+                            <input type="checkbox" id="olahSeasonalToggle" checked style="display:none;">
+                            <span style="font-size:0.8rem; font-weight:600; color:#6B7280; letter-spacing:0.02em;">Musiman</span>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </h3>
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
-                            <div id="olahMkResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
+                            <strong id="olahMkLabel" style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
+                            <div id="olahMkResult" class="trend-result" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Sen's Slope</strong>
-                            <div id="olahSsResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
+                            <strong id="olahSsLabel" style="display:block; margin-bottom:8px; color:#2563EB;">Sen's Slope</strong>
+                            <div id="olahSsResult" class="trend-result" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
                             <strong style="display:block; margin-bottom:8px; color:#2563EB;">Regresi Linear</strong>
@@ -512,7 +593,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span
-                            style="color:#DC2626;">*</span> signifikan berdasarkan tingkat kepercayaan 95% (α = 0.05)
+                            style="color:#DC2626;">*</span> tingkat kepercayaan 95% (α = 0.05)
                     </div>
                 </div>
 

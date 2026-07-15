@@ -115,14 +115,9 @@ $significant = abs($tStat) > $tCritical;
 
 // ====== TENTUKAN TREND ======
 $trend = 'Tidak Ada Trend';
-if ($slope > 0) {
-    $trend = 'Meningkat';
-} elseif ($slope < 0) {
-    $trend = 'Menurun';
-}
-
-if ($trend !== 'Tidak Ada Trend') {
-    $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+if ($significant) {
+    if ($slope > 0) $trend = 'Meningkat';
+    elseif ($slope < 0) $trend = 'Menurun';
 }
 
 // ====== KOEFISIEN KORELASI (r) ======

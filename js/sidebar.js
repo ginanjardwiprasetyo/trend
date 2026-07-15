@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dataRadioBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             updateAggregationVisibility();
+            updateSeasonalMethodState();
             if (typeof fetchAnalytics === 'function') fetchAnalytics();
         });
     });
@@ -121,10 +122,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ====== UPDATE STATE METODE SEASONAL ======
+    function updateSeasonalMethodState() {
+        const dataType = document.querySelector('#dataTypeGroup .radio-btn.active')?.dataset.value;
+        const monthVal = document.getElementById('monthSelect')?.value || 'all';
+        const isApplicable = dataType === 'bulanan' && monthVal === 'all';
+
+        document.querySelectorAll('.method-item[data-method="seasonal-mann-kendall"], .method-item[data-method="seasonal-sens-slope"]').forEach(el => {
+            if (isApplicable) {
+                el.classList.remove('disabled');
+                el.title = '';
+            } else {
+                el.classList.add('disabled');
+                el.title = 'Hanya tersedia untuk Bulanan + Semua Bulan';
+                // Nonaktifkan jika sedang aktif
+                if (el.classList.contains('active')) {
+                    el.querySelector('.toggle-switch').classList.remove('on');
+                    el.classList.remove('active');
+                    if (typeof currentMethod !== 'undefined') currentMethod = null;
+                    if (typeof resetMarkerIcons === 'function') resetMarkerIcons();
+                    updateLegendVisibility();
+                }
+            }
+        });
+    }
+
     // ====== HANDLE KLIK BULAN ======
     const monthSelect = document.getElementById('monthSelect');
     if (monthSelect) {
         monthSelect.addEventListener('change', () => {
+            updateSeasonalMethodState();
             if (typeof fetchAnalytics === 'function') fetchAnalytics();
         });
     }
@@ -132,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ====== HANDLE KLIK METODE (Radio Behavior + Toggle) ======
     methodItems.forEach(item => {
         item.addEventListener('click', () => {
+            if (item.classList.contains('disabled')) return;
+
             const method = item.dataset.method;
             const toggleSwitch = item.querySelector('.toggle-switch');
             const isActive = toggleSwitch.classList.contains('on');
@@ -310,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inisialisasi awal saat load
     updateAggregationVisibility();
+    updateSeasonalMethodState();
     updateLegendVisibility();
 });
 

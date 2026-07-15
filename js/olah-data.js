@@ -8,6 +8,10 @@ let rawData = [];       // All parsed daily records: [{date: Date, value: Number
 let aggregatedData = []; // Aggregated for analysis: [{year: Number, value: Number}]
 let olahChart = null;
 let inputPeriod = 'harian'; // 'harian' | 'bulanan' | 'tahunan' — auto-detected after upload
+let cachedRegularMK = null;
+let cachedRegularSS = null;
+let cachedSeasonalMK = null;
+let cachedSeasonalSS = null;
 
 const fM = (val) => val === undefined || val === null || val === '—' ? '—' : String(val).replace('-', '−');
 
@@ -17,6 +21,7 @@ function togglePreviewAccordion() {
     const content = document.getElementById('previewAccordionContent');
     header.classList.toggle('active');
     content.classList.toggle('show');
+    document.getElementById('configSection').classList.toggle('preview-open');
 }
 
 function resetUpload() {
@@ -27,11 +32,12 @@ function resetUpload() {
     document.getElementById('configSection').classList.remove('show');
     document.getElementById('resultsSection').classList.remove('show');
     document.getElementById('uploadZone').style.display = '';
-    
+
     // Reset accordion
     document.getElementById('previewAccordionHeader').classList.remove('active');
     document.getElementById('previewAccordionContent').classList.remove('show');
-    
+    document.getElementById('configSection').classList.remove('preview-open');
+
     // Reset headers
     document.getElementById('previewDateHeader').textContent = 'Tanggal';
     document.getElementById('previewDataHeader').textContent = 'Data';
@@ -245,7 +251,7 @@ function parseFlexDate(str) {
     // Monthly: Mon YYYY or Month YYYY
     const txtMatch = str.match(/^([a-zA-Z]{3,})\s+(\d{4})$/);
     if (txtMatch) {
-        const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         const idx = months.indexOf(txtMatch[1].toLowerCase().substring(0, 3));
         if (idx >= 0) {
             return new Date(parseInt(txtMatch[2]), idx, 1);
@@ -336,6 +342,7 @@ function onDataParsed() {
     // Auto-open accordion
     document.getElementById('previewAccordionHeader').classList.add('active');
     document.getElementById('previewAccordionContent').classList.add('show');
+    document.getElementById('configSection').classList.add('preview-open');
 
     // Preview table
     const previewBody = document.getElementById('previewBody');
@@ -369,7 +376,7 @@ function onDataParsed() {
     const years = [...new Set(rawData.map(d => d.date.getFullYear()))].sort((a, b) => a - b);
     const ys = years[0];
     const ye = years[years.length - 1];
-    
+
     window.stationMinYear = ys;
     window.stationMaxYear = ye;
 
@@ -555,12 +562,8 @@ async function runOlahAnalysis() {
     if (accordionContent.classList.contains('show')) {
         accordionContent.classList.remove('show');
         accordionHeader.classList.remove('active');
+        document.getElementById('configSection').classList.remove('preview-open');
     }
-
-    // Set year picker to open downwards after analysis
-    document.querySelectorAll('.year-grid').forEach(g => {
-        g.classList.remove('grid-up');
-    });
 
     const dtType = document.getElementById('olahDtType').value;
     let mo = document.getElementById('olahMonth').value;
@@ -619,52 +622,56 @@ async function runOlahAnalysis() {
         const mkRes = results[0];
         if (mkRes.status === 'fulfilled' && !mkRes.value.error) {
             const mk = mkRes.value;
-            const mkSig = mk.trend.includes('(Signifikan)');
+            const mkSig = mk.significant;
             const tTrendMK = mkSig ? (mk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let mkColor = '#6B7280';
             if (tTrendMK === 'Meningkat') mkColor = '#16A34A';
             else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
-            
+
             const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
             const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
+            cachedRegularMK = document.getElementById('olahMkResult').innerHTML;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
+            cachedRegularMK = 'Gagal menghitung';
         }
 
         // Sen's Slope
         const ssRes = results[1];
         if (ssRes.status === 'fulfilled' && !ssRes.value.error) {
             const ss = ssRes.value;
-            const ssSig = ss.trend.includes('(Signifikan)');
+            const ssSig = ss.significant;
             const tTrendSS = ssSig ? (ss.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let ssColor = '#6B7280';
             if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
             else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
-            
+
             const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
             const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
             const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
-            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+            cachedRegularSS = document.getElementById('olahSsResult').innerHTML;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
+            cachedRegularSS = 'Gagal menghitung';
         }
 
         // Linear Regression
         const lrRes = results[2];
         if (lrRes.status === 'fulfilled' && !lrRes.value.error) {
             const lr = lrRes.value;
-            const lrSig = lr.trend.includes('(Signifikan)');
+            const lrSig = lr.significant;
             const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
             let lrColor = '#6B7280';
             if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
             else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
-            
+
             const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
             const tUji = lr.tStatistic !== undefined ? fM(Number(lr.tStatistic).toFixed(3)) : '—';
             const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
             const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -681,6 +688,43 @@ async function runOlahAnalysis() {
             document.getElementById('olahLrResult').innerHTML = 'Gagal menghitung';
         }
 
+        // Seasonal Mann-Kendall & Sen's Slope (cache for toggle swap)
+        const dtType = document.getElementById('olahDtType').value;
+        const mo = document.getElementById('olahMonth').value;
+        if (dtType === 'bulanan' && mo === 'all') {
+            const seasonalMk = calcSeasonalMannKendallJS(aggregatedData);
+            const seasonalSs = calcSeasonalSenSlopeJS(aggregatedData);
+            if (seasonalMk && seasonalSs) {
+                const smkSig = seasonalMk.significant;
+                const smkDir = smkSig ? (seasonalMk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
+                let smkColor = '#6B7280';
+                if (smkDir === 'Meningkat') smkColor = '#16A34A';
+                else if (smkDir === 'Menurun') smkColor = '#DC2626';
+                const zUjiSeasonal = fM(Number(seasonalMk.Z).toFixed(3)) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                cachedSeasonalMK =
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${zUjiSeasonal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalMk.seasonCount} bulan</td></tr></table>`;
+
+                const sssDir = seasonalSs.slope > 0 ? 'Meningkat' : (seasonalSs.slope < 0 ? 'Menurun' : 'Tidak ada');
+                let sssColor = '#6B7280';
+                if (sssDir === 'Meningkat') sssColor = '#16A34A';
+                else if (sssDir === 'Menurun') sssColor = '#DC2626';
+                cachedSeasonalSS =
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(Number(seasonalSs.slope).toFixed(3))}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Jumlah Slope</td><td style="padding:3px 0;text-align:right;">${seasonalSs.slopeCount}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalSs.seasonCount} bulan</td></tr></table>`;
+
+                const seasonalToggle = document.getElementById('olahSeasonalToggle');
+                if (seasonalToggle && seasonalToggle.checked) {
+                    document.getElementById('olahMkResult').innerHTML = cachedSeasonalMK;
+                    document.getElementById('olahSsResult').innerHTML = cachedSeasonalSS;
+                }
+            } else {
+                cachedSeasonalMK = null;
+                cachedSeasonalSS = null;
+            }
+        } else {
+            cachedSeasonalMK = null;
+            cachedSeasonalSS = null;
+        }
+        updateSeasonalToggleVisibility();
     } catch (e) {
         console.error('Trend calculation error:', e);
         document.getElementById('olahMkResult').innerHTML = 'Error sistem';
@@ -691,6 +735,151 @@ async function runOlahAnalysis() {
         document.getElementById('olahSpinner').style.display = 'none';
         document.getElementById('btnOlahRun').disabled = false;
     }
+}
+
+// ====== Seasonal Toggle Functions ======
+function updateSeasonalToggleVisibility() {
+    const dtType = document.getElementById('olahDtType').value;
+    const mo = document.getElementById('olahMonth').value;
+    const wrap = document.getElementById('olahSeasonalToggleWrap');
+    if (wrap) {
+        wrap.style.display = (dtType === 'bulanan' && mo === 'all') ? 'inline-flex' : 'none';
+    }
+    updateSeasonalLabels();
+}
+
+function updateSeasonalLabels() {
+    const toggle = document.getElementById('olahSeasonalToggle');
+    const wrap = document.getElementById('olahSeasonalToggleWrap');
+    const mkLabel = document.getElementById('olahMkLabel');
+    const ssLabel = document.getElementById('olahSsLabel');
+    const isSeasonal = wrap && wrap.style.display !== 'none' && toggle && toggle.checked;
+    if (mkLabel) {
+        mkLabel.textContent = isSeasonal ? 'Seasonal Mann-Kendall' : 'Mann Kendall';
+        mkLabel.style.color = isSeasonal ? '#7C3AED' : '#2563EB';
+    }
+    if (ssLabel) {
+        ssLabel.textContent = isSeasonal ? "Seasonal Sen's Slope" : "Sen's Slope";
+        ssLabel.style.color = isSeasonal ? '#7C3AED' : '#2563EB';
+    }
+}
+
+function swapTrendCards() {
+    const toggle = document.getElementById('olahSeasonalToggle');
+    const mkEl = document.getElementById('olahMkResult');
+    const ssEl = document.getElementById('olahSsResult');
+    if (!toggle || !mkEl || !ssEl) return;
+    const useSeasonal = toggle.checked;
+    const mkHtml = useSeasonal ? cachedSeasonalMK : cachedRegularMK;
+    const ssHtml = useSeasonal ? cachedSeasonalSS : cachedRegularSS;
+    if (!mkHtml || !ssHtml) return;
+    mkEl.classList.add('fading');
+    ssEl.classList.add('fading');
+    setTimeout(() => {
+        mkEl.innerHTML = mkHtml;
+        ssEl.innerHTML = ssHtml;
+        requestAnimationFrame(() => {
+            mkEl.classList.remove('fading');
+            ssEl.classList.remove('fading');
+        });
+    }, 200);
+}
+
+// ====== Fungsi Bantu Statistik (Client-side) ======
+function normalCDF(x) {
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+    const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const sign = x < 0 ? -1 : 1;
+    x = Math.abs(x) / Math.sqrt(2);
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return 0.5 * (1.0 + sign * y);
+}
+
+function getCriticalZ(alpha) {
+    if (alpha === 0.05) return 1.96;
+    if (alpha === 0.01) return 2.576;
+    if (alpha === 0.10) return 1.645;
+    return 1.96;
+}
+
+function calcMannKendallBaseJS(values) {
+    const n = values.length;
+    if (n < 3) return { S: 0, varS: 0, Z: 0, pValue: 1 };
+    let S = 0;
+    for (let k = 0; k < n - 1; k++)
+        for (let j = k + 1; j < n; j++) {
+            const d = values[j] - values[k];
+            if (d > 0) S += 1; else if (d < 0) S -= 1;
+        }
+    const cnt = {};
+    values.forEach(v => { const k = String(v); cnt[k] = (cnt[k]||0) + 1; });
+    let tSum = 0;
+    Object.values(cnt).forEach(c => { if (c > 1) tSum += c * (c-1) * (2*c+5); });
+    const varS = (n * (n-1) * (2*n+5) - tSum) / 18;
+    let Z = 0;
+    if (S > 0) Z = (S - 1) / Math.sqrt(varS);
+    else if (S < 0) Z = (S + 1) / Math.sqrt(varS);
+    return { S, varS, Z, pValue: 2 * (1 - normalCDF(Math.abs(Z))) };
+}
+
+// ====== Seasonal Mann-Kendall & Sen's Slope (Client-side) ======
+function calcSeasonalMannKendallJS(dataArray) {
+    const byMonth = {};
+    dataArray.forEach(d => {
+        const yr = Math.floor(d.year);
+        const mo = Math.round((d.year - yr) * 12);
+        if (!byMonth[mo]) byMonth[mo] = [];
+        byMonth[mo].push(d.value);
+    });
+    let totalS = 0, totalVarS = 0, seasonCount = 0;
+    for (const mo in byMonth) {
+        const vals = byMonth[mo];
+        if (vals.length < 3) continue;
+        const mk = calcMannKendallBaseJS(vals);
+        totalS += mk.S;
+        totalVarS += mk.varS;
+        seasonCount++;
+    }
+    if (seasonCount < 2) return null;
+    let Z = 0;
+    if (totalS > 0) Z = (totalS - 1) / Math.sqrt(totalVarS);
+    else if (totalS < 0) Z = (totalS + 1) / Math.sqrt(totalVarS);
+    const pVal = 2 * (1 - normalCDF(Math.abs(Z)));
+    const sig = Math.abs(Z) > getCriticalZ(0.05);
+    let trend = 'Tidak Ada Trend';
+    if (sig) trend = Z > 0 ? 'Meningkat' : 'Menurun';
+    return { S: totalS, varS: totalVarS, Z, pValue: pVal, seasonCount, significant: sig, trend };
+}
+
+function calcSeasonalSenSlopeJS(dataArray) {
+    const byMonth = {};
+    dataArray.forEach(d => {
+        const yr = Math.floor(d.year);
+        const mo = Math.round((d.year - yr) * 12);
+        if (!byMonth[mo]) byMonth[mo] = [];
+        byMonth[mo].push({ year: yr, value: d.value });
+    });
+    const allSlopes = [];
+    let seasonCount = 0;
+    for (const mo in byMonth) {
+        const pts = byMonth[mo].sort((a,b) => a.year - b.year);
+        if (pts.length < 3) continue;
+        seasonCount++;
+        for (let i = 0; i < pts.length - 1; i++)
+            for (let j = i + 1; j < pts.length; j++) {
+                const dx = pts[j].year - pts[i].year;
+                if (dx !== 0) allSlopes.push((pts[j].value - pts[i].value) / dx);
+            }
+    }
+    if (seasonCount < 2 || allSlopes.length === 0) return null;
+    allSlopes.sort((a,b) => a - b);
+    const sc = allSlopes.length;
+    const senSlope = sc % 2 === 0 ? (allSlopes[sc/2-1] + allSlopes[sc/2]) / 2 : allSlopes[Math.floor(sc/2)];
+    let trend = 'Tidak Ada Trend';
+    if (senSlope > 0) trend = 'Meningkat';
+    else if (senSlope < 0) trend = 'Menurun';
+    return { slope: senSlope, slopeCount: sc, seasonCount, trend };
 }
 
 // ====== RENDER CHART ======
@@ -835,43 +1024,43 @@ function renderOlahAvailability(data, dtType, yFrom, yTo, mo) {
     }
 
     if (expectedCount <= 0) expectedCount = 1;
-        const pct = Math.min(100, (actualCount / expectedCount) * 100);
-        const pctDisplay = pct.toFixed(2);
-        const barFill = document.getElementById('olahAvailBar');
-        barFill.style.width = `${pct}%`;
-        let color = '#EF4444';
-        if (pct >= 80) color = '#16A34A';
-        else if (pct >= 50) color = '#F59E0B';
-        barFill.style.background = color;
-        const valEl = document.getElementById('olahAvailPct');
-        valEl.textContent = pctDisplay + '%';
-        valEl.style.color = color;
-        const labelEl = document.getElementById('olahAvailLabel');
-        labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
+    const pct = Math.min(100, (actualCount / expectedCount) * 100);
+    const pctDisplay = pct.toFixed(2);
+    const barFill = document.getElementById('olahAvailBar');
+    barFill.style.width = `${pct}%`;
+    let color = '#EF4444';
+    if (pct >= 80) color = '#16A34A';
+    else if (pct >= 50) color = '#F59E0B';
+    barFill.style.background = color;
+    const valEl = document.getElementById('olahAvailPct');
+    valEl.textContent = pctDisplay + '%';
+    valEl.style.color = color;
+    const labelEl = document.getElementById('olahAvailLabel');
+    labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
 }
 
 // ====== CUSTOM SELECT UI ======
 document.addEventListener('DOMContentLoaded', () => {
     function setupCustomSelects() {
         document.querySelectorAll('select.form-select').forEach(selectEl => {
-            if(selectEl.dataset.customized) return;
+            if (selectEl.dataset.customized) return;
             selectEl.dataset.customized = "true";
             selectEl.style.display = 'none'; // Hide native select
-            
+
             const wrapper = document.createElement('div');
             wrapper.className = 'custom-select-wrapper';
             // Copy margin/width styles
             wrapper.style.minWidth = selectEl.style.minWidth;
-            
+
             const trigger = document.createElement('div');
             trigger.className = 'custom-select-trigger';
             const triggerText = document.createElement('span');
             trigger.appendChild(triggerText);
             trigger.innerHTML += `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-            
+
             const optionsContainer = document.createElement('div');
             optionsContainer.className = 'custom-select-options';
-            
+
             wrapper.appendChild(trigger);
             wrapper.appendChild(optionsContainer);
             selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
@@ -893,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     optEl.className = 'custom-select-option' + (opt.selected ? ' selected' : '') + (opt.disabled ? ' disabled' : '');
                     optEl.textContent = opt.textContent;
                     optEl.dataset.value = opt.value;
-                    
+
                     if (!opt.disabled) {
                         optEl.addEventListener('click', (e) => {
                             e.stopPropagation();
@@ -906,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     optionsContainer.appendChild(optEl);
                 });
             }
-            
+
             renderOptions();
 
             // Toggle dropdown
@@ -918,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 wrapper.classList.toggle('open');
             });
-            
+
             // Watch for changes via JS
             selectEl.addEventListener('change', renderOptions);
             selectEl.addEventListener('optionsChanged', () => {
@@ -930,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 renderOptions();
             });
-            
+
             // Initial visibility check
             if (selectEl.id === 'olahAgg') {
                 syncAggVisibility();
@@ -939,13 +1128,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 wrapper.style.display = (dtVal === 'tahunan' || inputPeriod === 'tahunan') ? 'none' : 'inline-block';
             }
         });
-        
+
         // Close dropdowns on outside click
         document.addEventListener('click', () => {
             document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
         });
     }
-    
+
     // Call custom setup
     setupCustomSelects();
+
+    // Seasonal toggle change → swap with animation, no reload
+    const toggle = document.getElementById('olahSeasonalToggle');
+    if (toggle) {
+        toggle.addEventListener('change', () => {
+            swapTrendCards();
+            updateSeasonalLabels();
+        });
+    }
 });

@@ -417,6 +417,11 @@ async function runAnalysis(method) {
             ? station.properties.trendDataCache[dataType]
             : (station.properties.trendData || {});
 
+        // Sync trendData agar lightbox membaca data yang sama
+        if (station.properties.trendDataCache && station.properties.trendDataCache[dataType]) {
+            station.properties.trendData = station.properties.trendDataCache[dataType];
+        }
+
         const methodData = trendData[method];
         if (methodData) {
             results.push({

@@ -79,6 +79,12 @@ function openLightbox(stationData) {
             } else if (currentMethod === 'regresi-linear') {
                 trendLabel.textContent = "Regresi Linear";
                 trendValue.textContent = `Slope: ${fM(Number(trend.slope).toFixed(3))}`; // rSquared tidak disuplai bulk
+            } else if (currentMethod === 'seasonal-mann-kendall') {
+                trendLabel.textContent = "Seasonal MK";
+                trendValue.textContent = `Z: ${fM(Number(trend.Z).toFixed(3))}`;
+            } else if (currentMethod === 'seasonal-sens-slope') {
+                trendLabel.textContent = "Seasonal Sen's";
+                trendValue.textContent = `Slope: ${fM(Number(trend.slope).toFixed(3))}`;
             }
         } else {
             trendLabel.parentElement.style.display = "none";

@@ -101,10 +101,14 @@ try {
             $x = $row['yr'] + ($row['dy'] - 1) / 365.0;
         }
         
-        $stationsData[$pos_id][] = [
+        $entry = [
             'year' => (float)$x,
             'value' => (float)$row['y'] // Menggunakan nilai riil desimal untuk keakuratan statistik
         ];
+        if ($dataType === 'bulanan' && isset($row['mo'])) {
+            $entry['month'] = (int)$row['mo'];
+        }
+        $stationsData[$pos_id][] = $entry;
     }
 } catch (Exception $e) {
     echo json_encode(['error' => true, 'message' => 'Terjadi kesalahan sistem saat mengolah data: ' . $e->getMessage()]);
@@ -146,15 +150,11 @@ function calcMannKendall($data) {
     $significant = false;
     $zCrit = getCriticalZ(0.05);
     if ($Z > $zCrit) {
-        $trend = 'Meningkat (Signifikan)';
+        $trend = 'Meningkat';
         $significant = true;
     } elseif ($Z < -$zCrit) {
-        $trend = 'Menurun (Signifikan)';
+        $trend = 'Menurun';
         $significant = true;
-    } elseif ($Z > 0) {
-        $trend = 'Meningkat (Tidak Signifikan)';
-    } elseif ($Z < 0) {
-        $trend = 'Menurun (Tidak Signifikan)';
     }
     
     return [
@@ -212,14 +212,9 @@ function calcSensSlope($data) {
     $significant = ($Qmin > 0) || ($Qmax < 0);
     
     $trend = 'Tidak Ada Trend';
-    if ($medianSlope > 0) {
-        $trend = 'Meningkat';
-    } elseif ($medianSlope < 0) {
-        $trend = 'Menurun';
-    }
-    
-    if ($trend !== 'Tidak Ada Trend') {
-        $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+    if ($significant) {
+        if ($medianSlope > 0) $trend = 'Meningkat';
+        elseif ($medianSlope < 0) $trend = 'Menurun';
     }
     
     return [
@@ -282,14 +277,9 @@ function calcLinearRegression($data) {
     }
     
     $trend = 'Tidak Ada Trend';
-    if ($slope > 0) {
-        $trend = 'Meningkat';
-    } elseif ($slope < 0) {
-        $trend = 'Menurun';
-    }
-    
-    if ($trend !== 'Tidak Ada Trend') {
-        $trend .= $significant ? ' (Signifikan)' : ' (Tidak Signifikan)';
+    if ($significant) {
+        if ($slope > 0) $trend = 'Meningkat';
+        elseif ($slope < 0) $trend = 'Menurun';
     }
     
     return [
@@ -335,12 +325,56 @@ foreach ($stationsData as $pos_id => $data) {
             'regresi-linear' => calcLinearRegression($data)
         ];
     } else {
-        $results[$pos_id] = [
+        $stationResult = [
             'completeness_period' => round($completeness, 3),
             'mann-kendall' => calcMannKendall($data),
             'sens-slope' => calcSensSlope($data),
             'regresi-linear' => calcLinearRegression($data)
         ];
+
+        // Seasonal Mann-Kendall & Sen's Slope (hanya untuk bulanan dengan semua bulan)
+        if ($dataType === 'bulanan' && $monthFilter === 'all') {
+            $byMonthVal = [];
+            $byMonthPts = [];
+            foreach ($data as $point) {
+                if (!isset($point['month'])) continue;
+                $m = $point['month'];
+                $yr = (int)floor($point['year']);
+                $byMonthVal[$m][$yr] = $point['value'];
+                $byMonthPts[$m][] = ['year' => (float)$yr, 'value' => $point['value']];
+            }
+            if (count($byMonthVal) >= 2) {
+                $smk = calcSeasonalMannKendall($byMonthVal);
+                $sss = calcSeasonalSensSlope($byMonthPts);
+
+                $zCrit = getCriticalZ(0.05);
+                $smkSig = abs($smk['Z']) > $zCrit;
+                $smkTrend = 'Tidak Ada Trend';
+                if ($smk['Z'] > $zCrit) $smkTrend = 'Meningkat';
+                elseif ($smk['Z'] < -$zCrit) $smkTrend = 'Menurun';
+
+                $stationResult['seasonal-mann-kendall'] = [
+                    'trend' => $smkTrend,
+                    'significant' => $smkSig,
+                    'S' => round($smk['S'], 3),
+                    'Z' => round($smk['Z'], 3),
+                    'pValue' => round($smk['pValue'], 3),
+                    'seasonCount' => $smk['seasonCount']
+                ];
+
+                $sssTrend = 'Tidak Ada Trend';
+                if ($sss['slope'] > 0) $sssTrend = 'Meningkat';
+                elseif ($sss['slope'] < 0) $sssTrend = 'Menurun';
+                $stationResult['seasonal-sens-slope'] = [
+                    'trend' => $sssTrend,
+                    'slope' => round($sss['slope'], 3),
+                    'slopeCount' => $sss['slopeCount'],
+                    'seasonCount' => $sss['seasonCount']
+                ];
+            }
+        }
+
+        $results[$pos_id] = $stationResult;
     }
 }
 

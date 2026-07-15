@@ -1,0 +1,1 @@
+/Users/mac/agent-skills/AGENTS.md

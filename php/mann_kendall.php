@@ -73,15 +73,11 @@ $zCritical = getCriticalZ($alpha);
 $trend = 'Tidak Ada Trend';
 $significant = false;
 if ($Z > $zCritical) {
-    $trend = 'Meningkat (Signifikan)';
+    $trend = 'Meningkat';
     $significant = true;
 } elseif ($Z < -$zCritical) {
-    $trend = 'Menurun (Signifikan)';
+    $trend = 'Menurun';
     $significant = true;
-} elseif ($Z > 0) {
-    $trend = 'Meningkat (Tidak Signifikan)';
-} elseif ($Z < 0) {
-    $trend = 'Menurun (Tidak Signifikan)';
 }
 
 // ====== OUTPUT ======

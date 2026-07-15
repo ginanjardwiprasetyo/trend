@@ -73,7 +73,8 @@
             <!-- Pilih Wilayah Sungai -->
             <div class="control-group">
                 <label class="control-label" for="dasSelect">Wilayah Sungai</label>
-                <select class="form-select" id="dasSelect" disabled>
+                <select class="form-select" id="dasSelect" disabled
+                    style="cursor:default; background:#F3F4F6; color:#6B7280; appearance:none; -webkit-appearance:none;">
                     <option value="bbwsbs">WS Bengawan Solo</option>
                 </select>
             </div>
@@ -88,11 +89,10 @@
                 </div>
             </div>
 
-            <!-- Agregasi (Sembunyi) -->
-            <div class="control-group hidden" id="aggregationWrapper">
+            <!-- Agregasi -->
+            <div class="control-group" id="aggregationWrapper">
                 <label class="control-label">Agregasi</label>
                 <div class="aggregation-group" id="aggregationGroup">
-                    <button class="agg-btn" data-value="min">Min</button>
                     <button class="agg-btn" data-value="maks">Maks</button>
                     <button class="agg-btn" data-value="rerata">Rerata</button>
                     <button class="agg-btn active" data-value="kumulatif">Kumulatif</button>
@@ -180,6 +180,14 @@
                     <div class="method-item" data-method="regresi-linear" id="methodRL">
                         <span class="method-name">Regresi Linear</span>
                         <div class="toggle-switch" id="toggleRL"></div>
+                    </div>
+                    <div class="method-item" data-method="seasonal-mann-kendall" id="methodSMK">
+                        <span class="method-name" style="color:#7C3AED;">Seasonal MK</span>
+                        <div class="toggle-switch" id="toggleSMK"></div>
+                    </div>
+                    <div class="method-item" data-method="seasonal-sens-slope" id="methodSSS">
+                        <span class="method-name" style="color:#7C3AED;">Seasonal Sen's</span>
+                        <div class="toggle-switch" id="toggleSSS"></div>
                     </div>
                 </div>
             </div>

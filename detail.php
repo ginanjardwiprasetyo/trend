@@ -177,6 +177,47 @@ if (empty($stationId)) {
         .avail-year-grid.show {
             display: flex;
         }
+        #seasonalToggleWrap .toggle-slider {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: #D1D5DB;
+            border-radius: 100px;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        #seasonalToggleWrap .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            top: 2px;
+            left: 2px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        }
+        #seasonalToggleWrap:hover .toggle-slider {
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(124,58,237,0.12);
+        }
+        #seasonalToggle:checked ~ .toggle-slider {
+            background: #7C3AED;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+        }
+        #seasonalToggle:checked ~ .toggle-slider::after {
+            transform: translateX(18px);
+        }
+        #seasonalToggleWrap:has(#seasonalToggle:checked):hover .toggle-slider {
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 0 0 3px rgba(124,58,237,0.2);
+        }
+        .trend-result {
+            transition: opacity 0.2s ease;
+        }
+        .trend-result.fading {
+            opacity: 0;
+        }
     </style>
 </head>
 
@@ -283,27 +324,36 @@ if (empty($stationId)) {
                         <div class="spinner"></div>
                         <span class="loader-label">Menghitung <i>Trend</i>...</span>
                     </div>
-                    <h3>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 6l-9.5 9.5-5-5L1 18" />
-                        </svg>
-                        Rekapitulasi <i>Trend</i> Data Curah Hujan
+                    <h3 style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                                <path d="M23 6l-9.5 9.5-5-5L1 18" />
+                            </svg>
+                            Rekapitulasi <i>Trend</i> Data Curah Hujan
+                        </span>
+                        <label id="seasonalToggleWrap" style="display:none; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+                            <input type="checkbox" id="seasonalToggle" checked style="display:none;">
+                            <span style="font-size:0.8rem; font-weight:600; color:#6B7280; letter-spacing:0.02em;">Musiman</span>
+                            <span class="toggle-slider"></span>
+                        </label>
                     </h3>
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
-                            <div id="mkResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
+                            <strong id="mkLabel" style="display:block; margin-bottom:8px; color:#2563EB;">Mann Kendall</strong>
+                            <div id="mkResult" class="trend-result" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
-                            <strong style="display:block; margin-bottom:8px; color:#2563EB;">Sen's Slope</strong>
-                            <div id="ssResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
+                            <strong id="ssLabel" style="display:block; margin-bottom:8px; color:#2563EB;">Sen's Slope</strong>
+                            <div id="ssResult" class="trend-result" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                         <div style="padding:14px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:8px;">
                             <strong style="display:block; margin-bottom:8px; color:#2563EB;">Regresi Linear</strong>
                             <div id="lrResult" style="font-size:0.9rem; color:#4B5563;">Menunggu data...</div>
                         </div>
                     </div>
-                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span style="color:#DC2626;">*</span> signifikan berdasarkan tingkat kepercayaan 95% (α = 0.05)</div>
+                    <div style="font-size: 0.8rem; color: #6B7280; margin-top: 12px;"><span style="color:#DC2626;">*</span> tingkat kepercayaan 95% (α = 0.05)</div>
+
+
                 </div>
 
                 <!-- Ketersediaan Data Periode (kanan, 1/3) -->
@@ -519,6 +569,11 @@ if (empty($stationId)) {
         let stationMeta = null;
         let chartInstance = null;
         let pieChartInstance = null;
+        let currentDataArray = null;
+        let cachedRegularMK = null;
+        let cachedRegularSS = null;
+        let cachedSeasonalMK = null;
+        let cachedSeasonalSS = null;
         let currentAvailYear = new Date().getFullYear();
         let minAvailYear = 1980;
         let maxAvailYear = currentAvailYear;
@@ -629,10 +684,66 @@ if (empty($stationId)) {
                 updateGraphData();
                 loadAvailabilityYear();
 
+                // Seasonal toggle change → swap with animation, no reload
+                document.getElementById('seasonalToggle').addEventListener('change', () => {
+                    swapTrendCards();
+                    updateSeasonalLabels();
+                });
+
+                // Initial visibility
+                updateSeasonalToggleVisibility();
+
             } catch (err) {
                 console.error(err);
             }
         });
+
+        function updateSeasonalToggleVisibility() {
+            const dtType = document.getElementById('dtType').value;
+            const mo = document.getElementById('dtMonth').value;
+            const wrap = document.getElementById('seasonalToggleWrap');
+            if (wrap) {
+                wrap.style.display = (dtType === 'bulanan' && mo === 'all') ? 'inline-flex' : 'none';
+            }
+            updateSeasonalLabels();
+        }
+
+        function updateSeasonalLabels() {
+            const toggle = document.getElementById('seasonalToggle');
+            const wrap = document.getElementById('seasonalToggleWrap');
+            const mkLabel = document.getElementById('mkLabel');
+            const ssLabel = document.getElementById('ssLabel');
+            const isSeasonal = wrap && wrap.style.display !== 'none' && toggle && toggle.checked;
+            if (mkLabel) {
+                mkLabel.textContent = isSeasonal ? 'Seasonal Mann-Kendall' : 'Mann Kendall';
+                mkLabel.style.color = isSeasonal ? '#7C3AED' : '#2563EB';
+            }
+            if (ssLabel) {
+                ssLabel.textContent = isSeasonal ? "Seasonal Sen's Slope" : "Sen's Slope";
+                ssLabel.style.color = isSeasonal ? '#7C3AED' : '#2563EB';
+            }
+        }
+
+        function swapTrendCards() {
+            const toggle = document.getElementById('seasonalToggle');
+            const mkEl = document.getElementById('mkResult');
+            const ssEl = document.getElementById('ssResult');
+            if (!toggle || !mkEl || !ssEl) return;
+            const useSeasonal = toggle.checked;
+            const mkHtml = useSeasonal ? cachedSeasonalMK : cachedRegularMK;
+            const ssHtml = useSeasonal ? cachedSeasonalSS : cachedRegularSS;
+            if (!mkHtml || !ssHtml) return;
+            mkEl.classList.add('fading');
+            ssEl.classList.add('fading');
+            setTimeout(() => {
+                mkEl.innerHTML = mkHtml;
+                ssEl.innerHTML = ssHtml;
+                requestAnimationFrame(() => {
+                    mkEl.classList.remove('fading');
+                    ssEl.classList.remove('fading');
+                });
+            }, 200);
+        }
 
         function toggleMonthAgg() {
             const dtType = document.getElementById('dtType').value;
@@ -724,11 +835,12 @@ if (empty($stationId)) {
                     throw new Error(tsData.message || "Gagal memuat data dari server");
                 }
 
-
+                currentDataArray = tsData;
 
                 renderGraphAndStats(tsData, dtType, agg);
                 computeTrendsBackground(tsData);
                 updateAvailabilityPeriod(tsData, dtType, yFrom, yTo, mo);
+                updateSeasonalToggleVisibility();
 
             } catch (e) {
                 console.error("Gagal memperbarui data:", e);
@@ -999,8 +1111,7 @@ if (empty($stationId)) {
             const Qmin = slopes[iL]||0, Qmax = slopes[iU]||0;
             const sig = (Qmin > 0) || (Qmax < 0);
             let trend = 'Tidak Ada Trend';
-            if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun';
-            if (trend !== 'Tidak Ada Trend') trend += sig ? ' (Signifikan)' : ' (Tidak Signifikan)';
+            if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
             return { slope: senSlope, intercept: inter, S: mk.S, Z: mk.Z, pValue: mk.pValue, Qmin, Qmax, significant: sig, trend, n, slopeCount: sc };
         }
 
@@ -1022,10 +1133,67 @@ if (empty($stationId)) {
             const tCrit = getCriticalT(df, 0.05);
             const sig = Math.abs(tStat) > tCrit;
             let trend = 'Tidak Ada Trend';
-            if (slope > 0) trend = 'Meningkat'; else if (slope < 0) trend = 'Menurun';
-            if (trend !== 'Tidak Ada Trend') trend += sig ? ' (Signifikan)' : ' (Tidak Signifikan)';
+            if (sig) { if (slope > 0) trend = 'Meningkat'; else if (slope < 0) trend = 'Menurun'; }
             const r = rSq >= 0 ? Math.sqrt(rSq) : 0;
             return { slope, intercept, rSquared: rSq, r: slope<0?-r:r, tStatistic: tStat, tCritical: tCrit, pValue: pVal, significant: sig, trend, n, meanX: mX, meanY: mY };
+        }
+
+        function calcSeasonalMannKendallJS(dataArray) {
+            const byMonth = {};
+            dataArray.forEach(d => {
+                const yr = Math.floor(d.year);
+                const mo = Math.round((d.year - yr) * 12);
+                if (!byMonth[mo]) byMonth[mo] = [];
+                byMonth[mo].push(d.value);
+            });
+            let totalS = 0, totalVarS = 0, seasonCount = 0;
+            for (const mo in byMonth) {
+                const vals = byMonth[mo];
+                if (vals.length < 3) continue;
+                const mk = calcMannKendallBaseJS(vals);
+                totalS += mk.S;
+                totalVarS += mk.varS;
+                seasonCount++;
+            }
+            if (seasonCount < 2) return null;
+            let Z = 0;
+            if (totalS > 0) Z = (totalS - 1) / Math.sqrt(totalVarS);
+            else if (totalS < 0) Z = (totalS + 1) / Math.sqrt(totalVarS);
+            const pVal = 2 * (1 - normalCDF(Math.abs(Z)));
+            const sig = Math.abs(Z) > getCriticalZ(0.05);
+            let trend = 'Tidak Ada Trend';
+            if (sig) trend = Z > 0 ? 'Meningkat' : 'Menurun';
+            return { S: totalS, varS: totalVarS, Z, pValue: pVal, seasonCount, significant: sig, trend };
+        }
+
+        function calcSeasonalSenSlopeJS(dataArray) {
+            const byMonth = {};
+            dataArray.forEach(d => {
+                const yr = Math.floor(d.year);
+                const mo = Math.round((d.year - yr) * 12);
+                if (!byMonth[mo]) byMonth[mo] = [];
+                byMonth[mo].push({ year: yr, value: d.value });
+            });
+            const allSlopes = [];
+            let seasonCount = 0;
+            for (const mo in byMonth) {
+                const pts = byMonth[mo].sort((a,b) => a.year - b.year);
+                if (pts.length < 3) continue;
+                seasonCount++;
+                for (let i = 0; i < pts.length - 1; i++)
+                    for (let j = i + 1; j < pts.length; j++) {
+                        const dx = pts[j].year - pts[i].year;
+                        if (dx !== 0) allSlopes.push((pts[j].value - pts[i].value) / dx);
+                    }
+            }
+            if (seasonCount < 2 || allSlopes.length === 0) return null;
+            allSlopes.sort((a,b) => a - b);
+            const sc = allSlopes.length;
+            const senSlope = sc % 2 === 0 ? (allSlopes[sc/2-1] + allSlopes[sc/2]) / 2 : allSlopes[Math.floor(sc/2)];
+            let trend = 'Tidak Ada Trend';
+            if (senSlope > 0) trend = 'Meningkat';
+            else if (senSlope < 0) trend = 'Menurun';
+            return { slope: senSlope, slopeCount: sc, seasonCount, trend };
         }
 
         async function computeTrendsBackground(dataArray) {
@@ -1055,14 +1223,15 @@ if (empty($stationId)) {
                 else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
                 const zKritis = 1.96;
                 const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
+                document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
+                cachedRegularMK = document.getElementById('mkResult').innerHTML;
 
                 await new Promise(r => setTimeout(r, 10));
 
                 // 2. Sen's Slope
                 const ss = computeSenSlope(dataArray);
                 if (ss) {
-                    const ssSig = ss.trend.includes('(Signifikan)');
+                    const ssSig = ss.significant;
                     const tTrendSS = ssSig ? (ss.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let ssColor = '#6B7280';
                     if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
@@ -1070,9 +1239,12 @@ if (empty($stationId)) {
                     const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
                     const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
-                    document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+                    document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+                    cachedRegularSS = document.getElementById('ssResult').innerHTML;
                 } else {
-                    document.getElementById('ssResult').innerHTML = `Gagal menghitung`;
+                    const errHtml = `Gagal menghitung`;
+                    document.getElementById('ssResult').innerHTML = errHtml;
+                    cachedRegularSS = errHtml;
                 }
 
                 await new Promise(r => setTimeout(r, 10));
@@ -1080,7 +1252,7 @@ if (empty($stationId)) {
                 // 3. Linear Regression
                 const lr = computeLinearRegression(dataArray);
                 if (lr) {
-                    const lrSig = lr.trend.includes('(Signifikan)');
+                    const lrSig = lr.significant;
                     const tTrendLR = lrSig ? (lr.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                     let lrColor = '#6B7280';
                     if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
@@ -1089,7 +1261,7 @@ if (empty($stationId)) {
                     const tKrit = lr.tCritical !== undefined ? `±${fM(Number(lr.tCritical).toFixed(3))}` : '—';
                     const slopeLR = lr.slope !== undefined ? fM(Number(lr.slope).toFixed(3)) : '—';
                     const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
                     // Update chart with trend line
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -1106,6 +1278,40 @@ if (empty($stationId)) {
                     document.getElementById('lrResult').innerHTML = `Gagal menghitung`;
                 }
 
+                // 4. Seasonal cache (hanya untuk bulanan semua bulan)
+                const dtType4 = document.getElementById('dtType').value;
+                const mo4 = document.getElementById('dtMonth').value;
+                if (dtType4 === 'bulanan' && mo4 === 'all') {
+                    const seasonalMk = calcSeasonalMannKendallJS(dataArray);
+                    const seasonalSs = calcSeasonalSenSlopeJS(dataArray);
+                    if (seasonalMk && seasonalSs) {
+                        const smkSig = seasonalMk.significant;
+                        const smkDir = smkSig ? (seasonalMk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
+                        let smkColor = '#6B7280';
+                        if (smkDir === 'Meningkat') smkColor = '#16A34A';
+                        else if (smkDir === 'Menurun') smkColor = '#DC2626';
+                        const zUjiSeasonal = fM(Number(seasonalMk.Z).toFixed(3)) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                        cachedSeasonalMK =
+                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${zUjiSeasonal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalMk.seasonCount} bulan</td></tr></table>`;
+                        const sssDir = seasonalSs.slope > 0 ? 'Meningkat' : (seasonalSs.slope < 0 ? 'Menurun' : 'Tidak ada');
+                        let sssColor = '#6B7280';
+                        if (sssDir === 'Meningkat') sssColor = '#16A34A';
+                        else if (sssDir === 'Menurun') sssColor = '#DC2626';
+                        cachedSeasonalSS =
+                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(Number(seasonalSs.slope).toFixed(3))}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Jumlah Slope</td><td style="padding:3px 0;text-align:right;">${seasonalSs.slopeCount}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalSs.seasonCount} bulan</td></tr></table>`;
+                        const seasonalToggle = document.getElementById('seasonalToggle');
+                        if (seasonalToggle && seasonalToggle.checked) {
+                            document.getElementById('mkResult').innerHTML = cachedSeasonalMK;
+                            document.getElementById('ssResult').innerHTML = cachedSeasonalSS;
+                        }
+                    } else {
+                        cachedSeasonalMK = null;
+                        cachedSeasonalSS = null;
+                    }
+                } else {
+                    cachedSeasonalMK = null;
+                    cachedSeasonalSS = null;
+                }
             } catch (e) {
                 console.error("Gagal Kalkulasi Lanjutan", e);
                 document.getElementById('mkResult').innerHTML = "Terjadi kesalahan sistem";

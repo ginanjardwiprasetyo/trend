@@ -22,20 +22,15 @@ function createStationIcon() {
 function createTrendIcon(trend, completeness = 1.0) {
     let color, symbol;
     
-    switch (trend) {
-        case 'Meningkat':
-        case 'Meningkat (Signifikan)':
-            color = '#16A34A';
-            symbol = '▲';
-            break;
-        case 'Menurun':
-        case 'Menurun (Signifikan)':
-            color = '#DC2626';
-            symbol = '▼';
-            break;
-        default:
-            color = '#6B7280';
-            symbol = '—';
+    if (trend === 'Meningkat') {
+        color = '#16A34A';
+        symbol = '▲';
+    } else if (trend === 'Menurun') {
+        color = '#DC2626';
+        symbol = '▼';
+    } else {
+        color = '#6B7280';
+        symbol = '—';
     }
 
     // Indikator peringatan jika data < 16 tahun

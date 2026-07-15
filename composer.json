@@ -1,0 +1,8 @@
+{
+    "name": "trendhidro/app",
+    "description": "TrendHidro App",
+    "type": "project",
+    "require": {
+        "markrogoyski/math-php": "^2.13"
+    }
+}

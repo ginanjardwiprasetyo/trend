@@ -96,3 +96,83 @@ function getCriticalZ($alpha = 0.05) {
     }
 }
 
+/**
+ * Seasonal Mann-Kendall Test (Hirsch, Slack & Smith, 1982)
+ * Menerima data per season, menggabungkan statistik S dan var(S) dari semua season
+ * 
+ * @param array $dataBySeason [season_id => [year => value, ...], ...]
+ * @return array ['S', 'varS', 'Z', 'pValue', 'seasonCount']
+ */
+function calcSeasonalMannKendall($dataBySeason) {
+    $totalS = 0;
+    $totalVarS = 0;
+    $seasonCount = 0;
+
+    foreach ($dataBySeason as $season => $values) {
+        $n = count($values);
+        if ($n < 3) continue;
+
+        $values = array_values($values);
+        $mk = calcMannKendallBase($values, $n);
+        $totalS += $mk['S'];
+        $totalVarS += $mk['varS'];
+        $seasonCount++;
+    }
+
+    if ($seasonCount < 2) {
+        return ['S' => $totalS, 'varS' => $totalVarS, 'Z' => 0, 'pValue' => 1, 'seasonCount' => $seasonCount];
+    }
+
+    if ($totalS > 0) {
+        $Z = ($totalS - 1) / sqrt($totalVarS);
+    } elseif ($totalS < 0) {
+        $Z = ($totalS + 1) / sqrt($totalVarS);
+    } else {
+        $Z = 0;
+    }
+
+    $pValue = 2 * (1 - normalCDF(abs($Z)));
+
+    return ['S' => $totalS, 'varS' => $totalVarS, 'Z' => $Z, 'pValue' => $pValue, 'seasonCount' => $seasonCount];
+}
+
+/**
+ * Seasonal Sen's Slope Estimator
+ * Menghitung slope dalam setiap season lalu menggabungkan semua slope
+ * 
+ * @param array $dataBySeason [season_id => [['year' => float, 'value' => float], ...], ...]
+ * @return array ['slope', 'slopeCount', 'seasonCount']
+ */
+function calcSeasonalSensSlope($dataBySeason) {
+    $allSlopes = [];
+    $seasonCount = 0;
+
+    foreach ($dataBySeason as $season => $points) {
+        $n = count($points);
+        if ($n < 3) continue;
+
+        $seasonCount++;
+        usort($points, function($a, $b) { return $a['year'] <=> $b['year']; });
+
+        for ($i = 0; $i < $n - 1; $i++) {
+            for ($j = $i + 1; $j < $n; $j++) {
+                $dx = $points[$j]['year'] - $points[$i]['year'];
+                if ($dx != 0) {
+                    $allSlopes[] = ($points[$j]['value'] - $points[$i]['value']) / $dx;
+                }
+            }
+        }
+    }
+
+    if ($seasonCount < 2 || empty($allSlopes)) {
+        return ['slope' => 0, 'slopeCount' => 0, 'seasonCount' => $seasonCount];
+    }
+
+    sort($allSlopes);
+    $count = count($allSlopes);
+    $mid = floor($count / 2);
+    $medianSlope = ($count % 2 == 0) ? ($allSlopes[$mid - 1] + $allSlopes[$mid]) / 2 : $allSlopes[$mid];
+
+    return ['slope' => $medianSlope, 'slopeCount' => $count, 'seasonCount' => $seasonCount];
+}
+
