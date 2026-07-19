@@ -495,7 +495,7 @@
                 // Fix Location Casing (Title Case)
                 const locNames = (st.location || '-').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
                 const pct = st.completeness || 0;
-                const pctDisplay = parseFloat(pct).toFixed(2);
+                const pctDisplay = parseFloat(pct).toFixed(2).replace('.', ',');
 
                 let badgeClass = 'badge-red';
                 if (pct > 80) badgeClass = 'badge-green';

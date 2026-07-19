@@ -194,7 +194,6 @@
             font-size: 0.85rem;
             color: #475569;
             font-weight: 700;
-            text-transform: uppercase;
             letter-spacing: 0.05em;
             border-bottom: 1px solid #E2E8F0;
             text-align: center;
@@ -368,7 +367,6 @@
             font-size: 0.82rem;
             font-weight: 700;
             color: #475569;
-            text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
@@ -425,9 +423,8 @@
 
         <!-- Catatan Akademik -->
         <div class="academic-note">
-            <strong>💡 Petunjuk:</strong> Tabel-tabel di bawah ini dirancang berdasarkan standarisasi instansi
-            hidrologi. Anda dapat memfilter, mencari stasiun tertentu, dan mengekspor langsung hasil tabel ke format
-            cetak atau menyalinnya ke dokumen Anda.
+            <strong>💡 Petunjuk:</strong> Filter, mencari stasiun tertentu, dan mengekspor langsung hasil tabel ke format
+            cetak atau menyalinnya ke dokumen.
         </div>
 
         <!-- TABS HEADER -->
@@ -520,9 +517,9 @@
                         </thead>
                         <tbody id="detailTableBody">
                             <tr>
-                                <td colspan="6" class="table-loading">
+                                <td colspan="8" class="table-loading">
                                     <div class="spinner-rekap"></div>
-                                    Memuat data stasiun...
+                                    Sedang melakukan analisis statistik untuk seluruh stasiun...
                                 </td>
                             </tr>
                         </tbody>
@@ -588,11 +585,16 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Tampilan Trend</label>
+                        <label class="filter-label">Tampilan Data</label>
                         <select class="form-select-premium" id="trenDisplayStyle" onchange="handleTrenDisplayChange()">
                             <option value="sign">Tanda (+/−/*)</option>
                             <option value="icon">Ikon Panah (▲/▼)</option>
+                            <option value="iconOnly">Ikon Saja (Export)</option>
                         </select>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:6px; font-size:0.82rem; color:#475569;">
+                            <input type="checkbox" id="trenShowSig" checked onchange="renderTrendTable()" style="accent-color:#2563EB; width:15px; height:15px;">
+                            Tampilkan tanda * (signifikan)
+                        </label>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Tahun Mulai</label>
@@ -625,14 +627,16 @@
                             <tr>
                                 <th>No</th>
                                 <th>Stasiun</th>
-                                <th id="th-mk">MK (Z<sub>uji</sub>)</th>
-                                <th id="th-ss">SS (Q<sub>med</sub>)</th>
-                                <th id="th-lr">RL (t<sub>uji</sub>)</th>
+                                <th id="th-mk">Z</th>
+                                <th id="th-ss">Q<sub>med</sub></th>
+                                <th>Z<sub>SMK</sub></th>
+                                <th>Q<sub>med,gab</sub></th>
+                                <th id="th-lr">t</th>
                             </tr>
                         </thead>
                         <tbody id="trenTableBody">
                             <tr>
-                                <td colspan="5" class="table-loading">
+                                <td colspan="8" class="table-loading">
                                     <div class="spinner-rekap"></div>
                                     Sedang melakukan analisis statistik untuk seluruh stasiun...
                                 </td>
@@ -682,14 +686,17 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Tampilan Trend</label>
+                        <label class="filter-label">Tampilan Data</label>
                         <select class="form-select-premium" id="psDisplayStyle" onchange="handlePerStasiunDisplayChange()">
                             <option value="sign">Tanda (+/−/*)</option>
                             <option value="icon">Ikon Panah (▲/▼)</option>
+                            <option value="iconOnly">Ikon Saja (Export)</option>
                         </select>
                     </div>
                     <div class="filter-group" style="justify-content: flex-end; align-items: flex-end;">
-                        <button class="export-btn" onclick="exportToExcel('per-stasiun-table', 'Tabel_Olahan_Per_Stasiun')" style="width: 100%;">
+                        <button class="export-btn"
+                            onclick="exportToExcel('per-stasiun-table', 'Tabel_Per_Stasiun_Olahan_Trend')"
+                            style="width: 100%;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
                             </svg>
@@ -705,9 +712,11 @@
                                 <th>No</th>
                                 <th>Stasiun</th>
                                 <th>Jenis Data</th>
-                                <th id="ps-th-mk">MK (Z<sub>uji</sub>)</th>
-                                <th id="ps-th-ss">SS (Q<sub>med</sub>)</th>
-                                <th id="ps-th-lr">RL (t<sub>uji</sub>)</th>
+                                <th id="ps-th-mk">Z</th>
+                                <th id="ps-th-ss">Q<sub>med</sub></th>
+                                <th>Z<sub>SMK</sub></th>
+                                <th>Q<sub>med,gab</sub></th>
+                                <th id="ps-th-lr">t</th>
                             </tr>
                         </thead>
                         <tbody id="perStasiunTableBody">
@@ -774,9 +783,9 @@
                         </thead>
                         <tbody id="deskriptifTableBody">
                             <tr>
-                                <td colspan="8" class="table-loading">
+                                <td colspan="7" class="table-loading">
                                     <div class="spinner-rekap"></div>
-                                    Memuat parameter statistik stasiun...
+                                    Sedang melakukan analisis statistik untuk seluruh stasiun...
                                 </td>
                             </tr>
                         </tbody>
@@ -980,7 +989,7 @@
                 const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '—';
 
                 const pct = st.completeness || 0;
-                const pctDisplay = pct.toFixed(2) + '%';
+                const pctDisplay = pct.toFixed(2).replace('.', ',') + '%';
                 let badgeClass = 'badge-danger';
                 if (pct > 80) badgeClass = 'badge-success';
                 else if (pct > 50) badgeClass = 'badge-warning';
@@ -1055,14 +1064,14 @@
 
                 const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart} — ${st.yearEnd}` : '—';
                 const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '—';
-                const maxRainDisplay = st.maxRain !== null ? `${st.maxRain.toFixed(1)} mm` : '—';
-                const avgAnnualDisplay = st.avgAnnualRain !== null ? `${st.avgAnnualRain.toFixed(1)} mm/tahun` : '—';
+                const maxRainDisplay = st.maxRain !== null ? `${st.maxRain.toFixed(1).replace('.', ',')} mm` : '—';
+                const avgAnnualDisplay = st.avgAnnualRain !== null ? `${st.avgAnnualRain.toFixed(1).replace('.', ',')} mm/tahun` : '—';
 
                 tr.innerHTML = `
                     <td style="color:#64748B; font-weight:600;">${counter++}</td>
                     <td style="font-weight:700; color:#1E293B;">Pos ${st.name}</td>
-                    <td>${st.lat.toFixed(6)}</td>
-                    <td>${st.lon.toFixed(6)}</td>
+                    <td>${st.lat.toFixed(6).replace('.', ',')}</td>
+                    <td>${st.lon.toFixed(6).replace('.', ',')}</td>
                     <td>${yearRange}</td>
                     <td style="font-weight:600;">${lengthDisplay}</td>
                     <td style="color:#DC2626; font-weight:700;">${maxRainDisplay}</td>
@@ -1116,7 +1125,7 @@
         // Load or Re-load Trend Analysis with filters (Tabel 4.2)
         async function loadTrendAnalysis() {
             const tbody = document.getElementById('trenTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="table-loading"><div class="spinner-rekap"></div>Melakukan analisis komputasi statistik runtut waktu...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="table-loading"><div class="spinner-rekap"></div>Melakukan analisis komputasi statistik runtut waktu...</td></tr>';
 
             const yrFrom = parseInt(document.getElementById('trenYearFrom').value) || minYearGlobal;
             const yrTo = parseInt(document.getElementById('trenYearTo').value) || maxYearGlobal;
@@ -1145,7 +1154,7 @@
 
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="5" style="color:red; padding:20px;">Gagal memuat olahan trend curah hujan. Silakan sesuaikan filter atau segarkan halaman.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="color:red; padding:20px;">Gagal memuat olahan trend curah hujan. Silakan sesuaikan filter atau segarkan halaman.</td></tr>';
             }
         }
 
@@ -1168,36 +1177,29 @@
             return '(mm/th)';
         }
 
-        // Helper: format trend value with icon or +/-/* sign
+        // Helper: format numeric value with sign/icon based on display style
         function formatTrendVal(val, trendStr, displayStyle, isMk) {
             if (val === undefined || val === null) return '<span style="color:#94A3B8;">—</span>';
             const num = parseFloat(val);
             if (isNaN(num)) return val;
-
-            const isSig = isMk && (trendStr || '').includes('Signifikan') && !(trendStr || '').includes('Tidak Signifikan');
-            const isUp = num > 0;
-            const isDown = num < 0;
-
+            const formatted = Math.abs(num).toFixed(3).replace('.', ',');
+            const trend = (trendStr || '').trim();
+            const isSig = isMk && (trend === 'Meningkat' || trend === 'Menurun');
+            const showSig = document.getElementById('trenShowSig') ? document.getElementById('trenShowSig').checked : true;
+            if (displayStyle === 'iconOnly') {
+                if (!isSig) return '\u2013';
+                return num > 0 ? '▲' : num < 0 ? '▼' : '\u2013';
+            }
             if (displayStyle === 'sign') {
-                // +/- style: explicit + for positive, - already in number, * for significant
-                const sign = isUp ? '+' : '';
-                let text = `${sign}${num}`;
-                if (isSig) text += '<span style="color:#B91C1C; font-weight:900;">*</span>';
+                const sign = num > 0 ? '+' : num < 0 ? '\u2212' : '';
+                let text = `${sign}${formatted}`;
+                if (isSig && showSig) text += '<span style="color:#B91C1C; font-weight:900;">*</span>';
                 return text;
             } else {
-                // Icon style: arrow icon with significance color
-                let icon, color;
-                if (isUp) {
-                    icon = '▲';
-                    color = isSig ? '#0B6E2F' : '#16A34A';
-                } else if (isDown) {
-                    icon = '▼';
-                    color = isSig ? '#991B1B' : '#DC2626';
-                } else {
-                    icon = '•';
-                    color = '#94A3B8';
-                }
-                return `<span style="color:${color}; font-weight:bold; margin-right:5px;">${icon}</span>${num}`;
+                const icon = num > 0 ? '▲' : num < 0 ? '▼' : '•';
+                let text = `<span style="font-weight:bold;">${icon}</span> ${formatted}`;
+                if (isSig && showSig) text += '<span style="color:#B91C1C; font-weight:900;">*</span>';
+                return text;
             }
         }
 
@@ -1210,13 +1212,6 @@
             const displayStyle = document.getElementById('trenDisplayStyle') ? document.getElementById('trenDisplayStyle').value : 'sign';
             let counter = 1;
 
-            // Update column headers with dynamic unit
-            const unit = getSlopeUnit();
-            const thSs = document.getElementById('th-ss');
-            const thLr = document.getElementById('th-lr');
-            if (thSs) thSs.innerHTML = `SS (Q<sub>med</sub>) ${unit}`;
-            if (thLr) thLr.innerHTML = `RL (t<sub>uji</sub>)`;
-
             stationsData.forEach(st => {
                 const trenResult = activeTrenResults[st.id];
                 if (!trenResult) return;
@@ -1227,7 +1222,6 @@
 
                 if (mk.trend === 'too_large') return;
 
-                // Completeness filtering based on general duration
                 const len = st.yearStart !== null ? (st.yearEnd - st.yearStart + 1) : 0;
 
                 if (completenessFilter === 'gt50' && st.completeness <= 50) return;
@@ -1235,58 +1229,61 @@
                 if (completenessFilter === 'ge16' && len < 16) return;
                 if (completenessFilter === 'lt16' && (len >= 16 || len === 0)) return;
 
+                const smk = trenResult['seasonal-mann-kendall'] || {};
+                const sss = trenResult['seasonal-sens-slope'] || {};
+
                 const tr = document.createElement('tr');
-
-                const mkCell = formatTrendVal(mk.Z, mk.trend, displayStyle, true);
-                const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, true);
-                const lrCell = formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true);
-
                 tr.innerHTML = `
                     <td style="color:#64748B; font-weight:600;">${counter++}</td>
                     <td style="font-weight:700; color:#1E293B;">Pos ${st.name}</td>
-                    <td style="font-weight:600;">${mkCell}</td>
-                    <td style="font-weight:600; color:#2563EB;">${ssCell}</td>
-                    <td style="font-weight:600; color:#7C3AED;">${lrCell}</td>
+                    <td style="font-weight:600;">${formatTrendVal(mk.Z, mk.trend, displayStyle, true)}</td>
+                    <td style="font-weight:600; color:#2563EB;">${formatTrendVal(ss.slope, ss.trend || '', displayStyle, true)}</td>
+                    <td style="font-weight:600;">${formatTrendVal(smk.Z, smk.trend || '', displayStyle, true)}</td>
+                    <td style="font-weight:600; color:#7C3AED;">${formatTrendVal(sss.slope, sss.trend || '', displayStyle, true)}</td>
+                    <td style="font-weight:600; color:#7C3AED;">${formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true)}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
             if (counter === 1) {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding:20px; color:#6B7280;">Tidak ada stasiun yang memenuhi filter kelengkapan data periode ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; color:#6B7280;">Tidak ada stasiun yang memenuhi filter kelengkapan data periode ini.</td></tr>';
             }
 
-            // Update legend
-            updateTrenLegend(displayStyle);
+            updateTrenLegend();
         }
 
-        // Update legend below table based on display style
-        function updateTrenLegend(displayStyle) {
+        // Update legend below table
+        function updateTrenLegend() {
             const container = document.getElementById('trenLegendContainer');
             if (!container) return;
-
+            const displayStyle = document.getElementById('trenDisplayStyle') ? document.getElementById('trenDisplayStyle').value : 'sign';
             if (displayStyle === 'sign') {
                 container.innerHTML = `
-                    <div style="display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 18px; background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.84rem; color: #475569; align-items: center;">
-                        <span style="font-weight: 700; color: #334155; margin-right: 4px;">Keterangan:</span>
-                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#16A34A;">+</b> Naik</span>
-                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#DC2626;">&minus;</b> Turun</span>
-                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#B91C1C;">*</b> Signifikan (α = 0.05)</span>
-                    </div>
-                `;
+                    <div style="display:flex; flex-wrap:wrap; gap:12px; padding:14px 18px; background:linear-gradient(135deg,#F8FAFC,#EFF6FF); border:1px solid #E2E8F0; border-radius:10px; font-size:0.84rem; color:#475569; align-items:center;">
+                        <span style="font-weight:700; color:#334155; margin-right:4px;">Keterangan:</span>
+                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#2563EB;">+</b> Naik</span>
+                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#2563EB;">\u2212</b> Turun</span>
+                        <span style="display:inline-flex; align-items:center; gap:3px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><b style="color:#B91C1C;">*</b> Signifikan (\u03B1 = 0,05)</span>
+                        <span style="font-size:0.8rem; color:#64748B; margin-left:8px;">Z<sub>SMK</sub> &amp; Q<sub>med,gab</sub> hanya tersedia untuk data bulanan (semua bulan).</span>
+                    </div>`;
+            } else if (displayStyle === 'icon') {
+                container.innerHTML = `
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; padding:14px 18px; background:linear-gradient(135deg,#F8FAFC,#EFF6FF); border:1px solid #E2E8F0; border-radius:10px; font-size:0.84rem; color:#475569;">
+                        <span style="font-weight:700; color:#334155; margin-right:4px;">Keterangan:</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="font-weight:bold;">\u25B2</span> Naik</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="font-weight:bold;">\u25BC</span> Turun</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="font-weight:bold;">\u2022</span> Stabil</span>
+                        <span style="font-size:0.8rem; color:#64748B; margin-left:8px;">Z<sub>SMK</sub> &amp; Q<sub>med,gab</sub> hanya tersedia untuk data bulanan (semua bulan).</span>
+                    </div>`;
             } else {
                 container.innerHTML = `
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 18px; background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border: 1px solid #E2E8F0; border-radius: 10px; font-size: 0.84rem; color: #475569;">
-                        <div style="font-weight: 700; color: #334155; width: 100%; margin-bottom: 2px;">Keterangan Ikon Arah Trend:</div>
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#0B6E2F; font-weight:bold;">▲</span> Meningkat (Signifikan)</span>
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#16A34A; font-weight:bold;">▲</span> Meningkat</span>
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#991B1B; font-weight:bold;">▼</span> Menurun (Signifikan)</span>
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#DC2626; font-weight:bold;">▼</span> Menurun</span>
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;"><span style="color:#94A3B8; font-weight:bold;">•</span> Tidak Ada Trend</span>
-                        </div>
-                        <div style="font-size: 0.8rem; color: #64748B; margin-top: 2px;">Warna gelap menunjukkan signifikansi (α = 0.05).</div>
-                    </div>
-                `;
+                    <div style="display:flex; flex-wrap:wrap; gap:10px; padding:14px 18px; background:linear-gradient(135deg,#F8FAFC,#EFF6FF); border:1px solid #E2E8F0; border-radius:10px; font-size:0.84rem; color:#475569; align-items:center;">
+                        <span style="font-weight:700; color:#334155; margin-right:4px;">Keterangan:</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;">\u25B2 Meningkat Signifikan</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;">\u25BC Menurun Signifikan</span>
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:3px 10px; background:#fff; border-radius:6px; border:1px solid #E2E8F0;">\u2013 Tidak Signifikan</span>
+                        <span style="font-size:0.8rem; color:#64748B; margin-left:8px;">Hanya ikon tanpa angka. Cocok untuk ekspor Excel.</span>
+                    </div>`;
             }
         }
 
@@ -1312,7 +1309,7 @@
         function handlePerStasiunStationChange() {
             const selected = getSelectedPerStasiunStations();
             if (selected.length === 0) {
-                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="8" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
                 return;
             }
             if (activePerStasiunResults) {
@@ -1421,7 +1418,7 @@
 
         async function loadPerStasiunAnalysis() {
             const tbody = document.getElementById('perStasiunTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="table-loading"><div class="spinner-rekap"></div>Menghitung trend untuk seluruh tipe data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="table-loading"><div class="spinner-rekap"></div>Menghitung trend untuk seluruh tipe data...</td></tr>';
 
             const yrFrom = parseInt(document.getElementById('psYearFrom').value) || minYearGlobal;
             const yrTo = parseInt(document.getElementById('psYearTo').value) || maxYearGlobal;
@@ -1438,7 +1435,7 @@
                 renderPerStasiunTable();
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="6" style="color:red; padding:20px;">Gagal memuat olahan per stasiun.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="color:red; padding:20px;">Gagal memuat olahan per stasiun.</td></tr>';
             }
         }
 
@@ -1449,7 +1446,7 @@
             const selectedIds = getSelectedPerStasiunStations();
 
             if (selectedIds.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
                 return;
             }
 
@@ -1461,61 +1458,51 @@
                 if (!stResults) return;
 
                 perStasiunTypes.forEach(typeName => {
-                    const tr = document.createElement('tr');
                     const typeRes = stResults[typeName];
                     if (!typeRes) return;
 
                     const mk = typeRes.mk || {};
                     const ss = typeRes.ss || {};
                     const lr = typeRes.lr || {};
+                    const smk = typeRes.seasonal_mk || {};
+                    const sss = typeRes.seasonal_ss || {};
 
-                    const mkCell = formatTrendVal(mk.Z, mk.trend || '', displayStyle, true);
-                    const ssCell = formatTrendVal(ss.slope, ss.trend || '', displayStyle, true);
-                    const lrCell = formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true);
-
+                    const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td style="color:#64748B; font-weight:600;">${counter++}</td>
                         <td style="font-weight:700; color:#1E293B;">Pos ${st.name}</td>
                         <td style="font-weight:600; color:#4B5563;">${typeName}</td>
-                        <td style="font-weight:600;">${mkCell}</td>
-                        <td style="font-weight:600; color:#2563EB;">${ssCell}</td>
-                        <td style="font-weight:600; color:#7C3AED;">${lrCell}</td>
+                        <td style="font-weight:600;">${formatTrendVal(mk.Z, mk.trend || '', displayStyle, true)}</td>
+                        <td style="font-weight:600; color:#2563EB;">${formatTrendVal(ss.slope, ss.trend || '', displayStyle, true)}</td>
+                        <td style="font-weight:600;">${formatTrendVal(smk.Z, smk.trend || '', displayStyle, true)}</td>
+                        <td style="font-weight:600; color:#7C3AED;">${formatTrendVal(sss.slope, sss.trend || '', displayStyle, true)}</td>
+                        <td style="font-weight:600; color:#7C3AED;">${formatTrendVal(lr.tStatistic, lr.trend || '', displayStyle, true)}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             });
 
             if (counter === 1) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding:20px; color:#6B7280;">Tidak ada data tersedia.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:20px; color:#6B7280;">Tidak ada data tersedia.</td></tr>';
             }
 
-            updatePerStasiunLegend(displayStyle);
+            updatePerStasiunLegend();
         }
 
-        function updatePerStasiunLegend(displayStyle) {
+        function updatePerStasiunLegend() {
             const container = document.getElementById('psLegendContainer');
             if (!container) return;
-            const content = document.querySelector('#trenLegendContainer');
-            if (content) {
-                container.innerHTML = content.innerHTML;
-            }
+            container.innerHTML = document.getElementById('trenLegendContainer').innerHTML;
         }
 
         function handlePerStasiunDisplayChange() {
-            const selected = getSelectedPerStasiunStations();
-            if (selected.length === 0) {
-                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
-                return;
-            }
-            if (activePerStasiunResults) {
-                renderPerStasiunTable();
-            }
+            if (activePerStasiunResults) renderPerStasiunTable();
         }
 
         function applyPerStasiunFilters() {
             const selected = getSelectedPerStasiunStations();
             if (selected.length === 0) {
-                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
+                document.getElementById('perStasiunTableBody').innerHTML = '<tr><td colspan="8" style="padding:30px; text-align:center; color:#9CA3AF; font-size:0.9rem;">Pilih minimal satu stasiun untuk melihat hasil olahan.</td></tr>';
                 return;
             }
             const yrFrom = parseInt(document.getElementById('psYearFrom').value);
@@ -1538,9 +1525,7 @@
 
         // Handle display-only filter changes (completeness, display style) — no re-fetch needed
         function handleTrenDisplayChange() {
-            if (activeTrenResults) {
-                renderTrendTable();
-            }
+            if (activeTrenResults) renderTrendTable();
         }
 
         // Apply Tren Filters (period or aggregation changed — requires re-fetch)
@@ -1566,45 +1551,37 @@
             const table = document.getElementById(tableId);
             if (!table) return;
 
-            // Clone table to prevent modifying the original DOM table view
-            const clone = table.cloneNode(true);
+            const showSig = (tableId === 'tren-table' || tableId === 'per-stasiun-table') && document.getElementById('trenShowSig') && document.getElementById('trenShowSig').checked;
 
-            // Clean up cells in the clone to extract numeric values without * or icons
+            const clone = table.cloneNode(true);
             const rows = clone.getElementsByTagName('tr');
+
             for (let i = 0; i < rows.length; i++) {
                 const cells = rows[i].cells;
                 for (let j = 0; j < cells.length; j++) {
                     const cell = cells[j];
-                    
-                    // Skip header row cells
                     if (cell.tagName.toLowerCase() === 'th') continue;
 
-                    let text = cell.innerText || cell.textContent;
-                    // Remove symbols: *, ▲, ▼, •
-                    text = text.replace(/[*▲▼•]/g, '').trim();
+                    let text = (cell.innerText || cell.textContent).trim();
 
-                    // If it starts with '+', remove it so it's parsed as normal positive number
-                    if (text.startsWith('+')) {
-                        text = text.substring(1);
-                    }
+                    // Strip icon symbols only (keep \u2212 and comma)
+                    text = text.replace(/[\u25B2\u25BC\u2022\u2013+]/g, '').trim();
+                    if (!showSig) text = text.replace(/\*/g, '');
 
-                    // Replace Indonesian comma decimal with dot just in case
-                    text = text.replace(',', '.');
-
-                    // If it is a valid numeric string, replace cell content with a parsed number
                     if (text !== '' && !isNaN(Number(text))) {
                         cell.innerText = Number(text);
-                        // Tell SheetJS it is a number type cell
                         cell.setAttribute('data-t', 'n');
                         cell.setAttribute('t', 'n');
+                    } else if (text !== '') {
+                        // Force string type so SheetJS preserves comma and \u2212 as-is
+                        cell.innerText = text;
+                        cell.setAttribute('data-t', 's');
+                        cell.setAttribute('t', 's');
                     }
                 }
             }
 
-            // Generate workbook (raw: false allows SheetJS to parse element data types)
             const wb = XLSX.utils.table_to_book(clone, { raw: false });
-
-            // Trigger download
             XLSX.writeFile(wb, filename + '.xlsx');
         }
     </script>

@@ -12,8 +12,87 @@ let cachedRegularMK = null;
 let cachedRegularSS = null;
 let cachedSeasonalMK = null;
 let cachedSeasonalSS = null;
+let olahSatuan = 'mm';
 
 const fM = (val) => val === undefined || val === null || val === '—' ? '—' : String(val).replace('-', '−');
+const fmt = (val, d) => val === undefined || val === null || val === '—' ? '—' : fM(Number(val).toFixed(d)).replace('.', ',');
+
+// ====== SATUAN (UNIT) HELPERS ======
+function getOlahSatuanWrapper() {
+    const sel = document.getElementById('olahSatuan');
+    return sel ? sel.nextElementSibling : null;
+}
+
+function toggleOlahSatuanManual() {
+    const sel = document.getElementById('olahSatuan');
+    if (sel.value !== 'manual') {
+        olahSatuan = sel.value;
+        return;
+    }
+    // "Lainnya..." — replace trigger content with input, wrapper stays
+    const wrapper = getOlahSatuanWrapper();
+    if (!wrapper) return;
+    const trigger = wrapper.querySelector('.custom-select-trigger');
+    if (!trigger) return;
+    const span = trigger.querySelector('span');
+    const svg = trigger.querySelector('svg');
+    if (span) span.style.display = 'none';
+    if (svg) svg.style.display = 'none';
+    trigger.style.cursor = 'text';
+    trigger.style.padding = '0';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'olahSatuanManual';
+    input.placeholder = 'Ketik satuan…';
+    input.style.cssText = 'border:none; outline:none; background:transparent; font-size:inherit; font-weight:inherit; color:inherit; padding:8px 14px; width:100%; min-width:80px; flex:1; box-sizing:border-box;';
+    input.oninput = function() { olahSatuan = this.value || '—'; };
+    trigger.appendChild(input);
+    input.focus();
+    input.addEventListener('blur', function() {
+        // Capture value BEFORE removing
+        if (this.value.trim()) {
+            olahSatuan = this.value.trim();
+        } else {
+            olahSatuan = 'unit';
+        }
+        this.remove();
+        if (span) { span.style.display = ''; span.textContent = olahSatuan; }
+        if (svg) svg.style.display = '';
+        trigger.style.cursor = '';
+        trigger.style.padding = '';
+    });
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+        if (e.key === 'Escape') { this.value = ''; this.blur(); }
+    });
+}
+
+function revertOlahSatuanToSelect() {
+    const input = document.getElementById('olahSatuanManual');
+    const wrapper = getOlahSatuanWrapper();
+    if (input) {
+        const trigger = wrapper ? wrapper.querySelector('.custom-select-trigger') : null;
+        if (trigger) {
+            const span = trigger.querySelector('span');
+            const svg = trigger.querySelector('svg');
+            input.remove();
+            if (span) { span.style.display = ''; span.textContent = 'Lainnya...'; }
+            if (svg) svg.style.display = '';
+            trigger.style.cursor = '';
+            trigger.style.padding = '';
+        } else {
+            input.remove();
+        }
+    }
+    if (wrapper) wrapper.style.display = '';
+    const sel = document.getElementById('olahSatuan');
+    if (sel) sel.value = 'mm';
+    olahSatuan = 'mm';
+}
+
+function getOlahSatuan() {
+    return olahSatuan || '—';
+}
 
 // ====== UI UTILS ======
 function togglePreviewAccordion() {
@@ -32,6 +111,9 @@ function resetUpload() {
     document.getElementById('configSection').classList.remove('show');
     document.getElementById('resultsSection').classList.remove('show');
     document.getElementById('uploadZone').style.display = '';
+
+    // Reset satuan
+    revertOlahSatuanToSelect();
 
     // Reset accordion
     document.getElementById('previewAccordionHeader').classList.remove('active');
@@ -127,7 +209,7 @@ function handleFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     const fileInfo = document.getElementById('fileInfo');
     fileInfo.style.display = 'block';
-    fileInfo.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    fileInfo.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1).replace('.', ',')} KB)`;
 
     if (ext === 'csv') {
         parseCSV(file);
@@ -350,7 +432,7 @@ function onDataParsed() {
 
     // Update preview header based on input period
     const dateHeader = document.getElementById('previewDateHeader');
-    const headerLabels = { harian: 'Tanggal', bulanan: 'Periode', tahunan: 'Tahun' };
+    const headerLabels = { harian: 'Tanggal', bulanan: 'Bulan', tahunan: 'Tahun' };
     if (dateHeader) {
         dateHeader.textContent = headerLabels[inputPeriod] || 'Tanggal';
     }
@@ -392,6 +474,30 @@ function onDataParsed() {
 
     window.viewedDecadeFrom = Math.floor(ys / 10) * 10;
     window.viewedDecadeTo = Math.floor(ye / 10) * 10;
+
+    // Init daily availability card (only for daily input)
+    const dailyCard = document.getElementById('olahDailyAvailCard');
+    if (dailyCard) dailyCard.style.display = inputPeriod === 'harian' ? '' : 'none';
+
+    olahAvailMinYear = ys;
+    olahAvailMaxYear = ye;
+    olahCachedPieData = null;
+    olahIsPieActive = false;
+    const pieBtn = document.getElementById('btnTogglePie');
+    if (pieBtn) {
+        pieBtn.classList.remove('btn-primary');
+        pieBtn.classList.add('btn-secondary');
+        pieBtn.style.boxShadow = '';
+    }
+    const pieWrapper = document.getElementById('olahDailyPieWrapper');
+    const gridContent = document.getElementById('olahDailyGridContent');
+    const navControls = document.getElementById('olahDailyYearNav');
+    if (pieWrapper) pieWrapper.style.display = 'none';
+    if (gridContent) gridContent.style.display = 'block';
+    if (navControls) navControls.style.display = 'flex';
+    const pieText = document.getElementById('btnTogglePieText');
+    if (pieText) pieText.textContent = 'Tampilkan Ringkasan (Pie Chart)';
+    if (inputPeriod === 'harian') renderOlahDailyAvailability(ye);
 }
 
 // ====== YEAR PICKER LOGIC ======
@@ -665,6 +771,16 @@ async function runOlahAnalysis() {
     // Availability
     renderOlahAvailability(aggregatedData, dtType, yFrom, yTo, mo);
 
+    // Daily availability (per-year heatmap) — only for daily input
+    const dailyCard2 = document.getElementById('olahDailyAvailCard');
+    if (dailyCard2) dailyCard2.style.display = inputPeriod === 'harian' ? '' : 'none';
+    if (inputPeriod === 'harian') {
+        olahAvailMinYear = window.stationMinYear;
+        olahAvailMaxYear = window.stationMaxYear;
+        olahCachedPieData = null;
+        renderOlahDailyAvailability(yTo);
+    }
+
     // Trend calculations via backend
     const trendLoader = document.getElementById('olahTrendLoader');
     trendLoader.classList.add('active');
@@ -690,8 +806,8 @@ async function runOlahAnalysis() {
             else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
 
             const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
-            const zUjiVal = fM(Number(mk.Z).toFixed(3)) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${zUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fM(zKritis.toFixed(3))}</td></tr></table>`;
+            const zVal = fmt(mk.Z, 3) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
             cachedRegularMK = document.getElementById('olahMkResult').innerHTML;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
@@ -708,9 +824,9 @@ async function runOlahAnalysis() {
             if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
             else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
 
-            const qmedVal = fM(Number(ss.slope).toFixed(3)) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            const qminHtml = ss.Qmin !== undefined ? fM(Number(ss.Qmin).toFixed(3)) : '—';
-            const qmaxHtml = ss.Qmax !== undefined ? fM(Number(ss.Qmax).toFixed(3)) : '—';
+            const qmedVal = fmt(ss.slope, 3) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '—';
+            const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '—';
             document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
             cachedRegularSS = document.getElementById('olahSsResult').innerHTML;
         } else {
@@ -727,11 +843,11 @@ async function runOlahAnalysis() {
             if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
             else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
 
-            const slopeLR = fM(Number(lr.slope).toFixed(3));
-            const tUji = fM(Number(lr.tStatistic).toFixed(3));
-            const tKrit = `±${fM(Number(lr.tCritical).toFixed(3))}`;
-            const tUjiVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>uji</sub></td><td style="padding:3px 0;text-align:right;">${tUjiVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+            const slopeLR = fmt(lr.slope, 3);
+            const tUji = fmt(lr.tStatistic, 3);
+            const tKrit = `±${fmt(lr.tCritical, 3)}`;
+            const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart) {
@@ -753,23 +869,26 @@ async function runOlahAnalysis() {
         const mo = document.getElementById('olahMonth').value;
         if (dtType === 'bulanan' && mo === 'all') {
             const seasonalMk = calcSeasonalMannKendallJS(aggregatedData);
-            const seasonalSs = calcSeasonalSenSlopeJS(aggregatedData);
+            const seasonalSs = calcSeasonalSenSlopeJS(aggregatedData, seasonalMk ? seasonalMk.varS : 0);
             if (seasonalMk && seasonalSs) {
                 const smkSig = seasonalMk.significant;
                 const smkDir = smkSig ? (seasonalMk.Z > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                 let smkColor = '#6B7280';
                 if (smkDir === 'Meningkat') smkColor = '#16A34A';
                 else if (smkDir === 'Menurun') smkColor = '#DC2626';
-                const zUjiSeasonal = fM(Number(seasonalMk.Z).toFixed(3)) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                const zGabVal = fmt(seasonalMk.Z, 3) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
+                const zKritis = 1.96;
                 cachedSeasonalMK =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${zUjiSeasonal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalMk.seasonCount} bulan</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
 
-                const sssDir = seasonalSs.slope > 0 ? 'Meningkat' : (seasonalSs.slope < 0 ? 'Menurun' : 'Tidak ada');
+                const sssSig = seasonalSs.significant;
+                const sssDir = sssSig ? (seasonalSs.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                 let sssColor = '#6B7280';
                 if (sssDir === 'Meningkat') sssColor = '#16A34A';
                 else if (sssDir === 'Menurun') sssColor = '#DC2626';
+                const qMedGab = fmt(seasonalSs.slope, 3) + (sssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                 cachedSeasonalSS =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(Number(seasonalSs.slope).toFixed(3))}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Jumlah Slope</td><td style="padding:3px 0;text-align:right;">${seasonalSs.slopeCount}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Musim</td><td style="padding:3px 0;text-align:right;">${seasonalSs.seasonCount} bulan</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
 
                 const seasonalToggle = document.getElementById('olahSeasonalToggle');
                 if (seasonalToggle && seasonalToggle.checked) {
@@ -912,7 +1031,7 @@ function calcSeasonalMannKendallJS(dataArray) {
     return { S: totalS, varS: totalVarS, Z, pValue: pVal, seasonCount, significant: sig, trend };
 }
 
-function calcSeasonalSenSlopeJS(dataArray) {
+function calcSeasonalSenSlopeJS(dataArray, totalVarS) {
     const byMonth = {};
     dataArray.forEach(d => {
         const yr = Math.floor(d.year);
@@ -936,10 +1055,15 @@ function calcSeasonalSenSlopeJS(dataArray) {
     allSlopes.sort((a,b) => a - b);
     const sc = allSlopes.length;
     const senSlope = sc % 2 === 0 ? (allSlopes[sc/2-1] + allSlopes[sc/2]) / 2 : allSlopes[Math.floor(sc/2)];
+    const zC = getCriticalZ(0.05);
+    const Ca = zC * Math.sqrt(totalVarS || 0);
+    const M1 = (sc - Ca) / 2, M2 = (sc + Ca) / 2;
+    const iL = Math.max(0, Math.floor(M1)-1), iU = Math.min(sc-1, Math.floor(M2+1)-1);
+    const Qmin = allSlopes[iL]||0, Qmax = allSlopes[iU]||0;
+    const sig = (Qmin > 0) || (Qmax < 0);
     let trend = 'Tidak Ada Trend';
-    if (senSlope > 0) trend = 'Meningkat';
-    else if (senSlope < 0) trend = 'Menurun';
-    return { slope: senSlope, slopeCount: sc, seasonCount, trend };
+    if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
+    return { slope: senSlope, Qmin, Qmax, slopeCount: sc, seasonCount, significant: sig, trend };
 }
 
 // ====== RENDER CHART ======
@@ -1013,11 +1137,11 @@ function renderOlahChart(data, dtType) {
                     },
                     grid: { display: false }
                 },
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Nilai Data', font: { family: 'Inter', weight: 'bold' } },
-                    ticks: { font: { family: 'Inter', size: 11 } }
-                }
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Nilai Data (' + getOlahSatuan() + ')', font: { family: 'Inter', weight: 'bold' } },
+                        ticks: { font: { family: 'Inter', size: 11 } }
+                    }
             }
         }
     });
@@ -1034,11 +1158,11 @@ function renderOlahStats(data, dtType, yFrom, yTo, mo) {
     const std = values.length > 1 ? Math.round(Math.sqrt(values.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / (values.length - 1))) : 0;
     const cv = mean > 0 ? (std / mean) : 0;
 
-    document.getElementById('olahStatMean').textContent = fM(mean.toFixed(0)) + ' unit';
-    document.getElementById('olahStatMax').textContent = fM(max.toFixed(0)) + ' unit';
-    document.getElementById('olahStatMin').textContent = fM(min.toFixed(0)) + ' unit';
-    document.getElementById('olahStatStd').textContent = fM(std.toFixed(0)) + ' unit';
-    document.getElementById('olahStatCv').textContent = fM(cv.toFixed(2));
+    document.getElementById('olahStatMean').textContent = fM(mean.toFixed(0)) + ' ' + getOlahSatuan();
+    document.getElementById('olahStatMax').textContent = fM(max.toFixed(0)) + ' ' + getOlahSatuan();
+    document.getElementById('olahStatMin').textContent = fM(min.toFixed(0)) + ' ' + getOlahSatuan();
+    document.getElementById('olahStatStd').textContent = fM(std.toFixed(0)) + ' ' + getOlahSatuan();
+    document.getElementById('olahStatCv').textContent = fmt(cv, 2);
     document.getElementById('olahStatLength').textContent = `${values.length} unit`;
     document.getElementById('olahStatRange').textContent = `${yFrom}—${yTo}`;
 
@@ -1063,8 +1187,8 @@ function renderOlahStats(data, dtType, yFrom, yTo, mo) {
     const ub = q3 + 1.5 * iqr;
     const hasOutlier = values.some(v => v < lb || v > ub);
 
-    document.getElementById('olahStatLb').textContent = fM(lb.toFixed(0)) + ' unit';
-    document.getElementById('olahStatUb').textContent = fM(ub.toFixed(0)) + ' unit';
+    document.getElementById('olahStatLb').textContent = fM(lb.toFixed(0)) + ' ' + getOlahSatuan();
+    document.getElementById('olahStatUb').textContent = fM(ub.toFixed(0)) + ' ' + getOlahSatuan();
     document.getElementById('olahStatOutlier').innerHTML = hasOutlier
         ? `<span style="color:#DC2626;font-weight:600;">Ya</span>`
         : `Tidak`;
@@ -1085,7 +1209,7 @@ function renderOlahAvailability(data, dtType, yFrom, yTo, mo) {
 
     if (expectedCount <= 0) expectedCount = 1;
     const pct = Math.min(100, (actualCount / expectedCount) * 100);
-    const pctDisplay = pct.toFixed(2);
+    const pctDisplay = pct.toFixed(2).replace('.', ',');
     const barFill = document.getElementById('olahAvailBar');
     barFill.style.width = `${pct}%`;
     let color = '#EF4444';
@@ -1098,6 +1222,206 @@ function renderOlahAvailability(data, dtType, yFrom, yTo, mo) {
     const labelEl = document.getElementById('olahAvailLabel');
     labelEl.innerHTML = `<strong>${actualCount}</strong> dari <strong>${expectedCount}</strong> data tersedia`;
 }
+
+// ====== DAILY AVAILABILITY (olah-data) ======
+let olahAvailCurrentYear = null;
+let olahAvailMinYear = null;
+let olahAvailMaxYear = null;
+let olahAvailViewedDecade = 0;
+let olahIsPieActive = false;
+let olahPieChartInstance = null;
+let olahCachedPieData = null;
+
+function renderOlahDailyAvailability(year) {
+    olahAvailCurrentYear = year;
+    document.getElementById('olahAvailYearDisplay').textContent = year;
+    const grid = document.getElementById('olahAvailGrid');
+    grid.innerHTML = '';
+
+    // Build set of available DOYs for this year from rawData
+    const dataSet = new Set();
+    rawData.forEach(d => {
+        if (d.date.getFullYear() === year) {
+            const startOfYear = new Date(year, 0, 1);
+            const doy = Math.floor((d.date - startOfYear) / 86400000) + 1;
+            dataSet.add(doy);
+        }
+    });
+
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const daysInMonth = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const totalValidDays = isLeap ? 366 : 365;
+    let availableCount = 0;
+    let doyCounter = 1;
+
+    for (let m = 0; m < 12; m++) {
+        for (let d = 1; d <= 31; d++) {
+            const cell = document.createElement('div');
+            cell.classList.add('gh-cell');
+            if (d > daysInMonth[m]) {
+                cell.classList.add('empty');
+                cell.title = 'Tanggal tidak valid: ' + d + '/' + (m + 1);
+            } else {
+                if (dataSet.has(doyCounter)) {
+                    cell.classList.add('available');
+                    availableCount++;
+                    cell.title = 'Tanggal ' + d + '/' + (m + 1) + '/' + year + ' (Tersedia)';
+                } else {
+                    cell.classList.add('missing');
+                    cell.title = 'Tanggal ' + d + '/' + (m + 1) + '/' + year + ' (Hilang)';
+                }
+                doyCounter++;
+            }
+            grid.appendChild(cell);
+        }
+    }
+
+    const pct = ((availableCount / totalValidDays) * 100).toFixed(2).replace('.', ',');
+    document.getElementById('olahAvailSummary').innerHTML =
+        'Data harian tahun <strong>' + year + '</strong> tersedia <strong>' + pct + '%</strong> (' + availableCount + ' dari ' + totalValidDays + ' hari).';
+}
+
+function changeOlahAvailYear(step) {
+    const next = olahAvailCurrentYear + step;
+    if (next < olahAvailMinYear || next > olahAvailMaxYear) return;
+    renderOlahDailyAvailability(next);
+}
+
+function toggleOlahAvailYearPicker(e) {
+    e.stopPropagation();
+    const grid = document.getElementById('olahAvailYearGrid');
+    const isOpen = grid.classList.contains('show');
+    if (isOpen) {
+        grid.classList.remove('show');
+    } else {
+        olahAvailViewedDecade = Math.floor(olahAvailCurrentYear / 10) * 10;
+        renderOlahAvailDecadeGrid(olahAvailViewedDecade);
+        grid.classList.add('show');
+    }
+}
+
+function renderOlahAvailDecadeGrid(startYear) {
+    const grid = document.getElementById('olahAvailYearGrid');
+    const decadeStart = Math.floor(startYear / 10) * 10;
+    const decadeEnd = decadeStart + 9;
+    let yearsHtml = '';
+    for (let i = 0; i < 12; i++) {
+        const y = decadeStart + i;
+        const isDisabled = (y < olahAvailMinYear || y > olahAvailMaxYear);
+        const isActive = (y === olahAvailCurrentYear);
+        if (i > 9) {
+            yearsHtml += '<div class="year-item hidden" data-year="' + y + '">' + y + '</div>';
+        } else {
+            yearsHtml += '<div class="year-item ' + (isDisabled ? 'disabled' : '') + ' ' + (isActive ? 'active' : '') + '" data-year="' + y + '" onclick="selectOlahAvailYear(' + y + ')" style="cursor:pointer;">' + y + '</div>';
+        }
+    }
+    grid.innerHTML =
+        '<div class="year-grid-header">' +
+            '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade -= 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">‹</button>' +
+            '<span class="range-text">' + decadeStart + ' — ' + decadeEnd + '</span>' +
+            '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade += 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">›</button>' +
+        '</div>' +
+        '<div class="year-grid-content p-2"><div class="decade-grid">' + yearsHtml + '</div></div>';
+}
+
+function selectOlahAvailYear(year) {
+    if (year < olahAvailMinYear || year > olahAvailMaxYear) return;
+    document.getElementById('olahAvailYearGrid').classList.remove('show');
+    renderOlahDailyAvailability(year);
+}
+
+function toggleOlahPieChart() {
+    olahIsPieActive = !olahIsPieActive;
+    const btn = document.getElementById('btnTogglePie');
+    const btnText = document.getElementById('btnTogglePieText');
+    const btnIcon = btn.querySelector('svg');
+    const gridContent = document.getElementById('olahDailyGridContent');
+    const pieWrapper = document.getElementById('olahDailyPieWrapper');
+    const navControls = document.getElementById('olahDailyYearNav');
+
+    if (olahIsPieActive) {
+        btnText.textContent = 'Kembali ke Kalender';
+        btnIcon.innerHTML = '<path d="M19 12H5M12 19l-7-7 7-7"/>';
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+        btn.style.boxShadow = '0 2px 8px rgba(37, 99, 235, 0.25)';
+        gridContent.style.display = 'none';
+        navControls.style.display = 'none';
+        pieWrapper.style.display = 'flex';
+
+        // Compute pie data from rawData
+        const totalExpected = olahCachedPieData ? olahCachedPieData.expected : (() => {
+            let exp = 0;
+            for (let y = olahAvailMinYear; y <= olahAvailMaxYear; y++) {
+                exp += ((y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0)) ? 366 : 365;
+            }
+            return exp;
+        })();
+        const totalAvailable = rawData.length;
+        const missing = Math.max(0, totalExpected - totalAvailable);
+        olahCachedPieData = { expected: totalExpected, available: totalAvailable, missing: missing };
+        const pct = totalExpected > 0 ? ((totalAvailable / totalExpected) * 100).toFixed(2).replace('.', ',') : '0,00';
+
+        document.getElementById('olahDailyPieSummary').innerHTML =
+            'Dari rentang tahun <strong>' + olahAvailMinYear + ' — ' + olahAvailMaxYear + '</strong>,<br>' +
+            'Data tersedia: <strong>' + totalAvailable + '</strong> hari (' + pct + '%)<br>' +
+            'Data hilang: <strong>' + missing + '</strong> hari';
+
+        const ctx = document.getElementById('olahDailyPieChart').getContext('2d');
+        if (olahPieChartInstance) olahPieChartInstance.destroy();
+        olahPieChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Tersedia', 'Hilang'],
+                datasets: [{
+                    data: [totalAvailable, missing],
+                    backgroundColor: ['#3B82F6', '#EF4444'],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: 'Inter', size: 13, weight: '600' }, padding: 16, usePointStyle: true, pointStyle: 'circle' }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                        padding: 12,
+                        titleFont: { family: 'Inter', size: 13, weight: '600' },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        cornerRadius: 8,
+                        displayColors: true,
+                        boxPadding: 4
+                    }
+                },
+                animation: { animateRotate: true, animateScale: true, duration: 600, easing: 'easeOutQuart' }
+            }
+        });
+    } else {
+        btnText.textContent = 'Tampilkan Ringkasan (Pie Chart)';
+        btnIcon.innerHTML = '<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M12 3v9l4 2"/>';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+        btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+        gridContent.style.display = 'block';
+        navControls.style.display = 'flex';
+        pieWrapper.style.display = 'none';
+    }
+}
+
+// Close avail picker on outside click
+document.addEventListener('click', function(e) {
+    const wrap = e.target.closest('.avail-year-picker-wrap');
+    if (!wrap) {
+        const g = document.getElementById('olahAvailYearGrid');
+        if (g) g.classList.remove('show');
+    }
+});
 
 // ====== CUSTOM SELECT UI ======
 document.addEventListener('DOMContentLoaded', () => {

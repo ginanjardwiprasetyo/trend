@@ -179,11 +179,11 @@
                         <div class="toggle-switch" id="toggleRL"></div>
                     </div>
                     <div class="method-item" data-method="seasonal-mann-kendall" id="methodSMK">
-                        <span class="method-name" style="color:#7C3AED;">Seasonal MK</span>
+                        <span class="method-name" style="color:#7C3AED;">Seasonal Mann-Kendall</span>
                         <div class="toggle-switch" id="toggleSMK"></div>
                     </div>
                     <div class="method-item" data-method="seasonal-sens-slope" id="methodSSS">
-                        <span class="method-name" style="color:#7C3AED;">Seasonal Sen's</span>
+                        <span class="method-name" style="color:#7C3AED;">Seasonal Sen's Slope</span>
                         <div class="toggle-switch" id="toggleSSS"></div>
                     </div>
                 </div>

@@ -393,6 +393,69 @@
             opacity: 0;
         }
 
+        /* Daily availability grid */
+        .github-grid {
+            display: grid;
+            grid-template-columns: repeat(31, 1fr);
+            gap: 2px;
+            overflow-x: auto;
+            padding: 8px 0;
+        }
+        .gh-cell {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            background: #F3F4F6;
+            transition: all 0.2s;
+        }
+        .gh-cell:hover {
+            filter: brightness(0.9);
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .gh-cell.available { background: #3B82F6; }
+        .gh-cell.missing { background: #EF4444; }
+        .gh-cell.empty { background: transparent; pointer-events: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Availability year picker */
+        .avail-year-picker-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .avail-year-btn {
+            padding: 4px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-primary, #2563EB);
+            background: #EFF6FF;
+            border: 1.5px solid #BFDBFE;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .avail-year-btn:hover {
+            background: #DBEAFE;
+            border-color: #93C5FD;
+        }
+        .avail-year-grid {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            min-width: 200px;
+            overflow: hidden;
+        }
+        .avail-year-grid.show { display: flex; }
+
         @media (max-width: 768px) {
             .result-grid {
                 grid-template-columns: 1fr;
@@ -515,6 +578,17 @@
                     </div>
                     <input type="hidden" id="olahYFrom" value="1980">
                     <input type="hidden" id="olahYTo" value="2025">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <label style="font-size:0.82rem; font-weight:600; color:var(--color-text-secondary); white-space:nowrap;">Satuan:</label>
+                    <select id="olahSatuan" class="form-select" style="width:auto; min-width:100px;" onchange="toggleOlahSatuanManual()">
+                        <option value="mm">mm</option>
+                        <option value="m³/det">m³/det</option>
+                        <option value="°C">°C</option>
+                        <option value="liter/det">liter/det</option>
+                        <option value="manual">Lainnya...</option>
+                    </select>
                 </div>
 
                 <button class="btn btn-primary" onclick="runOlahAnalysis()" id="btnOlahRun" style="white-space:nowrap;">
@@ -692,8 +766,81 @@
                     </table>
                 </div>
             </div>
-        </div>
 
+            <!-- Ketersediaan Data Harian (hanya untuk data harian) -->
+            <div class="result-card full" id="olahDailyAvailCard" style="margin-bottom:24px; display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
+                    <h3 style="margin:0;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <path d="M16 2v4M8 2v4M3 10h18" />
+                        </svg>
+                        Ketersediaan Data Harian
+                    </h3>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <button class="btn btn-secondary" id="btnTogglePie" style="padding:6px 14px; font-size:0.82rem; font-weight:600; border-radius:8px; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s ease; box-shadow:0 1px 2px rgba(0,0,0,0.04);" onclick="toggleOlahPieChart()">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                <path d="M12 3v9l4 2"/>
+                            </svg>
+                            <span id="btnTogglePieText">Tampilkan Ringkasan (Pie Chart)</span>
+                        </button>
+                        <div id="olahDailyYearNav" style="display:flex; gap:8px; align-items:center;">
+                            <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
+                                onclick="changeOlahAvailYear(-1)">← Mundur</button>
+                            <div class="avail-year-picker-wrap">
+                                <button type="button" class="avail-year-btn" id="olahAvailYearDisplay" onclick="toggleOlahAvailYearPicker(event)">-</button>
+                                <div class="avail-year-grid" id="olahAvailYearGrid"></div>
+                            </div>
+                            <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;"
+                                onclick="changeOlahAvailYear(1)">Maju →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="olahDailyGridWrapper">
+                    <div id="olahDailyGridContent">
+                        <div style="display:flex; align-items:flex-start; gap:8px; justify-content:center;">
+                            <!-- Nama Bulan -->
+                            <div style="display:grid; grid-template-rows:repeat(12,35px); gap:2px; font-size:0.75rem; color:#6B7280; text-align:right; font-weight:600; padding-top:15px;">
+                                <div>Januari</div><div>Februari</div><div>Maret</div><div>April</div>
+                                <div>Mei</div><div>Juni</div><div>Juli</div><div>Agustus</div>
+                                <div>September</div><div>Oktober</div><div>November</div><div>Desember</div>
+                            </div>
+                            <div style="flex:none; overflow-x:auto;" class="no-scrollbar">
+                                <div id="olahAvailGrid" class="github-grid" style="width:max-content;"></div>
+                                <div style="display:grid; grid-template-columns:repeat(31,35px); gap:2px; margin-top:8px; font-size:0.7rem; color:#9CA3AF; text-align:center; font-weight:500;">
+                                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                    <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                                    <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+                                    <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+                                    <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+                                    <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+                                    <span>31</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:16px; margin-top:20px; border-top:1px solid #E5E7EB; padding-top:12px; font-size:0.85rem; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:300px;">
+                                <div id="olahAvailSummary">-</div>
+                            </div>
+                            <div style="display:flex; gap:16px; align-items:center; font-size:0.8rem; color:#4B5563;">
+                                <span><span style="display:inline-block;width:12px;height:12px;background:#3B82F6;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Tersedia</span>
+                                <span><span style="display:inline-block;width:12px;height:12px;background:#EF4444;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Hilang</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="olahDailyPieWrapper" style="display:none; align-items:center; justify-content:center; flex-direction:column; min-height:300px; width:100%; padding:24px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; box-sizing:border-box;">
+                        <div style="width:min(320px,100%); aspect-ratio:1/1; margin-bottom:20px; position:relative;">
+                            <canvas id="olahDailyPieChart"></canvas>
+                        </div>
+                        <div id="olahDailyPieSummary" style="font-size:0.95rem; color:#4B5563; text-align:center; max-width:90%; line-height:1.6;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <?php include 'footer.php'; ?>

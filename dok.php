@@ -28,6 +28,7 @@
             display: flex;
             min-height: calc(100vh - 56px);
             padding-top: 56px;
+            isolation: isolate;
         }
 
         /* ===== Sidebar ===== */
@@ -41,7 +42,14 @@
             top: 56px;
             height: calc(100vh - 56px);
             overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #D1D5DB transparent;
         }
+
+        .docs-sidebar::-webkit-scrollbar { width: 4px; }
+        .docs-sidebar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+        .docs-sidebar::-webkit-scrollbar-track { background: transparent; }
 
         .docs-sidebar h4 {
             font-size: 0.68rem;
@@ -156,7 +164,7 @@
         /* ===== Content ===== */
         .docs-content {
             flex: 1;
-            padding: 36px 48px 72px 44px;
+            padding: 36px 48px 20px 44px;
             max-width: 820px;
             min-width: 0;
         }
@@ -505,6 +513,23 @@
             .glos-row { grid-template-columns: 1fr; gap: 2px; }
             .glos-term { padding-right: 0; }
         }
+
+        /* ===== Footer inside content ===== */
+        .landing-footer {
+            position: relative;
+            z-index: 10;
+            margin: 12px 0 0;
+        }
+
+        .docs-sidebar::after {
+            content: '';
+            position: sticky;
+            bottom: 0;
+            display: block;
+            height: 40px;
+            background: linear-gradient(transparent, #fff);
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -522,15 +547,23 @@
             <a href="#peta-guide" onclick="showSection('peta-guide', this)">Peta Interaktif</a>
             <a href="#olah-guide" onclick="showSection('olah-guide', this)">Olah Data Anda</a>
 
+            <!-- ponytail: Metode hidden — formulas moved to detail page -->
+            <!--
             <h4>Metode</h4>
             <a href="#mann-kendall" onclick="showSection('mann-kendall', this)">Mann-Kendall</a>
+            <a href="#seasonal-mk" onclick="showSection('seasonal-mk', this)">Seasonal Mann-Kendall</a>
             <a href="#sens-slope" onclick="showSection('sens-slope', this)">Sen's Slope</a>
+            <a href="#seasonal-sens" onclick="showSection('seasonal-sens', this)">Seasonal Sen's Slope</a>
             <a href="#regresi-linear" onclick="showSection('regresi-linear', this)">Regresi Linear</a>
+            -->
 
+            <!-- ponytail: Lanjutan menu hidden — not part of thesis Ch3 documen -->
+            <!--
             <h4>Lanjutan</h4>
             <a href="#interpretasi" onclick="showSection('interpretasi', this)">Interpretasi Hasil</a>
             <a href="#faq" onclick="showSection('faq', this)">FAQ</a>
             <a href="#glosarium" onclick="showSection('glosarium', this)">Glosarium</a>
+            -->
         </aside>
 
         <!-- Content -->
@@ -544,7 +577,7 @@
                 </p>
 
                 <h2>Apa itu TrendHidro?</h2>
-                <p>TrendHidro menyediakan tiga metode uji statistik yang dapat dijalankan langsung di browser:</p>
+                <p>TrendHidro menyediakan tiga metode uji statistik yang dapat dijalankan langsung pada <i>browser</i>:</p>
                 <ul>
                     <li><strong>Uji Mann-Kendall</strong> — Mendeteksi keberadaan <i>trend</i> monoton secara non-parametrik</li>
                     <li><strong>Sen's Slope Estimator</strong> — Mengestimasi besaran kemiringan <i>trend</i> secara non-parametrik (<i>robust</i> terhadap <i>outlier</i>)</li>
@@ -574,7 +607,7 @@
                 <div class="changelog-item">
                     <h2 class="changelog-title">v1.0 <span class="changelog-sub">— Juni 2026</span></h2>
                     <div class="changelog-desc">
-                        Peluncuran TrendHidro dengan fitur lengkap: Peta Interaktif berbasis Leaflet.js dengan marker berwarna hasil uji statistik, halaman Detail Stasiun dengan grafik dan ketersediaan data harian, halaman Olah Data untuk upload file CSV/XLS/XLSX, serta ketiga metode statistik (Mann-Kendall, Sen's Slope, Regresi Linear) yang berjalan di server PHP.
+                        Peluncuran TrendHidro dengan fitur lengkap: Peta Interaktif berbasis Leaflet.js dengan marker berwarna hasil uji statistik, halaman Detail Stasiun dengan grafik dan ketersediaan data harian, halaman Olah Data untuk mengunggah <i>file</i> CSV/XLS/XLSX, serta ketiga metode statistik (Mann-Kendall, Sen's Slope, Regresi Linear) yang berjalan pada <i>server</i> PHP.
                     </div>
                 </div>
             </div>
@@ -598,39 +631,37 @@
                     <div class="summary-card">
                         <div class="summary-card-label">Tipe Data</div>
                         <div class="summary-card-value">Bulanan / Tahunan / Musiman</div>
-                        <div class="summary-card-sub">Agregasi periode sebelum data dianalisis. Musiman: Jan–Mar, Apr–Jun, Jul–Sep, Okt–Des.</div>
+                        <div class="summary-card-sub">Agregasi pada periode sebelum data dianalisis. Musiman: Jan–Mar, Apr–Jun, Jul–Sep, Okt–Des.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">Agregasi</div>
-                        <div class="summary-card-value">SUM / AVG / MAX / MIN</div>
-                        <div class="summary-card-sub">Fungsi peringkasan nilai curah hujan dalam periode terpilih.</div>
+                        <div class="summary-card-value">Kumulatif / Rerata / Maks</div>
+                        <div class="summary-card-sub">Fungsi peringkasan nilai curah hujan pada periode terpilih.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">Periode Tahun</div>
-                        <div class="summary-card-value">Year picker</div>
+                        <div class="summary-card-value"><i>Year picker</i></div>
                         <div class="summary-card-sub">Klik angka tahun untuk membuka pemilih. Tahun tidak tersedia ditampilkan abu-abu.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">Metode</div>
-                        <div class="summary-card-value">Toggle switch</div>
+                        <div class="summary-card-value"><i>Toggle switch</i></div>
                         <div class="summary-card-sub">Aktifkan satu metode (Mann-Kendall, Sen's Slope, atau Regresi Linear). Marker berubah warna sesuai hasil.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">Filter Kualitas</div>
-                        <div class="summary-card-value">&lt; 16 thn / &lt; 30 thn</div>
+                        <div class="summary-card-value">Sembunyikan &lt; 16 / &lt; 30 Tahun</div>
                         <div class="summary-card-sub">Sembunyikan stasiun dengan data pendek. Muncul setelah metode diaktifkan.</div>
                     </div>
                 </div>
 
                 <h2>Legenda Marker</h2>
                 <div class="color-legend">
-                    <div class="color-legend-row"><span class="color-dot" style="background:#0B6E2F;"></span> <strong style="color:#0B6E2F;">▲ Hijau Gelap</strong> — Meningkat signifikan</div>
-                    <div class="color-legend-row"><span class="color-dot" style="background:#16A34A;"></span> <strong style="color:#16A34A;">▲ Hijau Terang</strong> — Meningkat tidak signifikan</div>
-                    <div class="color-legend-row"><span class="color-dot" style="background:#991B1B;"></span> <strong style="color:#991B1B;">▼ Merah Gelap</strong> — Menurun signifikan</div>
-                    <div class="color-legend-row"><span class="color-dot" style="background:#DC2626;"></span> <strong style="color:#DC2626;">▼ Merah Terang</strong> — Menurun tidak signifikan</div>
+                    <div class="color-legend-row"><span class="color-dot" style="background:#16A34A;"></span> <strong style="color:#16A34A;">▲ Hijau</strong> — Meningkat</div>
+                    <div class="color-legend-row"><span class="color-dot" style="background:#DC2626;"></span> <strong style="color:#DC2626;">▼ Merah</strong> — Menurun</div>
                     <div class="color-legend-row"><span class="color-dot" style="background:#6B7280;"></span> <strong style="color:#6B7280;">— Abu-abu</strong> — Tidak ada <i>trend</i></div>
                 </div>
-                <p>Tanda <strong>⚠︎ (kuning)</strong> pada marker menandakan panjang data &lt; 16 tahun — hasil perlu diinterpretasi dengan hati-hati.</p>
+                <p>Tanda <strong style="color:#B91C1C;background:#FACC15;padding:1px 5px;border-radius:3px;font-size:0.85em;">!</strong> (kuning) pada marker menandakan panjang data &lt; 16 tahun — hasil perlu diinterpretasi dengan hati-hati.</p>
 
                 <h2>Interaksi Peta</h2>
                 <ul>
@@ -644,7 +675,7 @@
                 <div class="summary-grid">
                     <div class="summary-card">
                         <div class="summary-card-label">Grafik Curah Hujan</div>
-                        <div class="summary-card-value">Bar + garis regresi</div>
+                        <div class="summary-card-value"><i>Bar</i> + garis regresi</div>
                         <div class="summary-card-sub">Diagram batang data runtut waktu; garis merah menunjukkan regresi linear.</div>
                     </div>
                     <div class="summary-card">
@@ -679,7 +710,7 @@
             <div class="doc-section" id="sec-olah-guide">
                 <h1>Panduan Olah Data Anda</h1>
                 <p class="page-lead">
-                    Halaman <strong>Olah Data</strong> memungkinkan Anda mengunggah data curah hujan sendiri dan menjalankan ketiga uji statistik langsung di browser. Data <strong>tidak</strong> disimpan di server.
+                    Halaman <strong>Olah Data</strong> memungkinkan Anda mengunggah data curah hujan sendiri dan menjalankan ketiga uji statistik langsung di <i>browser</i>. Data <strong>tidak</strong> disimpan di <i>server</i>.
                 </p>
 
                 <h2>Cara Penggunaan</h2>
@@ -687,35 +718,39 @@
                     <div class="summary-card">
                         <div class="summary-card-label">1 — Upload</div>
                         <div class="summary-card-value">CSV, XLS, atau XLSX</div>
-                        <div class="summary-card-sub">Seret file ke area upload atau klik untuk memilih. Format tanggal dan separator CSV terdeteksi otomatis.</div>
+                        <div class="summary-card-sub">Seret <i>file</i> ke area <i>upload</i> atau klik untuk memilih. Format tanggal dan separator CSV terdeteksi otomatis.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">2 — Pratinjau</div>
                         <div class="summary-card-value">20 baris pertama</div>
-                        <div class="summary-card-sub">Tabel pratinjau muncul setelah file diproses. Klik "Ganti File" untuk mengganti.</div>
+                        <div class="summary-card-sub">Tabel pratinjau muncul setelah <i>file</i> diproses. Klik "Ganti <i>File</i>" untuk mengganti.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">3 — Parameter</div>
                         <div class="summary-card-value">Tipe, Bulan, Periode</div>
-                        <div class="summary-card-sub">Pilih tipe data (Bulanan/Tahunan/Musiman), filter bulan/musim, dan rentang tahun.</div>
+                        <div class="summary-card-sub">Pilih tipe data (Bulanan/Tahunan/Musiman), <i>filter</i> bulan/musim, dan rentang tahun.</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-card-label">4 — Olah</div>
                         <div class="summary-card-value">Klik "Olah Data"</div>
-                        <div class="summary-card-sub">Server menjalankan ketiga metode dan hasilnya ditampilkan langsung di halaman.</div>
+                        <div class="summary-card-sub"><i>Server</i> menjalankan ketiga metode dan hasilnya ditampilkan langsung di halaman.</div>
                     </div>
                 </div>
 
                 <h2>Format File</h2>
-                <p>File harus memiliki minimal <strong>2 kolom</strong>:</p>
-                <table class="stat-table" style="max-width:460px;">
+                <p><i>File</i> harus memiliki minimal <strong>2 kolom</strong>:</p>
+                <table class="stat-table" style="max-width:520px;">
                     <thead>
-                        <tr><th>Posisi</th><th>Isi</th><th>Format</th></tr>
+                        <tr><th>Posisi</th><th>Isi</th><th>Format yang Didukung</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Kolom 1</td><td>Tanggal</td><td><code>dd/mm/yy</code>, <code>dd/mm/yyyy</code>, <code>dd-mm-yyyy</code>, <code>dd.mm.yyyy</code>, atau <code>yyyy-mm-dd</code></td></tr>
+                        <tr><td>Kolom 1</td><td>Tanggal</td><td>
+                            <strong>Tahunan:</strong> <code>YYYY</code><br>
+                            <strong>Bulanan:</strong> <code>YYYY-MM</code>, <code>MM/YYYY</code>, <code>Mon YYYY</code> (contoh: <code>Jan 2020</code>)<br>
+                            <strong>Harian:</strong> <code>dd/mm/yy</code>, <code>dd/mm/yyyy</code>, <code>dd-mm-yyyy</code>, <code>dd.mm.yyyy</code>, <code>yyyy-mm-dd</code>
+                        </td></tr>
                         <tr><td>Kolom 2</td><td>Nilai curah hujan</td><td>Numerik (mm)</td></tr>
-                        <tr><td colspan="3" style="font-size:0.83rem;color:#6B7280;">Baris pertama (header) dilewati otomatis. Separator CSV (koma atau titik koma) terdeteksi otomatis.</td></tr>
+                        <tr><td colspan="3" style="font-size:0.83rem;color:#6B7280;">Baris pertama (<i>header</i>) dilewati otomatis. Separator CSV (koma atau titik koma) terdeteksi otomatis. Format tanggal fleksibel — jika format tidak dikenali, <i>browser</i> akan mencoba <i>parse</i> secara otomatis.</td></tr>
                     </tbody>
                 </table>
 
@@ -753,15 +788,22 @@
                     </div>
                 </div>
 
+                <!-- ponytail: Pesan galat hidden -->
+                <!--
                 <h2>Pesan Galat Umum</h2>
                 <ul>
-                    <li><strong>"Format file tidak didukung"</strong> — File bukan CSV, XLS, atau XLSX</li>
-                    <li><strong>"File CSV kosong"</strong> — File tidak memiliki baris data</li>
-                    <li><strong>"Tidak ada data valid"</strong> — Semua baris gagal dibaca (tanggal tidak dikenali atau nilai bukan angka)</li>
-                    <li><strong>"Gagal membaca file Excel"</strong> — File Excel rusak atau format tidak kompatibel</li>
-                    <li><strong>"Tahun awal &gt; tahun akhir"</strong> — Rentang tahun tidak valid</li>
-                    <li><strong>"Tidak ada data untuk periode"</strong> — Data kosong setelah filter diterapkan</li>
+                    <li><strong>"Format file tidak didukung. Gunakan CSV, XLS, atau XLSX."</strong> — File bukan CSV, XLS, atau XLSX</li>
+                    <li><strong>"File CSV kosong atau tidak memiliki data."</strong> — File tidak memiliki baris data</li>
+                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file CSV."</strong> — Semua baris gagal dibaca (tanggal tidak dikenali atau nilai bukan angka)</li>
+                    <li><strong>"Sheet Excel kosong atau tidak memiliki data."</strong> — Sheet Excel kosong</li>
+                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file Excel."</strong> — Semua baris gagal dibaca</li>
+                    <li><strong>"Gagal membaca file Excel. Pastikan format file benar."</strong> — File Excel rusak atau format tidak kompatibel</li>
+                    <li><strong>"Minimal 3 data"</strong> — Data terlalu sedikit untuk analisis statistik</li>
+                    <li><strong>"Silakan upload file data terlebih dahulu."</strong> — Belum ada file yang diunggah</li>
+                    <li><strong>"Tahun awal harus lebih kecil atau sama dengan tahun akhir."</strong> — Rentang tahun tidak valid</li>
+                    <li><strong>"Tidak ada data untuk periode yang dipilih."</strong> — Data kosong setelah filter diterapkan</li>
                 </ul>
+                -->
             </div>
 
             <!-- ==================== MANN-KENDALL ==================== -->
@@ -809,6 +851,56 @@
                 </ul>
             </div>
 
+            <!-- ==================== SEASONAL MANN-KENDALL ==================== -->
+            <div class="doc-section" id="sec-seasonal-mk">
+                <h1>Seasonal Mann-Kendall</h1>
+                <p class="page-lead">
+                    Adaptasi uji Mann-Kendall untuk data dengan siklus musiman. Membandingkan data yang berasal dari bulan atau musim yang sama, sehingga efek musiman tidak memengaruhi deteksi <i>trend</i>.
+                </p>
+
+                <h2>Rumus</h2>
+
+                <h3>Statistik S per musim</h3>
+                <div class="formula-box">
+                    $$S_i' = \sum_{k=1}^{n_i-1} \sum_{j=k+1}^{n_i} \text{sign}(x_{ij} - x_{ik})$$
+                </div>
+                <p>$S_i'$ = statistik Mann-Kendall untuk musim ke-$i$; $n_i$ = jumlah tahun yang memiliki data pada musim ke-$i$; $x_{ij}$ = nilai data pada musim ke-$i$, tahun ke-$j$.</p>
+
+                <h3>Statistik gabungan ($S^*$)</h3>
+                <div class="formula-box">
+                    $$S^* = \sum_{i=1}^{12} S_i'$$
+                </div>
+                <p>$S^*$ = statistik uji gabungan dari seluruh musim.</p>
+
+                <h3>Varians per musim</h3>
+                <div class="formula-box">
+                    $$\text{Var}(S_i') = \frac{n_i(n_i-1)(2n_i+5) - \displaystyle\sum_{p=1}^{g_i} t_{ip}(t_{ip} - 1)(2t_{ip} + 5)}{18}$$
+                </div>
+                <p>$\text{Var}(S_i')$ = varians $S_i'$ dengan koreksi <i>tied groups</i> per musim; $t_{ip}$ = jumlah data dalam <i>tied group</i> ke-$p$ pada musim ke-$i$; $g_i$ = banyaknya <i>tied groups</i> pada musim ke-$i$.</p>
+
+                <h3>Varians gabungan</h3>
+                <div class="formula-box">
+                    $$\text{Var}(S^*) = \sum_{i=1}^{12} \text{Var}(S_i')$$
+                </div>
+                <p>$\text{Var}(S^*)$ = varians gabungan dari seluruh musim.</p>
+
+                <h3>Statistik uji $Z^*$</h3>
+                <div class="formula-box">
+                    $$Z^* = \begin{cases}
+                    \dfrac{S^* - 1}{\sqrt{\text{Var}(S^*)}} & S^* > 0 \\[10pt]
+                    0 & S^* = 0 \\[10pt]
+                    \dfrac{S^* + 1}{\sqrt{\text{Var}(S^*)}} & S^* < 0
+                    \end{cases}$$
+                </div>
+                <p>$Z^*$ = statistik uji gabungan — disubstitusikan ke persamaan (3.6) menggantikan $S$ dan $\text{Var}(S)$. Kriteria: $|Z^*| > 1{,}96$ → <i>trend</i> signifikan pada $\alpha = 0{,}05$.</p>
+
+                <h2>Hipotesis</h2>
+                <ul>
+                    <li>$H_0$: Tidak ada <i>trend</i> monoton pada seluruh musim</li>
+                    <li>$H_1$: Terdapat <i>trend</i> monoton pada salah satu atau lebih musim</li>
+                </ul>
+            </div>
+
             <!-- ==================== SEN'S SLOPE ==================== -->
             <div class="doc-section" id="sec-sens-slope">
                 <h1>Sen's Slope Estimator</h1>
@@ -825,17 +917,11 @@
                 </div>
                 <p>$Q_i$ = kemiringan pasangan ke-$i$; $t_j, t_k$ = indeks waktu; $y_j, y_k$ = nilai data; $N$ = total jumlah pasangan; $n$ = jumlah titik data.</p>
 
-                <h3>Sen's Slope (median kemiringan)</h3>
+                <h3>Sen's Slope ($Q_{\text{med}}$)</h3>
                 <div class="formula-box">
-                    $$\hat{\beta} = \text{median}(Q_1, Q_2, \ldots, Q_N)$$
+                    $$Q_{\text{med}} = \text{median}(Q_1, Q_2, \ldots, Q_N)$$
                 </div>
-                <p>$\hat{\beta}$ = median dari seluruh $Q_i$ — besarnya perubahan per satuan waktu (<i>robust</i> terhadap <i>outlier</i>).</p>
-
-                <h3><i>Intercept</i></h3>
-                <div class="formula-box">
-                    $$\hat{\alpha} = \text{median}(y_i - \hat{\beta} \cdot t_i)$$
-                </div>
-                <p>$\hat{\alpha}$ = <i>intercept</i> garis <i>trend</i>.</p>
+                <p>$Q_{\text{med}}$ = median dari seluruh $Q_i$ — nilai Sen's Slope; besarnya perubahan per satuan waktu (<i>robust</i> terhadap <i>outlier</i>).</p>
 
                 <h3>Interval Kepercayaan 95%</h3>
                 <div class="formula-box">
@@ -853,50 +939,107 @@
                 </ul>
             </div>
 
-            <!-- ==================== REGRESI LINEAR ==================== -->
-            <div class="doc-section" id="sec-regresi-linear">
-                <h1>Regresi Linear</h1>
+            <!-- ==================== SEASONAL SEN'S SLOPE ==================== -->
+            <div class="doc-section" id="sec-seasonal-sens">
+                <h1>Seasonal Sen's Slope</h1>
                 <p class="page-lead">
-                    Metode parametrik (<i>Ordinary Least Squares</i>) untuk menentukan garis lurus terbaik yang meminimalkan jumlah kuadrat residual. Memberikan $R^2$ dan uji signifikansi $t$.
+                    Adaptasi Sen's Slope untuk data dengan siklus musiman. Pasangan data dibatasi hanya dari bulan atau musim yang sama, sehingga kemiringan dihitung dari perubahan antar-tahun pada musim yang setara.
                 </p>
 
                 <h2>Rumus</h2>
 
-                <h3>Komponen dasar</h3>
+                <h3>Kemiringan per musim</h3>
                 <div class="formula-box">
-                    $$S_{xx} = \sum_{i=1}^{n}(x_i - \bar{x})^2, \quad
-                    S_{yy} = \sum_{i=1}^{n}(y_i - \bar{y})^2, \quad
-                    S_{xy} = \sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})$$
+                    $$Q_i' = \frac{x'_{ij} - x'_{ik}}{t_j - t_k} \quad \text{untuk semua } j > k \text{ pada musim ke-}m, \quad i = 1, 2, \ldots, N_m$$
                 </div>
-                <p>$S_{xx}, S_{yy}, S_{xy}$ = jumlah kuadrat dan hasil kali silang deviasi; $x_i$ = indeks waktu; $y_i$ = nilai data; $\bar{x}, \bar{y}$ = rata-rata; $n$ = jumlah titik data.</p>
+                <p>$Q_i'$ = kemiringan pasangan ke-$i$ pada musim ke-$m$; $x'_{ij}, x'_{ik}$ = nilai data pada musim ke-$m$ tahun ke-$j$ dan ke-$k$; $N_m$ = jumlah pasangan pada musim ke-$m$.</p>
 
-                <h3>Slope dan intercept</h3>
+                <h3>Jumlah pasangan per musim</h3>
                 <div class="formula-box">
-                    $$\hat{\beta} = \frac{S_{xy}}{S_{xx}}, \quad
-                    \hat{\alpha} = \bar{y} - \hat{\beta} \cdot \bar{x}$$
+                    $$N_m = \frac{n_m(n_m-1)}{2}$$
                 </div>
-                <p>$\hat{\beta}$ = slope regresi (perubahan $y$ per satuan waktu); $\hat{\alpha}$ = <i>intercept</i>.</p>
+                <p>$N_m$ = jumlah total pasangan data yang mungkin dibentuk dari data musim ke-$m$; $n_m$ = jumlah tahun yang memiliki data pada musim ke-$m$.</p>
 
-                <h3>Koefisien determinasi ($R^2$)</h3>
+                <h3>Total pasangan gabungan</h3>
                 <div class="formula-box">
-                    $$R^2 = 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}}
-                    = 1 - \frac{\displaystyle\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\displaystyle\sum_{i=1}^{n}(y_i - \bar{y})^2}$$
+                    $$N^* = \sum_{m=1}^{12} N_m$$
                 </div>
-                <p>$R^2$ = proporsi variasi data yang dijelaskan model (0–1); $\hat{y}_i$ = nilai prediksi; $SS_{\text{res}}$ = jumlah kuadrat residual; $SS_{\text{tot}}$ = jumlah kuadrat total.</p>
+                <p>$N^*$ = jumlah total pasangan data gabungan dari seluruh musim.</p>
 
-                <h3>Uji signifikansi ($t$-test)</h3>
+                <h3>Median gabungan ($Q^*_{\text{med}}$)</h3>
                 <div class="formula-box">
-                    $$MSE = \frac{SS_{\text{res}}}{n - 2}, \quad
-                    SE(\hat{\beta}) = \sqrt{\frac{MSE}{S_{xx}}}, \quad
-                    t = \frac{\hat{\beta}}{SE(\hat{\beta})}$$
+                    $$Q^*_{\text{med}} = \text{median}(Q_1', Q_2', \ldots, Q_{N^*}')$$
                 </div>
-                <p>$MSE$ = <i>mean squared error</i>; $SE(\hat{\beta})$ = <i>standard error</i> slope; $t$ = statistik uji. $|t| > t_{\text{kritis}}(df=n-2,\; \alpha=0{,}05)$ → <i>trend</i> signifikan.</p>
+                <p>$Q^*_{\text{med}}$ = median dari seluruh $Q_i'$ gabungan dari seluruh musim — besarnya perubahan per satuan waktu.</p>
+
+                <h3>Interval Kepercayaan 95%</h3>
+                <div class="formula-box">
+                    $$C^*_{\alpha} = Z_{\alpha/2} \cdot \sqrt{\text{Var}(S^*)}, \quad
+                    M_1^* = \frac{N^* - C^*_{\alpha}}{2}, \quad
+                    M_2^* = \frac{N^* + C^*_{\alpha}}{2}$$
+                    $$Q^*_{\min} = Q'_{(M_1^*)}, \quad Q^*_{\max} = Q'_{(M_2^*)}$$
+                </div>
+                <p>$C^*_{\alpha}$ = lebar interval kepercayaan gabungan; $\text{Var}(S^*)$ = varians gabungan dari persamaan (3.10); $Q^*_{\min}, Q^*_{\max}$ = batas bawah/atas IK 95%. Jika 0 tidak berada dalam ($Q^*_{\min}, Q^*_{\max}$), <i>trend</i> signifikan.</p>
+
+                <h2>Hipotesis</h2>
+                <ul>
+                    <li>$H_0$: Tidak ada <i>trend</i> — kemiringan populasi gabungan musim ($\beta^*$) = 0</li>
+                    <li>$H_1$: Terdapat <i>trend</i> — $\beta^* \ne 0$ (meningkat atau menurun)</li>
+                </ul>
+            </div>
+
+            <!-- ==================== REGRESI LINEAR ==================== -->
+            <div class="doc-section" id="sec-regresi-linear">
+                <h1>Regresi Linear</h1>
+                <p class="page-lead">
+                    Metode parametrik (<i>Ordinary Least Squares</i>) untuk menentukan garis lurus terbaik yang meminimalkan jumlah kuadrat residual. Memberikan koefisien korelasi $r$ dan uji signifikansi $t$.
+                </p>
+
+                <h2>Rumus</h2>
+
+                <h3>Model regresi</h3>
+                <div class="formula-box">
+                    $$y_i = \alpha + \beta x_i$$
+                </div>
+                <p>$y_i$ = nilai variabel dependen; $x_i$ = nilai variabel bebas ke-$i$; $\beta$ = kemiringan garis regresi; $\alpha$ = perpotongan garis regresi dengan sumbu-$y$.</p>
+
+                <h3>Rata-rata</h3>
+                <div class="formula-box">
+                    $$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i, \quad \bar{y} = \frac{1}{n}\sum_{i=1}^{n} y_i$$
+                </div>
+                <p>$\bar{x}$ = rerata variabel bebas; $\bar{y}$ = rerata variabel dependen; $n$ = jumlah titik data.</p>
+
+                <h3>Slope ($\hat{\beta}$) dan intercept ($\hat{\alpha}$)</h3>
+                <div class="formula-box">
+                    $$\hat{\beta} = \frac{S_{xy}}{S_{xx}}, \quad \hat{\alpha} = \bar{y} - \hat{\beta} \cdot \bar{x}$$
+                </div>
+                <p>$\hat{\beta}$ = estimasi slope regresi (perubahan $y$ per satuan waktu); $\hat{\alpha}$ = estimasi intercept.</p>
 
                 <h3>Koefisien korelasi ($r$)</h3>
                 <div class="formula-box">
                     $$r = \frac{S_{xy}}{\sqrt{S_{xx} \cdot S_{yy}}}$$
                 </div>
-                <p>$r$ = koefisien korelasi Pearson ($-1 \le r \le 1$); tanda $r$ mengikuti arah $\hat{\beta}$.</p>
+                <p>$r$ = koefisien korelasi Pearson ($-1 \le r \le 1$); menunjukkan kekuatan hubungan antara variabel bebas dan terikat; tanda $r$ mengikuti arah $\hat{\beta}$.</p>
+
+                <h3>Komponen kuadrat</h3>
+                <div class="formula-box">
+                    $$S_{xy} = \sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}), \quad
+                    S_{xx} = \sum_{i=1}^{n}(x_i - \bar{x})^2, \quad
+                    S_{yy} = \sum_{i=1}^{n}(y_i - \bar{y})^2$$
+                </div>
+                <p>$S_{xy}$ = jumlah hasil kali selisih terhadap $\bar{x}$ dan selisih terhadap $\bar{y}$; $S_{xx}$ = jumlah kuadrat selisih nilai $x$ terhadap rata-ratanya; $S_{yy}$ = jumlah kuadrat selisih nilai $y$ terhadap rata-ratanya.</p>
+
+                <h3>Uji signifikansi ($t$-test)</h3>
+                <div class="formula-box">
+                    $$t = \frac{\hat{\beta}}{SE(\hat{\beta})}, \quad SE(\hat{\beta}) = \sqrt{\frac{MSE}{S_{xx}}}, \quad MSE = \frac{SS_{\text{res}}}{n - 2}$$
+                </div>
+                <p>$t$ = nilai statistik uji $t$; $SE(\hat{\beta})$ = <i>standard error</i> slope; $MSE$ = <i>mean squared error</i>. $|t| > t_{\text{kritis}}(df=n-2,\; \alpha=0{,}05)$ → <i>trend</i> signifikan.</p>
+
+                <h3>Derajat kebebasan</h3>
+                <div class="formula-box">
+                    $$df = n - k$$
+                </div>
+                <p>$df$ = derajat kebebasan; $k$ = parameter yang diestimasi ($k = 1$ untuk slope regresi).</p>
 
                 <h2>Hipotesis</h2>
                 <ul>
@@ -905,8 +1048,9 @@
                 </ul>
             </div>
 
+            <!-- ponytail: sections below hidden — not part of thesis Ch3 documen -->
             <!-- ==================== INTERPRETASI ==================== -->
-            <div class="doc-section" id="sec-interpretasi">
+            <div class="doc-section" id="sec-interpretasi" style="display:none!important;">
                 <h1>Interpretasi Hasil</h1>
                 <p class="page-lead">Panduan membaca output yang ditampilkan di Peta Interaktif maupun halaman Olah Data.</p>
 
@@ -997,7 +1141,7 @@
             </div>
 
             <!-- ==================== FAQ ==================== -->
-            <div class="doc-section" id="sec-faq">
+            <div class="doc-section" id="sec-faq" style="display:none!important;">
                 <h1>FAQ</h1>
                 <p class="page-lead">Pertanyaan yang sering diajukan.</p>
 
@@ -1059,7 +1203,7 @@
             </div>
 
             <!-- ==================== GLOSARIUM ==================== -->
-            <div class="doc-section" id="sec-glosarium">
+            <div class="doc-section" id="sec-glosarium" style="display:none!important;">
                 <h1>Glosarium</h1>
                 <p class="page-lead">Istilah teknis yang muncul di antarmuka TrendHidro.</p>
 
@@ -1115,6 +1259,7 @@
                 </div>
             </div>
 
+            <?php include 'footer.php'; ?>
         </main>
 
         <!-- Floating TOC -->
@@ -1236,8 +1381,6 @@
             watchToc();
         })();
     </script>
-
-    <?php include 'footer.php'; ?>
 </body>
 
 </html>

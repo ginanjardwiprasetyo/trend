@@ -24,6 +24,23 @@ function initMap() {
     // Kontrol zoom di kiri bawah
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
+    // Kontrol toggle label nama pos
+    const LabelToggle = L.Control.extend({
+        onAdd: function() {
+            const btn = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-labels');
+            btn.id = 'toggleLabelsBtn';
+            btn.title = 'Tampilkan/Sembunyikan Label Nama Pos';
+            btn.innerHTML = '🏷️';
+            btn.onclick = toggleLabels;
+            L.DomEvent.disableClickPropagation(btn);
+            return btn;
+        }
+    });
+    new LabelToggle({ position: 'bottomleft' }).addTo(map);
+
+    // Re-apply label state on zoom change
+    map.on('zoomend', applyLabelState);
+
     // Base layers
     baseLayers['OpenStreetMap'] = L.tileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

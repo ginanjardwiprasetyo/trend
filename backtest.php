@@ -638,7 +638,7 @@
                 <div class="step-substitution">${lr.rSquared_formula} = <strong>${lr.rSquared}</strong></div>
                 <div class="step-formula-label">Koefisien Korelasi</div>
                 <div class="step-substitution">${lr.r_formula} = <strong>${lr.r}</strong></div>
-                <div class="step-info"><span class="step-info-icon">💡</span><span>R² = ${lr.rSquared} berarti model menjelaskan <strong>${(lr.rSquared * 100).toFixed(2)}%</strong> variasi data.</span></div>
+                <div class="step-info"><span class="step-info-icon">💡</span><span>R² = ${lr.rSquared} berarti model menjelaskan <strong>${(lr.rSquared * 100).toFixed(2).replace('.', ',')}%</strong> variasi data.</span></div>
             </div>`;
 
             // Step 4: t-test
@@ -659,7 +659,7 @@
                     <div class="step-formula">t = β₁ / SE</div>
                     <div class="step-substitution">${lr.t_formula} = <strong>${lr.t_statistic}</strong></div>
                     <div class="step-formula-label">Keputusan (α = 0.05, df = ${lr.df})</div>
-                    <div class="step-substitution">|t| = ${Math.abs(lr.t_statistic).toFixed(4)} ${lr.t_significant ? '>' : '≤'} t<sub>kritis</sub> = ${lr.t_critical}<br><strong>${lr.t_significant ? 'Tolak H₀ → Slope signifikan' : 'Gagal tolak H₀ → Slope tidak signifikan'}</strong></div>`;
+                    <div class="step-substitution">|t| = ${Math.abs(lr.t_statistic).toFixed(4).replace('.', ',')} ${lr.t_significant ? '>' : '≤'} t<sub>kritis</sub> = ${lr.t_critical}<br><strong>${lr.t_significant ? 'Tolak H₀ → Slope signifikan' : 'Gagal tolak H₀ → Slope tidak signifikan'}</strong></div>`;
             } else {
                 html += `<div class="step-info"><span class="step-info-icon">⚠️</span><span>Data tidak cukup untuk uji-t (memerlukan n > 2)</span></div>`;
             }

@@ -3,6 +3,31 @@
  * Render marker stasiun dan perbarui ikon panah tren
  */
 
+// ====== TOGGLE LABEL NAMA POS ======
+let labelsVisible = false;
+const LABEL_ZOOM_THRESHOLD = 8;
+
+function toggleLabels() {
+    labelsVisible = !labelsVisible;
+    const btn = document.getElementById('toggleLabelsBtn');
+    if (btn) btn.classList.toggle('active', labelsVisible);
+    applyLabelState();
+}
+
+function applyLabelState() {
+    const isPermanent = labelsVisible && map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+    stationMarkers.forEach(m => {
+        if (!map.hasLayer(m)) return;
+        m.unbindTooltip();
+        m.bindTooltip(m.stationData.name, {
+            permanent: isPermanent,
+            direction: 'bottom',
+            offset: [0, 12],
+            className: 'station-tooltip'
+        });
+    });
+}
+
 // ====== SVG IKON ======
 function createStationIcon() {
     return L.divIcon({
@@ -98,12 +123,17 @@ function renderStationMarkers(stations) {
         // Klik → lightbox
         marker.on('click', () => {
             openLightbox(props);
+            // Buka ulang permanent tooltip yang ditutup Leaflet saat klik
+            if (labelsVisible && map.getZoom() >= LABEL_ZOOM_THRESHOLD) {
+                setTimeout(() => { if (map.hasLayer(marker)) marker.openTooltip(); }, 150);
+            }
         });
 
         // Tooltip nama stasiun
         marker.bindTooltip(props.name, {
-            direction: 'top',
-            offset: [0, -10],
+            permanent: false,
+            direction: 'bottom',
+            offset: [0, 12],
             className: 'station-tooltip'
         });
 
@@ -161,6 +191,7 @@ function resetMarkerIcons() {
         if (!map.hasLayer(marker)) marker.addTo(map);
         marker.setIcon(createStationIcon());
     });
+    if (typeof applyQualityFilter === 'function') applyQualityFilter();
 }
 
 // ====== APPLY QUALITY FILTER (tanpa metode aktif) ======

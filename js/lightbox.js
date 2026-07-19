@@ -40,8 +40,9 @@ function openLightbox(stationData) {
         document.getElementById('confirmYes').style.display = 'none';
     }
 
-    // Helper untul format minus typografi
+    // Helper format minus typografi + koma desimal
     const fM = (val) => val === undefined || val === null ? '—' : String(val).replace('-', '−');
+    const fmt = (val, d) => val === undefined || val === null ? '—' : fM(Number(val).toFixed(d)).replace('.', ',');
 
     // Isi data
     document.getElementById('lightboxTitle').textContent = "Pos " + stationData.name;
@@ -72,19 +73,19 @@ function openLightbox(stationData) {
             trendLabel.parentElement.style.display = "flex";
             if (currentMethod === 'mann-kendall') {
                 trendLabel.textContent = "Uji Mann-Kendall";
-                trendValue.textContent = `Z: ${fM(Number(trend.Z).toFixed(3))}`;
+                trendValue.textContent = `Z: ${fmt(trend.Z, 3)}`;
             } else if (currentMethod === 'sens-slope') {
                 trendLabel.textContent = "Sen's Slope";
-                trendValue.textContent = `Slope: ${fM(Number(trend.slope).toFixed(3))}`;
+                trendValue.textContent = `Slope: ${fmt(trend.slope, 3)}`;
             } else if (currentMethod === 'regresi-linear') {
                 trendLabel.textContent = "Regresi Linear";
-                trendValue.textContent = `Slope: ${fM(Number(trend.slope).toFixed(3))}`; // rSquared tidak disuplai bulk
+                trendValue.textContent = `Slope: ${fmt(trend.slope, 3)}`; // rSquared tidak disuplai bulk
             } else if (currentMethod === 'seasonal-mann-kendall') {
                 trendLabel.textContent = "Seasonal MK";
-                trendValue.textContent = `Z: ${fM(Number(trend.Z).toFixed(3))}`;
+                trendValue.textContent = `Z: ${fmt(trend.Z, 3)}`;
             } else if (currentMethod === 'seasonal-sens-slope') {
                 trendLabel.textContent = "Seasonal Sen's";
-                trendValue.textContent = `Slope: ${fM(Number(trend.slope).toFixed(3))}`;
+                trendValue.textContent = `Slope: ${fmt(trend.slope, 3)}`;
             }
         } else {
             trendLabel.parentElement.style.display = "none";
@@ -94,7 +95,7 @@ function openLightbox(stationData) {
     }
 
     document.getElementById('lbCoords').textContent =
-        `${fM(stationData.lat.toFixed(4))}, ${fM(stationData.lon.toFixed(4))}`;
+        `${fmt(stationData.lat, 4)}, ${fmt(stationData.lon, 4)}`;
     document.getElementById('lbManager').textContent = stationData.manager || '—';
 
     // Fetch Elevation
