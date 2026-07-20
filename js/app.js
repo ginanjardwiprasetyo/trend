@@ -498,9 +498,9 @@ function showLegend(method = null) {
     }
 
     legendBox.innerHTML = `
-        <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span><i>Trend</i> Meningkat</span></div>
-        <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span><i>Trend</i> Menurun</span></div>
-        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada <i>Trend</i></span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span>Tren Meningkat</span></div>
+        <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span>Tren Menurun</span></div>
+        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
         ${qualityLegend}
     `;
 

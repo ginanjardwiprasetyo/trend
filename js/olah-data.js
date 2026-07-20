@@ -807,7 +807,7 @@ async function runOlahAnalysis() {
 
             const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
             const zVal = fmt(mk.Z, 3) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
             cachedRegularMK = document.getElementById('olahMkResult').innerHTML;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
@@ -827,7 +827,7 @@ async function runOlahAnalysis() {
             const qmedVal = fmt(ss.slope, 3) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
             const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '—';
             const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '—';
-            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
             cachedRegularSS = document.getElementById('olahSsResult').innerHTML;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
@@ -847,7 +847,7 @@ async function runOlahAnalysis() {
             const tUji = fmt(lr.tStatistic, 3);
             const tKrit = `±${fmt(lr.tCritical, 3)}`;
             const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
             // Add trend line
             if (olahChart) {
@@ -879,7 +879,7 @@ async function runOlahAnalysis() {
                 const zGabVal = fmt(seasonalMk.Z, 3) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                 const zKritis = 1.96;
                 cachedSeasonalMK =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
 
                 const sssSig = seasonalSs.significant;
                 const sssDir = sssSig ? (seasonalSs.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
@@ -888,7 +888,7 @@ async function runOlahAnalysis() {
                 else if (sssDir === 'Menurun') sssColor = '#DC2626';
                 const qMedGab = fmt(seasonalSs.slope, 3) + (sssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                 cachedSeasonalSS =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
 
                 const seasonalToggle = document.getElementById('olahSeasonalToggle');
                 if (seasonalToggle && seasonalToggle.checked) {

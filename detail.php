@@ -20,9 +20,9 @@ if (empty($stationId)) {
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Detail Stasiun <?php echo $stationId; ?> — TrendHidro</title>
     <meta name="description"
-        content="Analisis detail <i>trend</i> hidrologi, grafik harian, parameter statistik, dan ketersediaan data untuk stasiun hidrologi ID: <?php echo $stationId; ?> di sistem TrendHidro.">
+        content="Analisis detail trend hidrologi, grafik harian, parameter statistik, dan ketersediaan data untuk stasiun hidrologi ID: <?php echo $stationId; ?> di sistem TrendHidro.">
     <meta name="keywords"
-        content="stasiun hidrologi, <i>trend</i> hidrologi, <?php echo $stationId; ?>, data hidrologi detail, statistik harian, trendhidro">
+        content="stasiun hidrologi, trend hidrologi, <?php echo $stationId; ?>, data hidrologi detail, statistik harian, trendhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -321,14 +321,14 @@ if (empty($stationId)) {
                 <div class="detail-card" style="flex: 2; min-width: 400px;">
                     <div class="card-loader active" id="trendLoaderOverlay">
                         <div class="spinner"></div>
-                        <span class="loader-label">Menghitung <i>Trend</i>...</span>
+                        <span class="loader-label">Menghitung Tren...</span>
                     </div>
                     <h3 style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="display:inline-flex; align-items:center; gap:6px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
                                 <path d="M23 6l-9.5 9.5-5-5L1 18" />
                             </svg>
-                            Rekapitulasi <i>Trend</i> Data Curah Hujan
+                            Rekapitulasi Tren Data Curah Hujan
                         </span>
                         <label id="seasonalToggleWrap" style="display:none; align-items:center; gap:8px; cursor:pointer; user-select:none;">
                             <input type="checkbox" id="seasonalToggle" checked style="display:none;">
@@ -1228,7 +1228,7 @@ if (empty($stationId)) {
                 else if (tTrendMK === 'Menurun') mkColor = '#DC2626';
                 const zKritis = 1.96;
                 const zVal = fmt(mk.Z, 3) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+                document.getElementById('mkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
                 cachedRegularMK = document.getElementById('mkResult').innerHTML;
 
                 await new Promise(r => setTimeout(r, 10));
@@ -1244,7 +1244,7 @@ if (empty($stationId)) {
                     const qmedVal = fmt(ss.slope, 3) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '—';
                     const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '—';
-                    document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+                    document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
                     cachedRegularSS = document.getElementById('ssResult').innerHTML;
                 } else {
                     const errHtml = `Gagal menghitung`;
@@ -1266,7 +1266,7 @@ if (empty($stationId)) {
                     const tKrit = lr.tCritical !== undefined ? `±${fmt(lr.tCritical, 3)}` : '—';
                     const slopeLR = lr.slope !== undefined ? fmt(lr.slope, 3) : '—';
                     const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+                    document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
                     // Update chart with trend line
                     if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
@@ -1298,7 +1298,7 @@ if (empty($stationId)) {
                         const zGabVal = fmt(seasonalMk.Z, 3) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                         const zKritis = 1.96;
                         cachedSeasonalMK =
-                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
                         const sssSig = seasonalSs.significant;
                         const sssDir = sssSig ? (seasonalSs.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
                         let sssColor = '#6B7280';
@@ -1306,7 +1306,7 @@ if (empty($stationId)) {
                         else if (sssDir === 'Menurun') sssColor = '#DC2626';
                         const qMedGab = fmt(seasonalSs.slope, 3) + (sssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                         cachedSeasonalSS =
-                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;"><i>Trend</i></td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
+                            `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
                         const seasonalToggle = document.getElementById('seasonalToggle');
                         if (seasonalToggle && seasonalToggle.checked) {
                             document.getElementById('mkResult').innerHTML = cachedSeasonalMK;

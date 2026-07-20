@@ -415,7 +415,7 @@
                 </svg>
             </div>
             <h2>Peta Interaktif</h2>
-            <p>Lihat <i>trend</i> curah hujan di wilayah sungai Bengawan Solo dengan peta interaktif.</p>
+            <p>Lihat trend curah hujan di wilayah sungai Bengawan Solo dengan peta interaktif.</p>
             <span class="card-cta">
                 Buka Peta
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

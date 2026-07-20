@@ -222,11 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dataAvail && years < 16) {
             setConfirmMode(true,
-                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Analisis tren dengan data kurang dari 16 tahun mungkin kurang <i>reliable</i>. Tetap lakukan pengolahan <i>trend</i> data runtut waktu?`
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Analisis tren dengan data kurang dari 16 tahun mungkin kurang <i>reliable</i>. Tetap lakukan pengolahan trend data runtut waktu?`
             );
         } else if (!dataAvail) {
             setConfirmMode(true,
-                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Tetap lakukan pengolahan <i>trend</i> data runtut waktu?`
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Tetap lakukan pengolahan trend data runtut waktu?`
             );
         } else {
             openDetailPage(stationId, params);

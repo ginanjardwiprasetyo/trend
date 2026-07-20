@@ -474,7 +474,7 @@
             <div>
                 <h1><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle; flex-shrink:0;"><path d="M3 20h18"/><path d="M6 16l4-6 4 4 6-8"/><circle cx="6" cy="16" r="1.5" fill="var(--color-primary)"/><circle cx="10" cy="10" r="1.5" fill="var(--color-primary)"/><circle cx="14" cy="14" r="1.5" fill="var(--color-primary)"/><circle cx="20" cy="6" r="1.5" fill="var(--color-primary)"/></svg>Olah
                     Data Anda</h1>
-                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung <i>trend</i> data runtut waktu langsung di
+                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung trend data runtut waktu langsung di
                     peramban Anda.
                 </p>
             </div>
@@ -637,14 +637,14 @@
                     <div class="card-loader-olah" id="olahTrendLoader">
                         <div class="spinner"></div>
                         <span style="font-size:0.8rem; font-weight:600; color:var(--color-primary);">Menghitung
-                            <i>Trend</i>...</span>
+                            Tren...</span>
                     </div>
                     <h3 style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="display:inline-flex; align-items:center; gap:6px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
                                 <path d="M23 6l-9.5 9.5-5-5L1 18" />
                             </svg>
-                            Rekapitulasi <i>Trend</i> Data Runtut Waktu
+                            Rekapitulasi Tren Data Runtut Waktu
                         </span>
                         <label id="olahSeasonalToggleWrap" style="display:none; align-items:center; gap:8px; cursor:pointer; user-select:none;">
                             <input type="checkbox" id="olahSeasonalToggle" checked style="display:none;">
