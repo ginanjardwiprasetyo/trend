@@ -330,6 +330,12 @@ function parseFlexDate(str) {
         return new Date(parseInt(myMatch[2]), parseInt(myMatch[1]) - 1, 1);
     }
 
+    // Monthly: MM-YYYY (e.g. 01-1953)
+    const mmyMatch = str.match(/^(\d{1,2})-(\d{4})$/);
+    if (mmyMatch) {
+        return new Date(parseInt(mmyMatch[2]), parseInt(mmyMatch[1]) - 1, 1);
+    }
+
     // Monthly: Mon YYYY or Month YYYY
     const txtMatch = str.match(/^([a-zA-Z]{3,})\s+(\d{4})$/);
     if (txtMatch) {
@@ -448,7 +454,7 @@ function onDataParsed() {
         } else {
             dateStr = `${d.date.getDate().toString().padStart(2, '0')}/${(d.date.getMonth() + 1).toString().padStart(2, '0')}/${d.date.getFullYear()}`;
         }
-        previewBody.innerHTML += `<tr><td>${i + 1}</td><td>${dateStr}</td><td>${d.value}</td></tr>`;
+        previewBody.innerHTML += `<tr><td>${i + 1}</td><td>${dateStr}</td><td>${String(d.value).replace('.', ',')}</td></tr>`;
     }
 
     document.getElementById('previewCount').textContent =
@@ -1122,7 +1128,8 @@ function renderOlahChart(data, dtType) {
                         title: (context) => {
                             const idx = context[0].dataIndex;
                             return tooltipLabels[idx] || context[0].label;
-                        }
+                        },
+                        label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(3).replace('.', ',')
                     }
                 }
             },
@@ -1163,7 +1170,7 @@ function renderOlahStats(data, dtType, yFrom, yTo, mo) {
     document.getElementById('olahStatMin').textContent = fM(min.toFixed(0)) + ' ' + getOlahSatuan();
     document.getElementById('olahStatStd').textContent = fM(std.toFixed(0)) + ' ' + getOlahSatuan();
     document.getElementById('olahStatCv').textContent = fmt(cv, 2);
-    document.getElementById('olahStatLength').textContent = `${values.length} unit`;
+    document.getElementById('olahStatLength').textContent = `${values.length}`;
     document.getElementById('olahStatRange').textContent = `${yFrom}—${yTo}`;
 
     // Outlier
@@ -1357,7 +1364,8 @@ function toggleOlahPieChart() {
             }
             return exp;
         })();
-        const totalAvailable = rawData.length;
+        const uniqueDates = new Set(rawData.map(d => d.date.getFullYear() + '-' + d.date.getMonth() + '-' + d.date.getDate()));
+        const totalAvailable = uniqueDates.size;
         const missing = Math.max(0, totalExpected - totalAvailable);
         olahCachedPieData = { expected: totalExpected, available: totalAvailable, missing: missing };
         const pct = totalExpected > 0 ? ((totalAvailable / totalExpected) * 100).toFixed(2).replace('.', ',') : '0,00';

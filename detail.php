@@ -936,7 +936,8 @@ if (empty($stationId)) {
                                 title: (context) => {
                                     const idx = context[0].dataIndex;
                                     return tooltipLabels[idx] || context[0].label;
-                                }
+                                },
+                                label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(3).replace('.', ',')
                             }
                         }
                     },
@@ -1003,7 +1004,7 @@ if (empty($stationId)) {
             const startYearData = Math.floor(tsData[0].year);
             const endYearData = Math.floor(tsData[tsData.length - 1].year);
             document.getElementById('statRange').textContent = `${startYearData}—${endYearData}`;
-            document.getElementById('statLength').textContent = `${values.length} unit`;
+            document.getElementById('statLength').textContent = `${values.length}`;
 
             // Outlier (Q1 - 1.5 IQR, Q3 + 1.5 IQR) - Linear Interpolation to match olah-data.js
             const sorted = [...values].sort((a, b) => a - b);
