@@ -15,7 +15,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Olah Data Anda — TrendHidro</title>
     <meta name="description"
-        content="Upload dan olah data runtut waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di peramban.">
+        content="Upload dan olah data deret waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di peramban.">
     <meta name="keywords"
         content="upload data, olah data hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
 
@@ -474,7 +474,7 @@
             <div>
                 <h1><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle; flex-shrink:0;"><path d="M3 20h18"/><path d="M6 16l4-6 4 4 6-8"/><circle cx="6" cy="16" r="1.5" fill="var(--color-primary)"/><circle cx="10" cy="10" r="1.5" fill="var(--color-primary)"/><circle cx="14" cy="14" r="1.5" fill="var(--color-primary)"/><circle cx="20" cy="6" r="1.5" fill="var(--color-primary)"/></svg>Olah
                     Data Anda</h1>
-                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung trend data runtut waktu langsung di
+                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung trend data deret waktu langsung di
                     peramban Anda.
                 </p>
             </div>
@@ -488,9 +488,8 @@
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
-            <h3>Seret file atau klik untuk upload</h3>
-            <p>Format yang didukung: CSV, XLS, XLSX — Kolom: <strong>Tanggal</strong> (dd/mm/yy) dan
-                <strong>Data</strong>
+            <h3>Seret berkas atau klik untuk mengunggah</h3>
+            <p>Berkas yang diizinkan yaitu csv, xls, dan xlsx.
             </p>
             <div class="file-info" id="fileInfo" style="display:none;"></div>
         </div>
@@ -612,21 +611,48 @@
                             <path d="M3 3v18h18" />
                             <path d="M7 16l4-8 4 4 4-10" />
                         </svg>
-                        Grafik Data Runtut Waktu
+                        Grafik Data Deret Waktu
                     </h3>
-                    <div style="display:flex; gap:12px; font-size:0.8rem; font-weight:600; color:#4B5563;">
-                        <span style="display:flex; align-items:center; gap:4px;">
-                            <span style="width:16px; height:3px; background:#3B82F6; border-radius:2px;"></span> Nilai
-                            Data
-                        </span>
-                        <span style="display:flex; align-items:center; gap:4px;">
-                            <span style="width:16px; height:3px; background:#DC2626; border-radius:2px;"></span> Garis
-                            Regresi
-                        </span>
-                    </div>
                 </div>
                 <div style="height:320px;">
                     <canvas id="olahChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Dekomposisi STL & BEAST -->
+            <div class="result-card full" id="beastOlahCard" style="display:none; margin-bottom:24px; min-height:520px;">
+                <div class="card-loader-olah" id="beastOlahLoader">
+                    <div class="spinner"></div>
+                    <span class="loader-label">Menghitung Dekomposisi...</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+                    <h3 style="margin:0;">
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                                <path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/>
+                            </svg>
+                            Dekomposisi STL & BEAST
+                        </span>
+                    </h3>
+                    <div id="beastOlahLegend" style="display:none; gap:16px; font-size:0.8rem; font-weight:600; color:#4B5563;">
+                        <span style="display:flex; align-items:center; gap:4px;">
+                            <span style="width:16px; height:3px; background:#00B300; border-radius:2px;"></span> Tren
+                        </span>
+                        <span id="beastOlahCpLegend" style="display:none; align-items:center; gap:4px;">
+                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> Titik Perubahan
+                        </span>
+                    </div>
+                </div>
+                <div id="beastOlahResultArea" style="display:none;">
+                    <div style="margin-bottom:8px;">
+                        <div style="height:220px; position:relative;"><canvas id="beastOlahStlChart"></canvas></div>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div style="height:220px; position:relative;"><canvas id="beastOlahBeastChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="beastOlahPlaceholder" style="text-align:center; padding:40px 0; color:#9CA3AF; font-size:0.9rem; min-height:480px; display:flex; align-items:center; justify-content:center;">
+                    Pilih stasiun referensi untuk dekomposisi.
                 </div>
             </div>
 
@@ -644,7 +670,7 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
                                 <path d="M23 6l-9.5 9.5-5-5L1 18" />
                             </svg>
-                            Rekapitulasi Tren Data Runtut Waktu
+                            Rekapitulasi Tren Data Deret Waktu
                         </span>
                         <label id="olahSeasonalToggleWrap" style="display:none; align-items:center; gap:8px; cursor:pointer; user-select:none;">
                             <input type="checkbox" id="olahSeasonalToggle" checked style="display:none;">
@@ -768,7 +794,7 @@
             </div>
 
             <!-- Ketersediaan Data Harian (hanya untuk data harian) -->
-            <div class="result-card full" id="olahDailyAvailCard" style="margin-bottom:24px; display:none;">
+            <div class="result-card full" id="olahDailyAvailCard" style="margin-bottom:24px; display:none; overflow:hidden;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
                     <h3 style="margin:0;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -800,14 +826,14 @@
 
                 <div id="olahDailyGridWrapper">
                     <div id="olahDailyGridContent">
-                        <div style="display:flex; align-items:flex-start; gap:8px; justify-content:center;">
+                        <div style="display:flex; align-items:flex-start; gap:8px;">
                             <!-- Nama Bulan -->
-                            <div style="display:grid; grid-template-rows:repeat(12,35px); gap:2px; font-size:0.75rem; color:#6B7280; text-align:right; font-weight:600; padding-top:15px;">
+                            <div style="display:grid; grid-template-rows:repeat(12,35px); gap:2px; font-size:0.75rem; color:#6B7280; text-align:right; font-weight:600; padding-top:15px; flex-shrink:0;">
                                 <div>Januari</div><div>Februari</div><div>Maret</div><div>April</div>
                                 <div>Mei</div><div>Juni</div><div>Juli</div><div>Agustus</div>
                                 <div>September</div><div>Oktober</div><div>November</div><div>Desember</div>
                             </div>
-                            <div style="flex:none; overflow-x:auto;" class="no-scrollbar">
+                            <div style="min-width:0; overflow-x:auto;" class="no-scrollbar">
                                 <div id="olahAvailGrid" class="github-grid" style="width:max-content;"></div>
                                 <div style="display:grid; grid-template-columns:repeat(31,35px); gap:2px; margin-top:8px; font-size:0.7rem; color:#9CA3AF; text-align:center; font-weight:500;">
                                     <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>

@@ -150,7 +150,7 @@ function calcSeasonalMannKendall($dataBySeason) {
  * @param array $dataBySeason [season_id => [['year' => float, 'value' => float], ...], ...]
  * @return array ['slope', 'slopeCount', 'seasonCount']
  */
-function calcSeasonalSensSlope($dataBySeason) {
+function calcSeasonalSensSlope($dataBySeason, $totalVarS = 0) {
     $allSlopes = [];
     $seasonCount = 0;
 
@@ -172,7 +172,7 @@ function calcSeasonalSensSlope($dataBySeason) {
     }
 
     if ($seasonCount < 2 || empty($allSlopes)) {
-        return ['slope' => 0, 'slopeCount' => 0, 'seasonCount' => $seasonCount];
+        return ['slope' => 0, 'Qmin' => 0, 'Qmax' => 0, 'slopeCount' => 0, 'seasonCount' => $seasonCount, 'significant' => false];
     }
 
     sort($allSlopes);
@@ -180,6 +180,17 @@ function calcSeasonalSensSlope($dataBySeason) {
     $mid = floor($count / 2);
     $medianSlope = ($count % 2 == 0) ? ($allSlopes[$mid - 1] + $allSlopes[$mid]) / 2 : $allSlopes[$mid];
 
-    return ['slope' => $medianSlope, 'slopeCount' => $count, 'seasonCount' => $seasonCount];
+    // Confidence interval via totalVarS dari seasonal MK
+    $zC = getCriticalZ(0.05);
+    $Ca = $zC * sqrt($totalVarS);
+    $M1 = ($count - $Ca) / 2;
+    $M2 = ($count + $Ca) / 2;
+    $idxLower = max(0, floor($M1) - 1);
+    $idxUpper = min($count - 1, floor($M2 + 1) - 1);
+    $Qmin = $allSlopes[$idxLower] ?? 0;
+    $Qmax = $allSlopes[$idxUpper] ?? 0;
+    $significant = ($Qmin > 0) || ($Qmax < 0);
+
+    return ['slope' => $medianSlope, 'Qmin' => round($Qmin, 3), 'Qmax' => round($Qmax, 3), 'slopeCount' => $count, 'seasonCount' => $seasonCount, 'significant' => $significant];
 }
 

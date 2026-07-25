@@ -318,14 +318,24 @@ if (empty($stationId)) {
                     <div class="spinner"></div>
                     <span class="loader-label">Menghitung Dekomposisi...</span>
                 </div>
-                <h3>
-                    <span style="display:inline-flex; align-items:center; gap:6px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
-                            <path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/>
-                        </svg>
-                        Dekomposisi STL & BEAST
-                    </span>
-                </h3>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+                    <h3 style="margin:0;">
+                        <span style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                                <path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/>
+                            </svg>
+                            Dekomposisi STL & BEAST
+                        </span>
+                    </h3>
+                    <div id="beastLegend" style="display:none; gap:16px; font-size:0.8rem; font-weight:600; color:#4B5563;">
+                        <span style="display:flex; align-items:center; gap:4px;">
+                            <span style="width:16px; height:3px; background:#00B300; border-radius:2px;"></span> Tren
+                        </span>
+                        <span id="beastCpLegend" style="display:none; align-items:center; gap:4px;">
+                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> Titik Perubahan
+                        </span>
+                    </div>
+                </div>
                 <div id="beastResultArea" style="display:none;">
                     <div style="margin-bottom:8px;">
                         <div style="height:220px; position:relative;"><canvas id="beastStlChart"></canvas></div>
@@ -486,7 +496,7 @@ if (empty($stationId)) {
             </div>
 
             <!-- Ketersediaan Data Harian 1 Tahun Terakhir -->
-            <div class="detail-card" style="grid-column: 1 / -1;">
+            <div class="detail-card" style="grid-column: 1 / -1; overflow: hidden;">
                 <div class="card-loader active" id="availLoaderOverlay">
                     <div class="spinner"></div>
                     <span class="loader-label">Menyusun Data Harian...</span>
@@ -521,12 +531,12 @@ if (empty($stationId)) {
                     </div>
                 </div>
 
-                <div id="dailyGridWrapper">
+                <div id="dailyGridWrapper" style="overflow:hidden;">
                     <div id="dailyGridContent">
-                        <div style="display:flex; align-items: flex-start; gap: 8px; justify-content: center;">
+                        <div style="display:flex; align-items: flex-start; gap: 8px;">
                             <!-- Nama Bulan -->
                             <div
-                                style="display:grid; grid-template-rows: repeat(12, 35px); gap: 2px; font-size: 0.75rem; color: #6B7280; text-align: right; font-weight: 600; padding-top: 15px;">
+                                style="display:grid; grid-template-rows: repeat(12, 35px); gap: 2px; font-size: 0.75rem; color: #6B7280; text-align: right; font-weight: 600; padding-top: 15px; flex-shrink:0;">
                                 <div>Januari</div>
                                 <div>Februari</div>
                                 <div>Maret</div>
@@ -541,7 +551,7 @@ if (empty($stationId)) {
                                 <div>Desember</div>
                             </div>
 
-                            <div style="flex:none; overflow-x: auto;" class="no-scrollbar">
+                            <div style="min-width:0; overflow-x: auto;" class="no-scrollbar">
                                 <div id="availabilityGrid" class="github-grid" style="width: max-content;"></div>
                                 <!-- Angka Tanggal (1-31) -->
                                 <div
@@ -619,6 +629,7 @@ if (empty($stationId)) {
             setCardLoading('statLoaderOverlay', true);
             setCardLoading('availLoaderOverlay', true);
             setCardLoading('availPeriodLoaderOverlay', true);
+            setCardLoading('beastLoaderOverlay', true);
 
             try {
                 // Parse params if redirected from lightbox
@@ -827,10 +838,11 @@ if (empty($stationId)) {
             setCardLoading('statLoaderOverlay', true);
             setCardLoading('availPeriodLoaderOverlay', true);
             setCardLoading('beastLoaderOverlay', true);
+
             runBeastAnalysis();
 
             // Update availability card title
-            const titleMap = { bulanan: 'Bulanan', tahunan: 'Tahunan', musiman: 'Bulanan' };
+            const titleMap = { bulanan: 'Bulanan', tahunan: 'Tahunan', musiman: 'Musiman' };
             document.getElementById('availPeriodTitle').textContent = 'Ketersediaan Data ' + (titleMap[dtType] || 'Periode Terpilih');
 
             try {
@@ -846,7 +858,6 @@ if (empty($stationId)) {
                     month: mo
                 };
 
-                // Pastikan URL tetap clean setiap kali data diupdate/diganti
                 window.history.replaceState({}, document.title, window.location.pathname + '?id=' + STATION_ID);
 
                 const res = await fetch('php/get_timeseries.php', {
@@ -866,6 +877,11 @@ if (empty($stationId)) {
                 updateAvailabilityPeriod(tsData, dtType, yFrom, yTo, mo);
                 updateSeasonalToggleVisibility();
 
+                setCardLoading('graphLoaderOverlay', false);
+                setCardLoading('trendLoaderOverlay', false);
+                setCardLoading('statLoaderOverlay', false);
+                setCardLoading('availPeriodLoaderOverlay', false);
+
             } catch (e) {
                 console.error("Gagal memperbarui data:", e);
                 setCardLoading('graphLoaderOverlay', false);
@@ -873,7 +889,6 @@ if (empty($stationId)) {
                 setCardLoading('statLoaderOverlay', false);
                 setCardLoading('availPeriodLoaderOverlay', false);
 
-                // Show error message in results
                 const errorMsg = `<span style="color:#DC2626;">Error: ${e.message}</span>`;
                 document.getElementById('mkResult').innerHTML = errorMsg;
                 document.getElementById('ssResult').innerHTML = errorMsg;
@@ -885,8 +900,6 @@ if (empty($stationId)) {
         }
 
         function renderGraphAndStats(tsData, dtType, agg) {
-            setCardLoading('graphLoaderOverlay', false);
-            setCardLoading('statLoaderOverlay', false);
             const values = tsData.map(d => d.value);
 
             // Extract year for each data point (used for X-axis display)
@@ -1828,28 +1841,28 @@ if (empty($stationId)) {
             const agg = document.getElementById('dtAgg').value;
             const mo = document.getElementById('dtMonth').value;
 
-            let metode = 'Kumulatif Bulanan';
+            const aggMap = { 'rerata': 'Rerata', 'kumulatif': 'Kumulatif', 'maks': 'Maksimum', 'min': 'Minimum' };
+            const prefix = aggMap[agg] || 'Kumulatif';
+
+            let metode = prefix + ' Bulanan';
             let bulan = '';
             let musim = '';
 
             if (dtType === 'tahunan') {
-                metode = 'Kumulatif Tahunan';
+                metode = prefix + ' Tahunan';
             } else if (dtType === 'musiman') {
                 if (mo === 'all' || mo === '') {
-                    metode = 'Kumulatif Musiman';
+                    metode = prefix + ' Musiman';
                 } else {
-                    metode = 'Kumulatif Musiman Khusus';
+                    metode = prefix + ' Musiman Khusus';
                     if (mo.startsWith('1,2,3')) musim = '1';
                     else if (mo.startsWith('4,5,6')) musim = '2';
                     else if (mo.startsWith('7,8,9')) musim = '3';
-                    else if (mo.startsWith('10,11,12')) musim = '4';
+                    else musim = '4';
                 }
             } else {
-                // bulanan
-                if (mo === 'all' || mo === '') {
-                    metode = 'Kumulatif Bulanan';
-                } else {
-                    metode = 'Kumulatif Bulanan Khusus';
+                if (mo !== 'all' && mo !== '') {
+                    metode = prefix + ' Bulanan Khusus';
                     bulan = mo;
                 }
             }
@@ -1860,7 +1873,8 @@ if (empty($stationId)) {
         async function runBeastAnalysis() {
             if (!stationMeta) return;
 
-            const { metode, bulan, musim } = mapToolbarToBeast();
+            const beastParams = mapToolbarToBeast();
+            const { metode, bulan, musim } = beastParams;
             const yFrom = parseInt(document.getElementById('yFrom').value);
             const yTo = parseInt(document.getElementById('yTo').value);
 
@@ -1877,8 +1891,20 @@ if (empty($stationId)) {
                 if (data.error) throw new Error(data.error);
                 renderBeastCharts(data);
             } catch (e) {
+                document.getElementById('beastResultArea').style.display = 'none';
                 document.getElementById('beastPlaceholder').style.display = 'flex';
-                document.getElementById('beastPlaceholder').innerHTML = '<span style="color:#DC2626;">Gagal: ' + e.message + '</span>';
+                document.getElementById('beastPlaceholder').innerHTML = `
+                    <div style="background: rgba(254, 226, 226, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(252, 165, 165, 0.5); border-radius: 12px; padding: 24px; text-align: center; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
+                        <svg style="width: 48px; height: 48px; color: #EF4444; margin: 0 auto 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <h4 style="color: #991B1B; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">Dekomposisi Gagal</h4>
+                        <p style="color: #B91C1C; font-size: 0.9rem; margin-bottom: 16px; line-height: 1.4;">${e.message}.<br><span style="font-weight:500; font-size: 0.85rem; opacity: 0.9;">Mohon coba lagi dalam beberapa saat.</span></p>
+                        <button onclick="runBeastAnalysis()" style="background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);" onmouseover="this.style.background='#DC2626'" onmouseout="this.style.background='#EF4444'">
+                            <svg style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Coba Lagi
+                        </button>
+                    </div>
+                `;
+                document.getElementById('beastLegend').style.display = 'none';
             } finally {
                 setCardLoading('beastLoaderOverlay', false);
             }
@@ -1971,7 +1997,7 @@ if (empty($stationId)) {
                     }
                 },
                 scales: {
-                    x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 11, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+                    x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 11, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
                     y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
                 }
             };
@@ -1990,6 +2016,9 @@ if (empty($stationId)) {
 
             document.getElementById('beastPlaceholder').style.display = 'none';
             document.getElementById('beastResultArea').style.display = 'block';
+            const hasCp = data.change_points && data.change_points.length > 0;
+            document.getElementById('beastLegend').style.display = 'flex';
+            document.getElementById('beastCpLegend').style.display = hasCp ? 'flex' : 'none';
         }
 
         setupCustomSelects();

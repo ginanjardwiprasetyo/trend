@@ -345,7 +345,7 @@ foreach ($stationsData as $pos_id => $data) {
             }
             if (count($byMonthVal) >= 2) {
                 $smk = calcSeasonalMannKendall($byMonthVal);
-                $sss = calcSeasonalSensSlope($byMonthPts);
+                $sss = calcSeasonalSensSlope($byMonthPts, $smk['varS'] ?? 0);
 
                 $zCrit = getCriticalZ(0.05);
                 $smkSig = abs($smk['Z']) > $zCrit;
@@ -362,12 +362,19 @@ foreach ($stationsData as $pos_id => $data) {
                     'seasonCount' => $smk['seasonCount']
                 ];
 
+                // Trend berdasarkan signifikansi Qmin/Qmax (sesuai alur detail.php)
+                $sssSig = $sss['significant'] ?? false;
                 $sssTrend = 'Tidak Ada Trend';
-                if ($sss['slope'] > 0) $sssTrend = 'Meningkat';
-                elseif ($sss['slope'] < 0) $sssTrend = 'Menurun';
+                if ($sssSig) {
+                    if ($sss['slope'] > 0) $sssTrend = 'Meningkat';
+                    elseif ($sss['slope'] < 0) $sssTrend = 'Menurun';
+                }
                 $stationResult['seasonal-sens-slope'] = [
                     'trend' => $sssTrend,
+                    'significant' => $sssSig,
                     'slope' => round($sss['slope'], 3),
+                    'Qmin' => $sss['Qmin'] ?? 0,
+                    'Qmax' => $sss['Qmax'] ?? 0,
                     'slopeCount' => $sss['slopeCount'],
                     'seasonCount' => $sss['seasonCount']
                 ];

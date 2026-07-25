@@ -9,7 +9,7 @@
     <meta name="description"
         content="TrendHidro adalah platform olah data runtut waktu interaktif. Jelajahi peta curah hujan atau olah data Anda sendiri menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
     <meta name="keywords"
-        content="hidrologi, trend curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, olah data, trendhidro">
+        content="hidrologi, tren curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, olah data, trendhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

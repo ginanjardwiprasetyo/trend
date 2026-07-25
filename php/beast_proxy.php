@@ -1,7 +1,9 @@
 <?php
 /**
  * TrendHidro - Beast API Proxy
- * Proxy ke beast-stl Render API untuk dekomposisi STL & BEAST
+ * Supports two modes:
+ * 1. pos_id mode: fetch from DB (detail.php)
+ * 2. raw_data mode: accept uploaded data directly (olah-data.php)
  */
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -22,26 +24,62 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 ini_set('max_execution_time', 120);
 ini_set('default_socket_timeout', 90);
 
-$BEAST_API_URL = 'https://beast-stl.onrender.com/gradio_api/api/api_analyze';
+$BEAST_API_BASE = 'https://beast-stl.onrender.com/gradio_api/api';
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-if (!$input || empty($input['pos_id']) || empty($input['metode'])) {
+if (!$input || empty($input['metode'])) {
     http_response_code(400);
-    echo json_encode(['error' => 'pos_id dan metode wajib diisi.']);
+    echo json_encode(['error' => 'metode wajib diisi.']);
     exit;
 }
 
-$posId    = $input['pos_id'];
 $metode   = $input['metode'];
-$th1      = isset($input['th1']) ? (int)$input['th1'] : 1980;
-$th2      = isset($input['th2']) ? (int)$input['th2'] : 2025;
 $bulan    = isset($input['bulan']) ? $input['bulan'] : '';
 $musim    = isset($input['musim']) ? $input['musim'] : '';
 
-$payload = json_encode([
-    'data' => [$posId, $metode, $th1, $th2, $bulan, $musim]
-]);
+$hasRawData = !empty($input['raw_data']);
+
+if ($hasRawData) {
+    $BEAST_API_URL = $BEAST_API_BASE . '/api_analyze_data';
+    $payload = json_encode([
+        'data' => [$input['raw_data'], $metode, $bulan, $musim]
+    ]);
+} else {
+    if (empty($input['pos_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'pos_id wajib diisi.']);
+        exit;
+    }
+    $posId    = $input['pos_id'];
+    $th1      = isset($input['th1']) ? (int)$input['th1'] : 1980;
+    $th2      = isset($input['th2']) ? (int)$input['th2'] : 2025;
+
+    $BEAST_API_URL = $BEAST_API_BASE . '/api_analyze';
+    $payload = json_encode([
+        'data' => [$posId, $metode, $th1, $th2, $bulan, $musim]
+    ]);
+}
+
+$cacheDir = __DIR__ . '/cache_beast';
+if (!is_dir($cacheDir)) {
+    mkdir($cacheDir, 0777, true);
+}
+$cacheKey = md5($payload);
+$cacheFile = $cacheDir . '/' . $cacheKey . '.json';
+
+// Cek apakah file cache ada dan masih valid (kita set TTL misalnya sangat lama karena historis, atau selamanya)
+// Kecuali data raw dari olah-data.php bisa kita cache juga karena isinya ada dalam payload.
+if (file_exists($cacheFile)) {
+    $cachedData = file_get_contents($cacheFile);
+    // Verifikasi validitas JSON
+    $decodedCache = json_decode($cachedData, true);
+    if ($decodedCache !== null) {
+        // Cache hit! Langsung return
+        echo $cachedData;
+        exit;
+    }
+}
 
 $ch = curl_init($BEAST_API_URL);
 curl_setopt_array($ch, [
@@ -58,7 +96,7 @@ curl_setopt_array($ch, [
 ]);
 
 $attempts = 0;
-$maxAttempts = 2;
+$maxAttempts = 3;
 $httpCode = 0;
 $response = '';
 
@@ -80,7 +118,7 @@ while ($attempts < $maxAttempts) {
 
     // Render cold start → retry after delay
     if ($httpCode >= 500 && $attempts < $maxAttempts) {
-        sleep(15);
+        sleep(45);
     }
 }
 curl_close($ch);
@@ -106,5 +144,8 @@ if (!$apiResult) {
     echo json_encode(['error' => 'Gagal parse hasil beast-stl.']);
     exit;
 }
+
+// Simpan ke cache jika berhasil
+file_put_contents($cacheFile, json_encode($apiResult));
 
 echo json_encode($apiResult);

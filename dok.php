@@ -583,7 +583,7 @@
                     <li><strong>Sen's Slope</strong>, mengestimasi besaran kemiringan trend secara non-parametrik (<i>robust</i> terhadap <i>outlier</i>)</li>
                     <li><strong>Seasonal Mann-Kendall</strong>, adaptasi Mann-Kendall untuk data dengan siklus musiman</li>
                     <li><strong>Seasonal Sen's Slope</strong>, adaptasi Sen's Slope untuk data dengan siklus musiman</li>
-                    <li><strong>Regresi Linear</strong>, uji tren parametrik dengan estimasi <i>slope</i> dan uji signifikansi $t$</li>
+                    <li><strong>Regresi Linear</strong>, uji tren parametrik dengan estimasi <i>slope</i></li>
                 </ul>
 
                 <h2>Sumber Data</h2>

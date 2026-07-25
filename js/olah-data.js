@@ -7,6 +7,8 @@
 let rawData = [];       // All parsed daily records: [{date: Date, value: Number}]
 let aggregatedData = []; // Aggregated for analysis: [{year: Number, value: Number}]
 let olahChart = null;
+let beastOlahStlChart = null;
+let beastOlahBeastChart = null;
 let inputPeriod = 'harian'; // 'harian' | 'bulanan' | 'tahunan' — auto-detected after upload
 let cachedRegularMK = null;
 let cachedRegularSS = null;
@@ -45,10 +47,10 @@ function toggleOlahSatuanManual() {
     input.id = 'olahSatuanManual';
     input.placeholder = 'Ketik satuan…';
     input.style.cssText = 'border:none; outline:none; background:transparent; font-size:inherit; font-weight:inherit; color:inherit; padding:8px 14px; width:100%; min-width:80px; flex:1; box-sizing:border-box;';
-    input.oninput = function() { olahSatuan = this.value || '—'; };
+    input.oninput = function () { olahSatuan = this.value || '—'; };
     trigger.appendChild(input);
     input.focus();
-    input.addEventListener('blur', function() {
+    input.addEventListener('blur', function () {
         // Capture value BEFORE removing
         if (this.value.trim()) {
             olahSatuan = this.value.trim();
@@ -61,7 +63,7 @@ function toggleOlahSatuanManual() {
         trigger.style.cursor = '';
         trigger.style.padding = '';
     });
-    input.addEventListener('keydown', function(e) {
+    input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
         if (e.key === 'Escape') { this.value = ''; this.blur(); }
     });
@@ -855,17 +857,6 @@ async function runOlahAnalysis() {
             const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
             document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
-            // Add trend line
-            if (olahChart) {
-                const trendPts = aggregatedData.map((d, index) => lr.intercept + (lr.slope * index));
-                olahChart.data.datasets = olahChart.data.datasets.filter(ds => ds.label !== 'Garis Regresi Linear');
-                olahChart.data.datasets.push({
-                    type: 'line', label: 'Garis Regresi Linear',
-                    data: trendPts, borderColor: '#DC2626', borderWidth: 2,
-                    tension: 0, pointRadius: 0, fill: false, order: -1
-                });
-                olahChart.update();
-            }
         } else {
             document.getElementById('olahLrResult').innerHTML = 'Gagal menghitung';
         }
@@ -998,10 +989,10 @@ function calcMannKendallBaseJS(values) {
             if (d > 0) S += 1; else if (d < 0) S -= 1;
         }
     const cnt = {};
-    values.forEach(v => { const k = String(v); cnt[k] = (cnt[k]||0) + 1; });
+    values.forEach(v => { const k = String(v); cnt[k] = (cnt[k] || 0) + 1; });
     let tSum = 0;
-    Object.values(cnt).forEach(c => { if (c > 1) tSum += c * (c-1) * (2*c+5); });
-    const varS = (n * (n-1) * (2*n+5) - tSum) / 18;
+    Object.values(cnt).forEach(c => { if (c > 1) tSum += c * (c - 1) * (2 * c + 5); });
+    const varS = (n * (n - 1) * (2 * n + 5) - tSum) / 18;
     let Z = 0;
     if (S > 0) Z = (S - 1) / Math.sqrt(varS);
     else if (S < 0) Z = (S + 1) / Math.sqrt(varS);
@@ -1048,7 +1039,7 @@ function calcSeasonalSenSlopeJS(dataArray, totalVarS) {
     const allSlopes = [];
     let seasonCount = 0;
     for (const mo in byMonth) {
-        const pts = byMonth[mo].sort((a,b) => a.year - b.year);
+        const pts = byMonth[mo].sort((a, b) => a.year - b.year);
         if (pts.length < 3) continue;
         seasonCount++;
         for (let i = 0; i < pts.length - 1; i++)
@@ -1058,14 +1049,14 @@ function calcSeasonalSenSlopeJS(dataArray, totalVarS) {
             }
     }
     if (seasonCount < 2 || allSlopes.length === 0) return null;
-    allSlopes.sort((a,b) => a - b);
+    allSlopes.sort((a, b) => a - b);
     const sc = allSlopes.length;
-    const senSlope = sc % 2 === 0 ? (allSlopes[sc/2-1] + allSlopes[sc/2]) / 2 : allSlopes[Math.floor(sc/2)];
+    const senSlope = sc % 2 === 0 ? (allSlopes[sc / 2 - 1] + allSlopes[sc / 2]) / 2 : allSlopes[Math.floor(sc / 2)];
     const zC = getCriticalZ(0.05);
     const Ca = zC * Math.sqrt(totalVarS || 0);
     const M1 = (sc - Ca) / 2, M2 = (sc + Ca) / 2;
-    const iL = Math.max(0, Math.floor(M1)-1), iU = Math.min(sc-1, Math.floor(M2+1)-1);
-    const Qmin = allSlopes[iL]||0, Qmax = allSlopes[iU]||0;
+    const iL = Math.max(0, Math.floor(M1) - 1), iU = Math.min(sc - 1, Math.floor(M2 + 1) - 1);
+    const Qmin = allSlopes[iL] || 0, Qmax = allSlopes[iU] || 0;
     const sig = (Qmin > 0) || (Qmax < 0);
     let trend = 'Tidak Ada Trend';
     if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
@@ -1129,26 +1120,35 @@ function renderOlahChart(data, dtType) {
                             const idx = context[0].dataIndex;
                             return tooltipLabels[idx] || context[0].label;
                         },
-                        label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(3).replace('.', ',')
+                        label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(2).replace('.', ',')
                     }
                 }
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Tahun', font: { family: 'Inter', weight: 'bold' } },
+                    title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } },
                     ticks: {
-                        font: { family: 'Inter', size: 10 },
+                        font: { family: 'Inter', size: 11 },
                         maxRotation: 0,
                         autoSkip: true,
-                        maxTicksLimit: 15
+                        maxTicksLimit: 15,
+                        callback: function (value, index, ticks) {
+                            const label = this.getLabelForValue(value);
+                            if (index === 0 || index === ticks.length - 1) return label;
+                            if (index > 0) {
+                                const prevLabel = this.getLabelForValue(ticks[index - 1].value);
+                                if (label === prevLabel) return null;
+                            }
+                            return label;
+                        }
                     },
                     grid: { display: false }
                 },
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Nilai Data (' + getOlahSatuan() + ')', font: { family: 'Inter', weight: 'bold' } },
-                        ticks: { font: { family: 'Inter', size: 11 } }
-                    }
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Nilai Data (' + getOlahSatuan() + ')', font: { family: 'Inter', weight: 'bold' } },
+                    ticks: { font: { family: 'Inter', size: 11 } }
+                }
             }
         }
     });
@@ -1324,9 +1324,9 @@ function renderOlahAvailDecadeGrid(startYear) {
     }
     grid.innerHTML =
         '<div class="year-grid-header">' +
-            '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade -= 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">‹</button>' +
-            '<span class="range-text">' + decadeStart + ' — ' + decadeEnd + '</span>' +
-            '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade += 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">›</button>' +
+        '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade -= 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">‹</button>' +
+        '<span class="range-text">' + decadeStart + ' — ' + decadeEnd + '</span>' +
+        '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade += 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">›</button>' +
         '</div>' +
         '<div class="year-grid-content p-2"><div class="decade-grid">' + yearsHtml + '</div></div>';
 }
@@ -1423,7 +1423,7 @@ function toggleOlahPieChart() {
 }
 
 // Close avail picker on outside click
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const wrap = e.target.closest('.avail-year-picker-wrap');
     if (!wrap) {
         const g = document.getElementById('olahAvailYearGrid');
@@ -1539,87 +1539,120 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load beast stations on page load
-    loadBeastStations();
 });
 
-// ====== BEAST DECOMPOSITION (olah-data) ======
+function mapOlahToBeast() {
+    const dtType = document.getElementById('olahDtType').value;
+    const agg = (inputPeriod === 'tahunan' || (inputPeriod === 'bulanan' && dtType === 'bulanan'))
+        ? 'kumulatif' : document.getElementById('olahAgg').value;
+    const mo = document.getElementById('olahMonth').value;
 
-function isoToFractional(iso) {
-    const d = new Date(iso);
-    return d.getFullYear() + (d.getMonth()) / 12;
-}
+    const aggMap = { 'rerata': 'Rerata', 'kumulatif': 'Kumulatif', 'maks': 'Maksimum', 'min': 'Minimum' };
+    const prefix = aggMap[agg] || 'Kumulatif';
 
-async function loadBeastStations() {
-    try {
-        const res = await fetch('php/get_stations.php?lite=1');
-        const features = await res.json();
-        const sel = document.getElementById('beastOlahStation');
-        if (!sel || !Array.isArray(features)) return;
-        features.forEach(f => {
-            if (!f.properties) return;
-            const opt = document.createElement('option');
-            opt.value = f.properties.id;
-            opt.textContent = f.properties.name + ' (' + f.properties.id + ')';
-            sel.appendChild(opt);
-        });
-    } catch (e) {
-        console.error('Gagal memuat stasiun untuk beast:', e);
+    let metode = prefix + ' Bulanan';
+    let bulan = '';
+    let musim = '';
+
+    if (dtType === 'tahunan') {
+        metode = prefix + ' Tahunan';
+    } else if (dtType === 'musiman') {
+        if (mo === 'all' || mo === '') {
+            metode = prefix + ' Musiman';
+        } else {
+            metode = prefix + ' Musiman Khusus';
+            if (mo.startsWith('1,2,3')) musim = '1';
+            else if (mo.startsWith('4,5,6')) musim = '2';
+            else if (mo.startsWith('7,8,9')) musim = '3';
+            else musim = '4';
+        }
+    } else {
+        if (mo !== 'all' && mo !== '') {
+            metode = prefix + ' Bulanan Khusus';
+            bulan = mo;
+        }
     }
-}
 
-document.getElementById('beastOlahMetode').addEventListener('change', function() {
-    const m = this.value;
-    document.getElementById('beastOlahBulan').style.display = m === 'Kumulatif Bulanan Khusus' ? '' : 'none';
-    document.getElementById('beastOlahMusim').style.display = m === 'Kumulatif Musiman Khusus' ? '' : 'none';
-});
+    return { metode, bulan, musim };
+}
 
 async function runOlahBeast() {
-    const stationSel = document.getElementById('beastOlahStation');
-    const posId = stationSel.value;
-    if (!posId) {
-        alert('Pilih stasiun referensi dari database terlebih dahulu.');
-        return;
-    }
+    if (!aggregatedData || aggregatedData.length === 0) return;
 
-    const metode = document.getElementById('beastOlahMetode').value;
-    const bulan = document.getElementById('beastOlahBulan').value;
-    const musim = document.getElementById('beastOlahMusim').value;
-    const yFrom = parseInt(document.getElementById('olahYFrom').value);
-    const yTo = parseInt(document.getElementById('olahYTo').value);
+    const beastParams = mapOlahToBeast();
+    const { metode, bulan, musim } = beastParams;
 
-    document.getElementById('beastOlahSpinner').style.display = 'block';
-    document.getElementById('btnBeastOlahRun').disabled = true;
     document.getElementById('beastOlahResultArea').style.display = 'none';
     document.getElementById('beastOlahPlaceholder').style.display = 'none';
     document.getElementById('beastOlahLoader').classList.add('active');
+
+    const dtType = document.getElementById('olahDtType').value;
+    // ponytail: cap 500 data points — beast MCMC segfaults past ~512MB on Render free tier
+    const BEAST_MAX = 500;
+    const beastData = aggregatedData.length > BEAST_MAX
+        ? aggregatedData.filter((_, i, a) => i % Math.ceil(a.length / BEAST_MAX) === 0).slice(0, BEAST_MAX)
+        : aggregatedData;
+    const rawPayload = JSON.stringify(beastData.map(d => {
+        const y = Math.floor(d.year);
+        let m = 1;
+        if (dtType === 'bulanan' || dtType === 'musiman') {
+            m = Math.round((d.year - y) * 12) + 1;
+        }
+        return {
+            date: `${y}-${m.toString().padStart(2, '0')}-01`,
+            value: d.value
+        };
+    }));
 
     try {
         const res = await fetch('php/beast_proxy.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pos_id: posId, metode, th1: yFrom, th2: yTo, bulan, musim })
+            body: JSON.stringify({ raw_data: rawPayload, metode, bulan, musim })
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         renderOlahBeastCharts(data);
     } catch (e) {
-        document.getElementById('beastOlahPlaceholder').style.display = '';
-        document.getElementById('beastOlahPlaceholder').innerHTML = '<span style="color:#DC2626;">Gagal: ' + e.message + '</span>';
+        document.getElementById('beastOlahCharts').style.display = 'none';
+        document.getElementById('beastOlahPlaceholder').style.display = 'flex';
+        document.getElementById('beastOlahPlaceholder').innerHTML = `
+            <div style="background: rgba(254, 226, 226, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(252, 165, 165, 0.5); border-radius: 12px; padding: 24px; text-align: center; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
+                <svg style="width: 48px; height: 48px; color: #EF4444; margin: 0 auto 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <h4 style="color: #991B1B; font-weight: 600; font-size: 1.1rem; margin-bottom: 8px;">Dekomposisi Gagal</h4>
+                <p style="color: #B91C1C; font-size: 0.9rem; margin-bottom: 16px; line-height: 1.4;">${e.message}.<br><span style="font-weight:500; font-size: 0.85rem; opacity: 0.9;">Mohon coba lagi dalam beberapa saat.</span></p>
+                <button onclick="runBeast()" style="background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);" onmouseover="this.style.background='#DC2626'" onmouseout="this.style.background='#EF4444'">
+                    <svg style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 4px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Coba Lagi
+                </button>
+            </div>
+        `;
     } finally {
-        document.getElementById('beastOlahSpinner').style.display = 'none';
-        document.getElementById('btnBeastOlahRun').disabled = false;
         document.getElementById('beastOlahLoader').classList.remove('active');
     }
 }
 
 function renderOlahBeastCharts(data) {
-    const idMonth = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const idMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     const fullLabels = data.dates.map(d => {
         const dt = new Date(d);
         return idMonth[dt.getMonth()] + ' ' + dt.getFullYear();
     });
     const shortLabels = data.dates.map(d => new Date(d).getFullYear().toString());
+
+    const labelPlugin = (text) => ({
+        id: 'labelPlugin',
+        afterDraw(chart) {
+            const { ctx, chartArea: { left, top } } = chart;
+            ctx.save();
+            ctx.font = 'bold 13px Inter';
+            ctx.fillStyle = '#1F2937';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(text, left + 8, top + 4);
+            ctx.restore();
+        }
+    });
 
     const makeDatasets = (trendKey) => {
         return [{
@@ -1686,30 +1719,36 @@ function renderOlahBeastCharts(data) {
             }
         },
         scales: {
-            x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+            x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
             y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
         }
     };
 
     if (beastOlahStlChart) beastOlahStlChart.destroy();
     beastOlahStlChart = new Chart(document.getElementById('beastOlahStlChart').getContext('2d'), {
-        type: 'line', data: { labels: shortLabels, datasets: makeDatasets('trend_stl') }, options: chartOpts
+        type: 'line', data: { labels: shortLabels, datasets: makeDatasets('trend_stl') },
+        options: chartOpts, plugins: [labelPlugin('(a) STL')]
     });
 
     if (beastOlahBeastChart) beastOlahBeastChart.destroy();
     beastOlahBeastChart = new Chart(document.getElementById('beastOlahBeastChart').getContext('2d'), {
         type: 'line', data: { labels: shortLabels, datasets: makeBeastDatasets() },
-        options: chartOpts, plugins: [cpPlugin(data.change_points, data.dates)]
+        options: chartOpts, plugins: [labelPlugin('(b) BEAST'), cpPlugin(data.change_points, data.dates)]
     });
 
     document.getElementById('beastOlahResultArea').style.display = 'block';
+    const hasCp = data.change_points && data.change_points.length > 0;
+    document.getElementById('beastOlahLegend').style.display = 'flex';
+    document.getElementById('beastOlahCpLegend').style.display = hasCp ? 'flex' : 'none';
 }
 
-// Show beast card when analysis runs
+// Auto-run beast after olah-data analysis
 const _origRunOlah = window.runOlahAnalysis;
-window.runOlahAnalysis = async function() {
+window.runOlahAnalysis = async function () {
     await _origRunOlah.call(this);
-    document.getElementById('beastOlahCard').style.display = '';
-    document.getElementById('beastOlahResultArea').style.display = 'none';
-    document.getElementById('beastOlahPlaceholder').style.display = '';
+
+    const beastCard = document.getElementById('beastOlahCard');
+    beastCard.style.display = '';
+
+    runOlahBeast();
 };
