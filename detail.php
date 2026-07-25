@@ -305,14 +305,36 @@ if (empty($stationId)) {
                         <span style="display:flex; align-items:center; gap:4px;">
                             <span style="width:16px; height:3px; background:#3B82F6; border-radius:2px;"></span> Curah Hujan
                         </span>
-                        <span style="display:flex; align-items:center; gap:4px;">
-                            <span style="width:16px; height:3px; background:#DC2626; border-radius:2px;"></span> Garis Regresi
-                        </span>
                     </div>
                 </div>
                 <div class="chart-container" style="height:320px;">
                     <canvas id="rainfallChart"></canvas>
                 </div>
+            </div>
+
+            <!-- Dekomposisi STL & BEAST -->
+            <div class="detail-card" style="grid-column: 1 / -1; min-height:520px;">
+                <div class="card-loader" id="beastLoaderOverlay">
+                    <div class="spinner"></div>
+                    <span class="loader-label">Menghitung Dekomposisi...</span>
+                </div>
+                <h3>
+                    <span style="display:inline-flex; align-items:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">
+                            <path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-10"/>
+                        </svg>
+                        Dekomposisi STL & BEAST
+                    </span>
+                </h3>
+                <div id="beastResultArea" style="display:none;">
+                    <div style="margin-bottom:8px;">
+                        <div style="height:220px; position:relative;"><canvas id="beastStlChart"></canvas></div>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div style="height:220px; position:relative;"><canvas id="beastBeastChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="beastPlaceholder" style="text-align:center; padding:40px 0; color:#9CA3AF; font-size:0.9rem; min-height:480px; display:flex; align-items:center; justify-content:center;"></div>
             </div>
 
             <!-- Rekap Perhitungan Trend + Ketersediaan Data Periode -->
@@ -804,6 +826,8 @@ if (empty($stationId)) {
             setCardLoading('trendLoaderOverlay', true);
             setCardLoading('statLoaderOverlay', true);
             setCardLoading('availPeriodLoaderOverlay', true);
+            setCardLoading('beastLoaderOverlay', true);
+            runBeastAnalysis();
 
             // Update availability card title
             const titleMap = { bulanan: 'Bulanan', tahunan: 'Tahunan', musiman: 'Bulanan' };
@@ -844,7 +868,6 @@ if (empty($stationId)) {
 
             } catch (e) {
                 console.error("Gagal memperbarui data:", e);
-                // Clear all loaders on error
                 setCardLoading('graphLoaderOverlay', false);
                 setCardLoading('trendLoaderOverlay', false);
                 setCardLoading('statLoaderOverlay', false);
@@ -931,32 +954,30 @@ if (empty($stationId)) {
                             enabled: true,
                             position: 'nearest',
                             external: null,
-                            filter: (item) => item.dataset.label !== 'Garis Regresi',
                             callbacks: {
                                 title: (context) => {
                                     const idx = context[0].dataIndex;
                                     return tooltipLabels[idx] || context[0].label;
                                 },
-                                label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(3).replace('.', ',')
+                                label: (item) => item.dataset.label + ': ' + Number(item.raw).toFixed(2).replace('.', ',')
                             }
                         }
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Tahun', font: { family: 'Inter', weight: 'bold' } },
+                            border: { display: true, width: 1.5, color: '#000' },
+                            title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } },
                             ticks: {
-                                font: { family: 'Inter', size: 10 },
+                                font: { family: 'Inter', size: 11 },
                                 maxRotation: 0,
                                 autoSkip: true,
                                 maxTicksLimit: 15,
                                 callback: function (value, index, ticks) {
                                     const label = this.getLabelForValue(value);
-                                    // Always show first and last tick (start & end year)
                                     if (index === 0 || index === ticks.length - 1) return label;
-                                    // For intermediate ticks, only show if year changes from previous shown label
                                     if (index > 0) {
                                         const prevLabel = this.getLabelForValue(ticks[index - 1].value);
-                                        if (label === prevLabel) return null; // skip duplicate years
+                                        if (label === prevLabel) return null;
                                     }
                                     return label;
                                 }
@@ -964,8 +985,9 @@ if (empty($stationId)) {
                             grid: { display: false }
                         },
                         y: {
+                            border: { display: true, width: 1.5, color: '#000' },
                             beginAtZero: true,
-                            title: { display: true, text: 'Curah Hujan (mm)', font: { family: 'Inter', weight: 'bold' } },
+                            title: { display: true, text: 'Curah Hujan (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } },
                             ticks: { font: { family: 'Inter', size: 11 } }
                         }
                     }
@@ -1268,18 +1290,6 @@ if (empty($stationId)) {
                     const slopeLR = lr.slope !== undefined ? fmt(lr.slope, 3) : '—';
                     const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
-
-                    // Update chart with trend line
-                    if (chartInstance && lr.slope !== undefined && lr.intercept !== undefined) {
-                        const trendDataPts = dataArray.map((d, index) => lr.intercept + (lr.slope * index));
-                        chartInstance.data.datasets = chartInstance.data.datasets.filter(ds => ds.label !== 'Garis Regresi');
-                        chartInstance.data.datasets.push({
-                            type: 'line', label: 'Garis Regresi', data: trendDataPts,
-                            borderColor: '#DC2626', borderWidth: 2, tension: 0,
-                            pointRadius: 0, fill: false, order: -1
-                        });
-                        chartInstance.update();
-                    }
                 } else {
                     document.getElementById('lrResult').innerHTML = `Gagal menghitung`;
                 }
@@ -1804,6 +1814,184 @@ if (empty($stationId)) {
                 document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
             });
         }
+        // ====== BEAST DECOMPOSITION ======
+        let beastStlChart = null;
+        let beastBeastChart = null;
+
+        function isoToFractional(iso) {
+            const d = new Date(iso);
+            return d.getFullYear() + (d.getMonth()) / 12;
+        }
+
+        function mapToolbarToBeast() {
+            const dtType = document.getElementById('dtType').value;
+            const agg = document.getElementById('dtAgg').value;
+            const mo = document.getElementById('dtMonth').value;
+
+            let metode = 'Kumulatif Bulanan';
+            let bulan = '';
+            let musim = '';
+
+            if (dtType === 'tahunan') {
+                metode = 'Kumulatif Tahunan';
+            } else if (dtType === 'musiman') {
+                if (mo === 'all' || mo === '') {
+                    metode = 'Kumulatif Musiman';
+                } else {
+                    metode = 'Kumulatif Musiman Khusus';
+                    if (mo.startsWith('1,2,3')) musim = '1';
+                    else if (mo.startsWith('4,5,6')) musim = '2';
+                    else if (mo.startsWith('7,8,9')) musim = '3';
+                    else if (mo.startsWith('10,11,12')) musim = '4';
+                }
+            } else {
+                // bulanan
+                if (mo === 'all' || mo === '') {
+                    metode = 'Kumulatif Bulanan';
+                } else {
+                    metode = 'Kumulatif Bulanan Khusus';
+                    bulan = mo;
+                }
+            }
+
+            return { metode, bulan, musim };
+        }
+
+        async function runBeastAnalysis() {
+            if (!stationMeta) return;
+
+            const { metode, bulan, musim } = mapToolbarToBeast();
+            const yFrom = parseInt(document.getElementById('yFrom').value);
+            const yTo = parseInt(document.getElementById('yTo').value);
+
+            document.getElementById('beastResultArea').style.display = 'none';
+            document.getElementById('beastPlaceholder').style.display = 'flex';
+
+            try {
+                const res = await fetch('php/beast_proxy.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pos_id: STATION_ID, metode, th1: yFrom, th2: yTo, bulan, musim })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                renderBeastCharts(data);
+            } catch (e) {
+                document.getElementById('beastPlaceholder').style.display = 'flex';
+                document.getElementById('beastPlaceholder').innerHTML = '<span style="color:#DC2626;">Gagal: ' + e.message + '</span>';
+            } finally {
+                setCardLoading('beastLoaderOverlay', false);
+            }
+        }
+
+        function renderBeastCharts(data) {
+            const idMonth = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+            const fullLabels = data.dates.map(d => {
+                const dt = new Date(d);
+                return idMonth[dt.getMonth()] + ' ' + dt.getFullYear();
+            });
+            const shortLabels = data.dates.map(d => new Date(d).getFullYear().toString());
+
+            const makeDatasets = (trendKey) => {
+                return [{
+                    label: 'Tren', data: data[trendKey],
+                    borderColor: '#00B300', borderWidth: 2.5, tension: 0.3, pointRadius: 0, fill: false
+                }];
+            };
+
+            const makeBeastDatasets = () => {
+                const ds = [{
+                    label: 'Tren', data: data.trend_beast,
+                    borderColor: '#00B300', borderWidth: 2.5, tension: 0.3, pointRadius: 0, fill: false
+                }];
+                if (data.ci_lower && data.ci_upper && data.ci_lower.length) {
+                    ds.push({
+                        label: 'CI Lower', data: data.ci_lower,
+                        borderColor: 'transparent', backgroundColor: 'rgba(0,179,0,0.12)',
+                        pointRadius: 0, fill: '+1', tension: 0.3
+                    });
+                    ds.push({
+                        label: 'CI Upper', data: data.ci_upper,
+                        borderColor: 'transparent', backgroundColor: 'rgba(0,179,0,0.12)',
+                        pointRadius: 0, fill: false, tension: 0.3
+                    });
+                }
+                return ds;
+            };
+
+            const labelPlugin = (label) => ({
+                id: 'innerLabel_' + label,
+                afterDraw(chart) {
+                    const { ctx, chartArea: { left, top } } = chart;
+                    ctx.save();
+                    ctx.font = 'bold 13px Inter, sans-serif';
+                    ctx.fillStyle = '#374151';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText(label, left + 6, top + 6);
+                    ctx.restore();
+                }
+            });
+
+            const cpPlugin = (changePoints, dates) => ({
+                id: 'cpLines',
+                afterDraw(chart) {
+                    if (!changePoints || !changePoints.length) return;
+                    const { ctx, chartArea, scales: { x } } = chart;
+                    ctx.save();
+                    ctx.strokeStyle = '#2563EB';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([6, 4]);
+                    changePoints.forEach(cpDate => {
+                        const idx = dates.indexOf(cpDate);
+                        if (idx < 0) return;
+                        const xPos = x.getPixelForValue(idx);
+                        if (xPos < chartArea.left || xPos > chartArea.right) return;
+                        ctx.beginPath();
+                        ctx.moveTo(xPos, chartArea.top);
+                        ctx.lineTo(xPos, chartArea.bottom);
+                        ctx.stroke();
+                    });
+                    ctx.restore();
+                }
+            });
+
+            const chartOpts = {
+                responsive: true, maintainAspectRatio: false, animation: false, normalized: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        filter: (item) => item.dataset.label === 'Tren',
+                        callbacks: {
+                            title: (ctx) => fullLabels[ctx[0].dataIndex] || ctx[0].label,
+                            label: (item) => 'Tren: ' + Number(item.raw).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        }
+                    }
+                },
+                scales: {
+                    x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 11, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+                    y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
+                }
+            };
+
+            if (beastStlChart) beastStlChart.destroy();
+            beastStlChart = new Chart(document.getElementById('beastStlChart').getContext('2d'), {
+                type: 'line', data: { labels: shortLabels, datasets: makeDatasets('trend_stl') },
+                options: chartOpts, plugins: [labelPlugin('(a) STL')]
+            });
+
+            if (beastBeastChart) beastBeastChart.destroy();
+            beastBeastChart = new Chart(document.getElementById('beastBeastChart').getContext('2d'), {
+                type: 'line', data: { labels: shortLabels, datasets: makeBeastDatasets() },
+                options: chartOpts, plugins: [labelPlugin('(b) BEAST'), cpPlugin(data.change_points, data.dates)]
+            });
+
+            document.getElementById('beastPlaceholder').style.display = 'none';
+            document.getElementById('beastResultArea').style.display = 'block';
+        }
+
         setupCustomSelects();
     </script>
 

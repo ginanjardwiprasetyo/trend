@@ -1538,4 +1538,178 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSeasonalLabels();
         });
     }
+
+    // Load beast stations on page load
+    loadBeastStations();
 });
+
+// ====== BEAST DECOMPOSITION (olah-data) ======
+
+function isoToFractional(iso) {
+    const d = new Date(iso);
+    return d.getFullYear() + (d.getMonth()) / 12;
+}
+
+async function loadBeastStations() {
+    try {
+        const res = await fetch('php/get_stations.php?lite=1');
+        const features = await res.json();
+        const sel = document.getElementById('beastOlahStation');
+        if (!sel || !Array.isArray(features)) return;
+        features.forEach(f => {
+            if (!f.properties) return;
+            const opt = document.createElement('option');
+            opt.value = f.properties.id;
+            opt.textContent = f.properties.name + ' (' + f.properties.id + ')';
+            sel.appendChild(opt);
+        });
+    } catch (e) {
+        console.error('Gagal memuat stasiun untuk beast:', e);
+    }
+}
+
+document.getElementById('beastOlahMetode').addEventListener('change', function() {
+    const m = this.value;
+    document.getElementById('beastOlahBulan').style.display = m === 'Kumulatif Bulanan Khusus' ? '' : 'none';
+    document.getElementById('beastOlahMusim').style.display = m === 'Kumulatif Musiman Khusus' ? '' : 'none';
+});
+
+async function runOlahBeast() {
+    const stationSel = document.getElementById('beastOlahStation');
+    const posId = stationSel.value;
+    if (!posId) {
+        alert('Pilih stasiun referensi dari database terlebih dahulu.');
+        return;
+    }
+
+    const metode = document.getElementById('beastOlahMetode').value;
+    const bulan = document.getElementById('beastOlahBulan').value;
+    const musim = document.getElementById('beastOlahMusim').value;
+    const yFrom = parseInt(document.getElementById('olahYFrom').value);
+    const yTo = parseInt(document.getElementById('olahYTo').value);
+
+    document.getElementById('beastOlahSpinner').style.display = 'block';
+    document.getElementById('btnBeastOlahRun').disabled = true;
+    document.getElementById('beastOlahResultArea').style.display = 'none';
+    document.getElementById('beastOlahPlaceholder').style.display = 'none';
+    document.getElementById('beastOlahLoader').classList.add('active');
+
+    try {
+        const res = await fetch('php/beast_proxy.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pos_id: posId, metode, th1: yFrom, th2: yTo, bulan, musim })
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        renderOlahBeastCharts(data);
+    } catch (e) {
+        document.getElementById('beastOlahPlaceholder').style.display = '';
+        document.getElementById('beastOlahPlaceholder').innerHTML = '<span style="color:#DC2626;">Gagal: ' + e.message + '</span>';
+    } finally {
+        document.getElementById('beastOlahSpinner').style.display = 'none';
+        document.getElementById('btnBeastOlahRun').disabled = false;
+        document.getElementById('beastOlahLoader').classList.remove('active');
+    }
+}
+
+function renderOlahBeastCharts(data) {
+    const idMonth = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const fullLabels = data.dates.map(d => {
+        const dt = new Date(d);
+        return idMonth[dt.getMonth()] + ' ' + dt.getFullYear();
+    });
+    const shortLabels = data.dates.map(d => new Date(d).getFullYear().toString());
+
+    const makeDatasets = (trendKey) => {
+        return [{
+            label: 'Tren', data: data[trendKey],
+            borderColor: '#00B300', borderWidth: 2.5, tension: 0.3, pointRadius: 0, fill: false
+        }];
+    };
+
+    const makeBeastDatasets = () => {
+        const ds = [{
+            label: 'Tren', data: data.trend_beast,
+            borderColor: '#00B300', borderWidth: 2.5, tension: 0.3, pointRadius: 0, fill: false
+        }];
+        if (data.ci_lower && data.ci_upper && data.ci_lower.length) {
+            ds.push({
+                label: 'CI Lower', data: data.ci_lower,
+                borderColor: 'transparent', backgroundColor: 'rgba(0,179,0,0.12)',
+                pointRadius: 0, fill: '+1', tension: 0.3
+            });
+            ds.push({
+                label: 'CI Upper', data: data.ci_upper,
+                borderColor: 'transparent', backgroundColor: 'rgba(0,179,0,0.12)',
+                pointRadius: 0, fill: false, tension: 0.3
+            });
+        }
+        return ds;
+    };
+
+    const cpPlugin = (changePoints, dates) => ({
+        id: 'cpLines',
+        afterDraw(chart) {
+            if (!changePoints || !changePoints.length) return;
+            const { ctx, chartArea, scales: { x } } = chart;
+            ctx.save();
+            ctx.strokeStyle = '#2563EB';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 4]);
+            changePoints.forEach(cpDate => {
+                const idx = dates.indexOf(cpDate);
+                if (idx < 0) return;
+                const xPos = x.getPixelForValue(idx);
+                if (xPos < chartArea.left || xPos > chartArea.right) return;
+                ctx.beginPath();
+                ctx.moveTo(xPos, chartArea.top);
+                ctx.lineTo(xPos, chartArea.bottom);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+    });
+
+    const chartOpts = {
+        responsive: true, maintainAspectRatio: false, animation: false, normalized: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                enabled: true,
+                filter: (item) => item.dataset.label === 'Tren',
+                callbacks: {
+                    title: (ctx) => fullLabels[ctx[0].dataIndex] || ctx[0].label,
+                    label: (item) => 'Tren: ' + Number(item.raw).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                }
+            }
+        },
+        scales: {
+            x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15 }, grid: { display: false } },
+            y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
+        }
+    };
+
+    if (beastOlahStlChart) beastOlahStlChart.destroy();
+    beastOlahStlChart = new Chart(document.getElementById('beastOlahStlChart').getContext('2d'), {
+        type: 'line', data: { labels: shortLabels, datasets: makeDatasets('trend_stl') }, options: chartOpts
+    });
+
+    if (beastOlahBeastChart) beastOlahBeastChart.destroy();
+    beastOlahBeastChart = new Chart(document.getElementById('beastOlahBeastChart').getContext('2d'), {
+        type: 'line', data: { labels: shortLabels, datasets: makeBeastDatasets() },
+        options: chartOpts, plugins: [cpPlugin(data.change_points, data.dates)]
+    });
+
+    document.getElementById('beastOlahResultArea').style.display = 'block';
+}
+
+// Show beast card when analysis runs
+const _origRunOlah = window.runOlahAnalysis;
+window.runOlahAnalysis = async function() {
+    await _origRunOlah.call(this);
+    document.getElementById('beastOlahCard').style.display = '';
+    document.getElementById('beastOlahResultArea').style.display = 'none';
+    document.getElementById('beastOlahPlaceholder').style.display = '';
+};
