@@ -46,7 +46,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Trend'
+        'trend' => 'Tidak Ada Tren'
     ]);
     exit;
 }
@@ -70,7 +70,7 @@ $alpha = 0.05;
 $zCritical = getCriticalZ($alpha);
 
 // ====== TENTUKAN TREND ======
-$trend = 'Tidak Ada Trend';
+$trend = 'Tidak Ada Tren';
 $significant = false;
 if ($Z > $zCritical) {
     $trend = 'Meningkat';

@@ -13,7 +13,7 @@ function updateLightboxLength(stationId) {
     if (!feat) return;
     const p = feat.properties;
     if (p.yearStart && p.yearEnd) {
-        document.getElementById('lbRange').textContent = `${p.yearStart}—${p.yearEnd}`;
+        document.getElementById('lbRange').textContent = `${p.yearStart}–${p.yearEnd}`;
         document.getElementById('lbLength').textContent = `${p.yearEnd - p.yearStart + 1} tahun`;
         document.getElementById('lightboxDetailBtn').disabled = false;
     }
@@ -41,18 +41,18 @@ function openLightbox(stationData) {
     }
 
     // Helper format minus typografi + koma desimal
-    const fM = (val) => val === undefined || val === null ? '—' : String(val).replace('-', '−');
-    const fmt = (val, d) => val === undefined || val === null ? '—' : fM(Number(val).toFixed(d)).replace('.', ',');
+    const fM = (val) => val === undefined || val === null ? '–' : String(val).replace('-', '−');
+    const fmt = (val, d) => val === undefined || val === null ? '–' : fM(Number(val).toFixed(d)).replace('.', ',');
 
     // Isi data
     document.getElementById('lightboxTitle').textContent = "Pos " + stationData.name;
-    document.getElementById('lbLocation').textContent = (stationData.location || '—').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    document.getElementById('lbLocation').textContent = (stationData.location || '–').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
     // Rentang Data (berdasarkan tahun pertama & terakhir rain non-null)
     let yearStart = stationData.yearStart;
     let yearEnd = stationData.yearEnd;
     if (yearStart && yearEnd) {
-        document.getElementById('lbRange').textContent = `${yearStart}—${yearEnd}`;
+        document.getElementById('lbRange').textContent = `${yearStart}–${yearEnd}`;
         document.getElementById('lbLength').textContent = `${yearEnd - yearStart + 1} tahun`;
         detailBtn.disabled = false;
     } else {
@@ -64,8 +64,8 @@ function openLightbox(stationData) {
     const trendLabel = document.getElementById('lbTrendLabel');
     const trendValue = document.getElementById('lbTrendValue');
 
-    trendLabel.textContent = "Nilai Trend";
-    trendValue.textContent = "—";
+    trendLabel.textContent = "Nilai Tren";
+    trendValue.textContent = "–";
 
     if (typeof currentMethod !== 'undefined' && currentMethod && stationData.trendData) {
         const trend = stationData.trendData[currentMethod];
@@ -96,7 +96,7 @@ function openLightbox(stationData) {
 
     document.getElementById('lbCoords').textContent =
         `${fmt(stationData.lat, 4)}, ${fmt(stationData.lon, 4)}`;
-    document.getElementById('lbManager').textContent = stationData.manager || '—';
+    document.getElementById('lbManager').textContent = stationData.manager || '–';
 
     // Fetch Elevation
     const lat = stationData.lat;
@@ -222,11 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dataAvail && years < 16) {
             setConfirmMode(true,
-                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Analisis tren dengan data kurang dari 16 tahun mungkin kurang <i>reliable</i>. Tetap lakukan pengolahan trend data runtut waktu?`
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Analisis tren dengan data kurang dari 16 tahun mungkin kurang <i>reliable</i>. Tetap lakukan pengolahan tren data runtut waktu?`
             );
         } else if (!dataAvail) {
             setConfirmMode(true,
-                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Tetap lakukan pengolahan trend data runtut waktu?`
+                `Stasiun ini hanya memiliki data <strong>${years} tahun</strong>. Tetap lakukan pengolahan tren data runtut waktu?`
             );
         } else {
             openDetailPage(stationId, params);

@@ -46,7 +46,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Trend'
+        'trend' => 'Tidak Ada Tren'
     ]);
     exit;
 }
@@ -121,7 +121,7 @@ $Qmax = $slopes[$idxUpper] ?? 0;
 // Signifikan, jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
 $significant = ($Qmin > 0) || ($Qmax < 0);
 
-$trend = 'Tidak Ada Trend';
+$trend = 'Tidak Ada Tren';
 if ($significant) {
     if ($senSlope > 0) $trend = 'Meningkat';
     elseif ($senSlope < 0) $trend = 'Menurun';

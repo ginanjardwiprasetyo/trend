@@ -133,9 +133,9 @@ try {
             }
 
             $n = count($aggregated);
-            $mk = ['trend' => 'Tidak Ada Trend', 'S' => 0, 'Z' => 0, 'pValue' => 1, 'n' => $n];
-            $ss = ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
-            $lr = ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'rSquared' => 0, 'tStatistic' => 0];
+            $mk = ['trend' => 'Tidak Ada Tren', 'S' => 0, 'Z' => 0, 'pValue' => 1, 'n' => $n];
+            $ss = ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
+            $lr = ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'rSquared' => 0, 'tStatistic' => 0];
 
             if ($n >= 3) {
                 $mk = calcMannKendall($aggregated);
@@ -163,7 +163,7 @@ try {
 
                 $zCrit = getCriticalZ(0.05);
                 $smkSig = abs($rawSeasonalMk['Z']) > $zCrit;
-                $smkTrend = 'Tidak Ada Trend';
+                $smkTrend = 'Tidak Ada Tren';
                 if ($rawSeasonalMk['Z'] > $zCrit) $smkTrend = 'Meningkat';
                 elseif ($rawSeasonalMk['Z'] < -$zCrit) $smkTrend = 'Menurun';
 
@@ -176,7 +176,7 @@ try {
                     'seasonCount' => $rawSeasonalMk['seasonCount']
                 ];
 
-                $sssTrend = 'Tidak Ada Trend';
+                $sssTrend = 'Tidak Ada Tren';
                 if ($rawSeasonalSs['slope'] > 0) $sssTrend = 'Meningkat';
                 elseif ($rawSeasonalSs['slope'] < 0) $sssTrend = 'Menurun';
                 $seasonalSs = [
@@ -209,7 +209,7 @@ try {
 
 function calcMannKendall($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'S' => 0, 'Z' => 0, 'pValue' => 1, 'n' => $n];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'S' => 0, 'Z' => 0, 'pValue' => 1, 'n' => $n];
 
     $values = array_column($data, 'value');
     $S = 0;
@@ -239,7 +239,7 @@ function calcMannKendall($data) {
     $pValue = 2 * (1 - normalCDF(abs($Z)));
     $zCrit = getCriticalZ(0.05);
 
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     $significant = false;
     if ($Z > $zCrit) {
         $trend = 'Meningkat';
@@ -261,7 +261,7 @@ function calcMannKendall($data) {
 
 function calcSensSlope($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
 
     $slopes = [];
     for ($i = 0; $i < $n - 1; $i++) {
@@ -273,7 +273,7 @@ function calcSensSlope($data) {
         }
     }
 
-    if (empty($slopes)) return ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
+    if (empty($slopes)) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'Qmin' => 0, 'Qmax' => 0];
 
     sort($slopes);
     $count = count($slopes);
@@ -296,7 +296,7 @@ function calcSensSlope($data) {
     $Qmax = $slopes[$idxUpper] ?? 0;
 
     $significant = ($Qmin > 0) || ($Qmax < 0);
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     if ($significant) {
         if ($medianSlope > 0) $trend = 'Meningkat';
         elseif ($medianSlope < 0) $trend = 'Menurun';
@@ -313,7 +313,7 @@ function calcSensSlope($data) {
 
 function calcLinearRegression($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'rSquared' => 0, 'tStatistic' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'rSquared' => 0, 'tStatistic' => 0];
 
     $x = range(0, $n - 1);
     $y = array_column($data, 'value');
@@ -355,7 +355,7 @@ function calcLinearRegression($data) {
         $significant = abs($tStat) > $tCritical;
     }
 
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     if ($significant) {
         if ($slope > 0) $trend = 'Meningkat';
         elseif ($slope < 0) $trend = 'Menurun';

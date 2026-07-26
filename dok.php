@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Dokumentasi — TrendHidro</title>
+    <title>Dokumentasi – TrenHidro</title>
     <meta name="description"
-        content="Dokumentasi TrendHidro: rumus, metode, panduan penggunaan, dan changelog.">
+        content="Dokumentasi TrenHidro: rumus, metode, panduan penggunaan, dan changelog.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400;1,14..32,500&display=swap" rel="stylesheet">
@@ -540,14 +540,14 @@
         <!-- Sidebar -->
         <aside class="docs-sidebar" id="docsSidebar">
             <h4>Umum</h4>
-            <a href="#tentang" class="active" onclick="showSection('tentang', this)">Tentang TrendHidro</a>
+            <a href="#tentang" class="active" onclick="showSection('tentang', this)">Tentang TrenHidro</a>
             <a href="#changelog" onclick="showSection('changelog', this)"><i>Changelog</i></a>
 
             <h4>Panduan</h4>
             <a href="#peta-guide" onclick="showSection('peta-guide', this)">Peta Interaktif</a>
             <a href="#olah-guide" onclick="showSection('olah-guide', this)">Olah Data Anda</a>
 
-            <!-- ponytail: Metode hidden — formulas moved to detail page -->
+            <!-- ponytail: Metode hidden – formulas moved to detail page -->
             <!--
             <h4>Metode</h4>
             <a href="#mann-kendall" onclick="showSection('mann-kendall', this)">Mann-Kendall</a>
@@ -557,7 +557,7 @@
             <a href="#regresi-linear" onclick="showSection('regresi-linear', this)">Regresi Linear</a>
             -->
 
-            <!-- ponytail: Lanjutan menu hidden — not part of thesis Ch3 documen -->
+            <!-- ponytail: Lanjutan menu hidden – not part of thesis Ch3 documen -->
             <!--
             <h4>Lanjutan</h4>
             <a href="#interpretasi" onclick="showSection('interpretasi', this)">Interpretasi Hasil</a>
@@ -571,16 +571,16 @@
 
             <!-- ==================== TENTANG ==================== -->
             <div class="doc-section active" id="sec-tentang">
-                <h1>Tentang TrendHidro</h1>
+                <h1>Tentang TrenHidro</h1>
                 <p class="page-lead">
-                    Platform pengolah data runtut waktu (<i>time series</i>) hidrometeorologi, khususnya data curah hujan, berbasis metode statistik untuk mendeteksi dan mengestimasi trend.
+                    Platform pengolah data runtut waktu (<i>time series</i>) hidrometeorologi, khususnya data curah hujan, berbasis metode statistik untuk mendeteksi dan mengestimasi tren.
                 </p>
 
-                <h2>Apa itu TrendHidro?</h2>
-                <p>TrendHidro menyediakan metode-metode uji statistik berikut yang dapat dijalankan langsung pada <i>browser</i>:</p>
+                <h2>Apa itu TrenHidro?</h2>
+                <p>TrenHidro menyediakan metode-metode uji statistik berikut yang dapat dijalankan langsung pada <i>browser</i>:</p>
                 <ul>
                     <li><strong>Uji Mann-Kendall</strong>, mendeteksi keberadaan tren secara non-parametrik</li>
-                    <li><strong>Sen's Slope</strong>, mengestimasi besaran kemiringan trend secara non-parametrik (<i>robust</i> terhadap <i>outlier</i>)</li>
+                    <li><strong>Sen's Slope</strong>, mengestimasi besaran kemiringan tren secara non-parametrik (<i>robust</i> terhadap <i>outlier</i>)</li>
                     <li><strong>Seasonal Mann-Kendall</strong>, adaptasi Mann-Kendall untuk data dengan siklus musiman</li>
                     <li><strong>Seasonal Sen's Slope</strong>, adaptasi Sen's Slope untuk data dengan siklus musiman</li>
                     <li><strong>Regresi Linear</strong>, uji tren parametrik dengan estimasi <i>slope</i></li>
@@ -604,12 +604,12 @@
             <!-- ==================== CHANGELOG ==================== -->
             <div class="doc-section" id="sec-changelog">
                 <h1><i>Changelog</i></h1>
-                <p class="page-lead">Riwayat versi TrendHidro.</p>
+                <p class="page-lead">Riwayat versi TrenHidro.</p>
 
                 <div class="changelog-item">
-                    <h2 class="changelog-title">v1.0 <span class="changelog-sub">— Juni 2026</span></h2>
+                    <h2 class="changelog-title">v1.0 <span class="changelog-sub">– Juni 2026</span></h2>
                     <div class="changelog-desc">
-                        Peluncuran TrendHidro dengan fitur lengkap: Peta Interaktif berbasis Leaflet.js dengan marker berwarna hasil uji statistik, halaman Detail Stasiun dengan grafik dan ketersediaan data harian, halaman Olah Data untuk mengunggah <i>file</i> CSV/XLS/XLSX, serta lima metode statistik (Mann-Kendall, Sen's Slope, Seasonal Mann-Kendall, Seasonal Sen's Slope, Regresi Linear) yang berjalan pada <i>server</i> PHP dan <i>browser</i>.
+                        Peluncuran TrenHidro dengan fitur lengkap: Peta Interaktif berbasis Leaflet.js dengan marker berwarna hasil uji statistik, halaman Detail Stasiun dengan grafik dan ketersediaan data harian, halaman Olah Data untuk mengunggah <i>file</i> CSV/XLS/XLSX, serta lima metode statistik (Mann-Kendall, Sen's Slope, Seasonal Mann-Kendall, Seasonal Sen's Slope, Regresi Linear) yang berjalan pada <i>server</i> PHP dan <i>browser</i>.
                     </div>
                 </div>
             </div>
@@ -719,22 +719,22 @@
                 <h2>Cara Penggunaan</h2>
                 <div class="summary-grid">
                     <div class="summary-card">
-                        <div class="summary-card-label">1 — Upload</div>
+                        <div class="summary-card-label">1 – Upload</div>
                         <div class="summary-card-value">CSV, XLS, atau XLSX</div>
                         <div class="summary-card-sub">Seret <i>file</i> ke area <i>upload</i> atau klik untuk memilih. Format tanggal dan separator CSV terdeteksi otomatis.</div>
                     </div>
                     <div class="summary-card">
-                        <div class="summary-card-label">2 — Pratinjau</div>
+                        <div class="summary-card-label">2 – Pratinjau</div>
                         <div class="summary-card-value">20 baris pertama</div>
                         <div class="summary-card-sub">Tabel pratinjau muncul setelah <i>file</i> diproses. Klik "Ganti <i>File</i>" untuk mengganti.</div>
                     </div>
                     <div class="summary-card">
-                        <div class="summary-card-label">3 — Parameter</div>
+                        <div class="summary-card-label">3 – Parameter</div>
                         <div class="summary-card-value">Tipe, Bulan, Periode</div>
                         <div class="summary-card-sub">Pilih tipe data (Bulanan/Tahunan/Musiman), <i>filter</i> bulan/musim, dan rentang tahun.</div>
                     </div>
                     <div class="summary-card">
-                        <div class="summary-card-label">4 — Olah</div>
+                        <div class="summary-card-label">4 – Olah</div>
                         <div class="summary-card-value">Klik "Olah Data"</div>
                         <div class="summary-card-sub"><i>Server</i> menjalankan kelima metode dan hasilnya ditampilkan langsung di halaman.</div>
                     </div>
@@ -795,16 +795,16 @@
                 <!--
                 <h2>Pesan Galat Umum</h2>
                 <ul>
-                    <li><strong>"Format file tidak didukung. Gunakan CSV, XLS, atau XLSX."</strong> — File bukan CSV, XLS, atau XLSX</li>
-                    <li><strong>"File CSV kosong atau tidak memiliki data."</strong> — File tidak memiliki baris data</li>
-                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file CSV."</strong> — Semua baris gagal dibaca (tanggal tidak dikenali atau nilai bukan angka)</li>
-                    <li><strong>"Sheet Excel kosong atau tidak memiliki data."</strong> — Sheet Excel kosong</li>
-                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file Excel."</strong> — Semua baris gagal dibaca</li>
-                    <li><strong>"Gagal membaca file Excel. Pastikan format file benar."</strong> — File Excel rusak atau format tidak kompatibel</li>
-                    <li><strong>"Minimal 3 data"</strong> — Data terlalu sedikit untuk analisis statistik</li>
-                    <li><strong>"Silakan upload file data terlebih dahulu."</strong> — Belum ada file yang diunggah</li>
-                    <li><strong>"Tahun awal harus lebih kecil atau sama dengan tahun akhir."</strong> — Rentang tahun tidak valid</li>
-                    <li><strong>"Tidak ada data untuk periode yang dipilih."</strong> — Data kosong setelah filter diterapkan</li>
+                    <li><strong>"Format file tidak didukung. Gunakan CSV, XLS, atau XLSX."</strong> – File bukan CSV, XLS, atau XLSX</li>
+                    <li><strong>"File CSV kosong atau tidak memiliki data."</strong> – File tidak memiliki baris data</li>
+                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file CSV."</strong> – Semua baris gagal dibaca (tanggal tidak dikenali atau nilai bukan angka)</li>
+                    <li><strong>"Sheet Excel kosong atau tidak memiliki data."</strong> – Sheet Excel kosong</li>
+                    <li><strong>"Tidak ada data valid yang berhasil di-parse dari file Excel."</strong> – Semua baris gagal dibaca</li>
+                    <li><strong>"Gagal membaca file Excel. Pastikan format file benar."</strong> – File Excel rusak atau format tidak kompatibel</li>
+                    <li><strong>"Minimal 3 data"</strong> – Data terlalu sedikit untuk analisis statistik</li>
+                    <li><strong>"Silakan upload file data terlebih dahulu."</strong> – Belum ada file yang diunggah</li>
+                    <li><strong>"Tahun awal harus lebih kecil atau sama dengan tahun akhir."</strong> – Rentang tahun tidak valid</li>
+                    <li><strong>"Tidak ada data untuk periode yang dipilih."</strong> – Data kosong setelah filter diterapkan</li>
                 </ul>
                 -->
             </div>
@@ -839,7 +839,7 @@
                     \dfrac{S + 1}{\sqrt{\text{Var}(S)}} & S < 0
                     \end{cases}$$
                 </div>
-                <p>$Z$ = statistik uji (distribusi normal standar); koreksi ±1 meningkatkan akurasi pada sampel kecil. $|Z| > 1{,}96$ → trend signifikan pada tingkat kepercayaan 95%; $Z > 0$ → meningkat, $Z < 0$ → menurun.</p>
+                <p>$Z$ = statistik uji (distribusi normal standar); koreksi ±1 meningkatkan akurasi pada sampel kecil. $|Z| > 1{,}96$ → tren signifikan pada tingkat kepercayaan 95%; $Z > 0$ → meningkat, $Z < 0$ → menurun.</p>
 
                 <h3><i>p-value</i></h3>
                 <div class="formula-box">
@@ -849,8 +849,8 @@
 
                 <h2>Hipotesis</h2>
                 <ul>
-                    <li>$H_0$: Tidak ada trend, data bersifat <i>i.i.d.</i></li>
-                    <li>$H_1$: Terdapat trend (meningkat atau menurun)</li>
+                    <li>$H_0$: Tidak ada tren, data bersifat <i>i.i.d.</i></li>
+                    <li>$H_1$: Terdapat tren (meningkat atau menurun)</li>
                 </ul>
             </div>
 
@@ -858,7 +858,7 @@
             <div class="doc-section" id="sec-seasonal-mk">
                 <h1>Seasonal Mann-Kendall</h1>
                 <p class="page-lead">
-                    Adaptasi uji Mann-Kendall untuk data dengan siklus musiman. Membandingkan data yang berasal dari bulan atau musim yang sama, sehingga efek musiman tidak memengaruhi deteksi trend.
+                    Adaptasi uji Mann-Kendall untuk data dengan siklus musiman. Membandingkan data yang berasal dari bulan atau musim yang sama, sehingga efek musiman tidak memengaruhi deteksi tren.
                 </p>
 
                 <h2>Rumus</h2>
@@ -895,12 +895,12 @@
                     \dfrac{S^* + 1}{\sqrt{\text{Var}(S^*)}} & S^* < 0
                     \end{cases}$$
                 </div>
-                <p>$Z^*$ = statistik uji gabungan, disubstitusikan ke persamaan (3.6) menggantikan $S$ dan $\text{Var}(S)$. Kriteria: $|Z^*| > 1{,}96$ → trend signifikan pada tingkat kepercayaan 95%.</p>
+                <p>$Z^*$ = statistik uji gabungan, disubstitusikan ke persamaan (3.6) menggantikan $S$ dan $\text{Var}(S)$. Kriteria: $|Z^*| > 1{,}96$ → tren signifikan pada tingkat kepercayaan 95%.</p>
 
                 <h2>Hipotesis</h2>
                 <ul>
-                    <li>$H_0$: Tidak ada trend pada seluruh musim</li>
-                    <li>$H_1$: Terdapat trend pada salah satu atau lebih musim</li>
+                    <li>$H_0$: Tidak ada tren pada seluruh musim</li>
+                    <li>$H_1$: Terdapat tren pada salah satu atau lebih musim</li>
                 </ul>
             </div>
 
@@ -908,7 +908,7 @@
             <div class="doc-section" id="sec-sens-slope">
                 <h1>Sen's Slope Estimator</h1>
                 <p class="page-lead">
-                    Estimator non-parametrik untuk menghitung besaran kemiringan trend. Lebih <em>robust</em> terhadap <i>outlier</i> dibandingkan regresi linear karena menggunakan <strong>median</strong> dari seluruh kemiringan pasangan data.
+                    Estimator non-parametrik untuk menghitung besaran kemiringan tren. Lebih <em>robust</em> terhadap <i>outlier</i> dibandingkan regresi linear karena menggunakan <strong>median</strong> dari seluruh kemiringan pasangan data.
                 </p>
 
                 <h2>Rumus</h2>
@@ -933,12 +933,12 @@
                     M_2 = \frac{N + C_{\alpha}}{2}$$
                     $$Q_{\min} = Q_{(M_1)}, \quad Q_{\max} = Q_{(M_2)}$$
                 </div>
-                <p>$C_{\alpha}$ = lebar interval (jumlah kemiringan); $\text{Var}(S)$ = varians $S$ dari Mann-Kendall; $Z_{\alpha/2}=1{,}96$ pada tingkat kepercayaan 95%; $Q_{\min}, Q_{\max}$ = batas bawah/atas IK 95%. Jika 0 tidak berada dalam ($Q_{\min}, Q_{\max}$), trend signifikan.</p>
+                <p>$C_{\alpha}$ = lebar interval (jumlah kemiringan); $\text{Var}(S)$ = varians $S$ dari Mann-Kendall; $Z_{\alpha/2}=1{,}96$ pada tingkat kepercayaan 95%; $Q_{\min}, Q_{\max}$ = batas bawah/atas IK 95%. Jika 0 tidak berada dalam ($Q_{\min}, Q_{\max}$), tren signifikan.</p>
 
                 <h2>Hipotesis</h2>
                 <ul>
-                    <li>$H_0$: Tidak ada trend, kemiringan populasi ($\beta$) = 0</li>
-                    <li>$H_1$: Terdapat trend, $\beta \ne 0$ (meningkat atau menurun)</li>
+                    <li>$H_0$: Tidak ada tren, kemiringan populasi ($\beta$) = 0</li>
+                    <li>$H_1$: Terdapat tren, $\beta \ne 0$ (meningkat atau menurun)</li>
                 </ul>
             </div>
 
@@ -982,12 +982,12 @@
                     M_2^* = \frac{N^* + C^*_{\alpha}}{2}$$
                     $$Q^*_{\min} = Q'_{(M_1^*)}, \quad Q^*_{\max} = Q'_{(M_2^*)}$$
                 </div>
-                <p>$C^*_{\alpha}$ = lebar interval kepercayaan gabungan; $\text{Var}(S^*)$ = varians gabungan dari persamaan (3.10); $Q^*_{\min}, Q^*_{\max}$ = batas bawah/atas IK 95%. Jika 0 tidak berada dalam ($Q^*_{\min}, Q^*_{\max}$), trend signifikan.</p>
+                <p>$C^*_{\alpha}$ = lebar interval kepercayaan gabungan; $\text{Var}(S^*)$ = varians gabungan dari persamaan (3.10); $Q^*_{\min}, Q^*_{\max}$ = batas bawah/atas IK 95%. Jika 0 tidak berada dalam ($Q^*_{\min}, Q^*_{\max}$), tren signifikan.</p>
 
                 <h2>Hipotesis</h2>
                 <ul>
-                    <li>$H_0$: Tidak ada trend, kemiringan populasi gabungan musim ($\beta^*$) = 0</li>
-                    <li>$H_1$: Terdapat trend, $\beta^* \ne 0$ (meningkat atau menurun)</li>
+                    <li>$H_0$: Tidak ada tren, kemiringan populasi gabungan musim ($\beta^*$) = 0</li>
+                    <li>$H_1$: Terdapat tren, $\beta^* \ne 0$ (meningkat atau menurun)</li>
                 </ul>
             </div>
 
@@ -1022,7 +1022,7 @@
                 <div class="formula-box">
                     $$t = \frac{\hat{\beta}}{SE(\hat{\beta})}, \quad SE(\hat{\beta}) = \sqrt{\frac{MSE}{S_{xx}}}, \quad MSE = \frac{SS_{\text{res}}}{n - 2}$$
                 </div>
-                <p>$t$ = nilai statistik uji $t$; $SE(\hat{\beta})$ = <i>standard error</i> slope; $MSE$ = <i>mean squared error</i>. $|t| > t_{\text{kritis}}(df=n-2)$ → trend signifikan pada tingkat kepercayaan 95%.</p>
+                <p>$t$ = nilai statistik uji $t$; $SE(\hat{\beta})$ = <i>standard error</i> slope; $MSE$ = <i>mean squared error</i>. $|t| > t_{\text{kritis}}(df=n-2)$ → tren signifikan pada tingkat kepercayaan 95%.</p>
 
                 <h3>Derajat kebebasan</h3>
                 <div class="formula-box">
@@ -1032,12 +1032,12 @@
 
                 <h2>Hipotesis</h2>
                 <ul>
-                    <li>$H_0$: Tidak ada trend linear, $\beta = 0$</li>
-                    <li>$H_1$: Terdapat trend linear, $\beta \ne 0$ (meningkat atau menurun)</li>
+                    <li>$H_0$: Tidak ada tren linear, $\beta = 0$</li>
+                    <li>$H_1$: Terdapat tren linear, $\beta \ne 0$ (meningkat atau menurun)</li>
                 </ul>
             </div>
 
-            <!-- ponytail: sections below hidden — not part of thesis Ch3 documen -->
+            <!-- ponytail: sections below hidden – not part of thesis Ch3 documen -->
             <!-- ==================== INTERPRETASI ==================== -->
             <div class="doc-section" id="sec-interpretasi" style="display:none!important;">
                 <h1>Interpretasi Hasil</h1>
@@ -1100,7 +1100,7 @@
                     <tbody>
                         <tr>
                             <td>Metode non-parametrik sepakat signifikan</td>
-                            <td><strong>Keyakinan tinggi</strong>, trend sangat mungkin nyata</td>
+                            <td><strong>Keyakinan tinggi</strong>, tren sangat mungkin nyata</td>
                         </tr>
                         <tr>
                             <td>Mann-Kendall dan Sen's Slope sepakat; Regresi Linear berbeda</td>
@@ -1111,7 +1111,7 @@
                             <td>Data kemungkinan pendek (&lt; 10 titik). Regresi punya <i>power</i> lebih tinggi pada sampel kecil, namun bergantung asumsi normalitas.</td>
                         </tr>
                         <tr>
-                            <td>Semua tidak signifikan / tidak ada trend</td>
+                            <td>Semua tidak signifikan / tidak ada tren</td>
                             <td>Tidak terdeteksi perubahan sistematis. Data mungkin terlalu pendek atau variabilitas terlalu tinggi.</td>
                         </tr>
                     </tbody>
@@ -1133,7 +1133,7 @@
                 <div class="faq-item">
                     <h3 class="faq-q">Apa perbedaan Mann-Kendall dan Regresi Linear?</h3>
                     <div class="faq-a">
-                        Mann-Kendall adalah uji non-parametrik yang mendeteksi trend tanpa asumsi distribusi normal, sehingga lebih <em>robust</em> terhadap <i>outlier</i>. Regresi Linear adalah uji parametrik yang mengasumsikan hubungan linear dan residual normal, namun memberikan estimasi <i>slope</i> dan uji signifikansi $t$. Untuk data hidrologi, Mann-Kendall dan Sen's Slope umumnya lebih direkomendasikan.
+                        Mann-Kendall adalah uji non-parametrik yang mendeteksi tren tanpa asumsi distribusi normal, sehingga lebih <em>robust</em> terhadap <i>outlier</i>. Regresi Linear adalah uji parametrik yang mengasumsikan hubungan linear dan residual normal, namun memberikan estimasi <i>slope</i> dan uji signifikansi $t$. Untuk data hidrologi, Mann-Kendall dan Sen's Slope umumnya lebih direkomendasikan.
                     </div>
                 </div>
 
@@ -1154,14 +1154,14 @@
                 <div class="faq-item">
                     <h3 class="faq-q">Apa arti tingkat kepercayaan 95%?</h3>
                     <div class="faq-a">
-                        Tingkat kepercayaan 95% berarti ada 5% kemungkinan bahwa trend yang terdeteksi adalah <i>false positive</i>, yaitu kita menyimpulkan ada trend padahal sebenarnya tidak. Atau: jika studi diulang 100 kali dengan data acak tanpa trend, sekitar 5 kali akan terdeteksi "signifikan" secara kebetulan.
+                        Tingkat kepercayaan 95% berarti ada 5% kemungkinan bahwa tren yang terdeteksi adalah <i>false positive</i>, yaitu kita menyimpulkan ada tren padahal sebenarnya tidak. Atau: jika studi diulang 100 kali dengan data acak tanpa tren, sekitar 5 kali akan terdeteksi "signifikan" secara kebetulan.
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <h3 class="faq-q">Mengapa data perlu diagregasi (bulanan/tahunan/musiman)?</h3>
                     <div class="faq-a">
-                        Data curah hujan harian memiliki variabilitas sangat tinggi sehingga trend jangka panjang sulit terdeteksi di tengah <i>noise</i>. Agregasi (penjumlahan atau rata-rata per bulan/tahun/musim) meredam <i>noise</i> dan memperkuat sinyal trend.
+                        Data curah hujan harian memiliki variabilitas sangat tinggi sehingga tren jangka panjang sulit terdeteksi di tengah <i>noise</i>. Agregasi (penjumlahan atau rata-rata per bulan/tahun/musim) meredam <i>noise</i> dan memperkuat sinyal tren.
                     </div>
                 </div>
 
@@ -1190,7 +1190,7 @@
             <!-- ==================== GLOSARIUM ==================== -->
             <div class="doc-section" id="sec-glosarium" style="display:none!important;">
                 <h1>Glosarium</h1>
-                <p class="page-lead">Istilah teknis yang muncul di antarmuka TrendHidro.</p>
+                <p class="page-lead">Istilah teknis yang muncul di antarmuka TrenHidro.</p>
 
                 <div class="glos-list">
                     <div class="glos-row">
@@ -1207,11 +1207,11 @@
                     </div>
                     <div class="glos-row">
                         <h3 class="glos-term"><i>Slope</i> ($\hat{\beta}$)</h3>
-                        <div class="glos-def">Kemiringan garis trend, besarnya perubahan nilai per satuan waktu (misalnya mm/tahun). Positif berarti meningkat, negatif berarti menurun.</div>
+                        <div class="glos-def">Kemiringan garis tren, besarnya perubahan nilai per satuan waktu (misalnya mm/tahun). Positif berarti meningkat, negatif berarti menurun.</div>
                     </div>
                     <div class="glos-row">
                         <h3 class="glos-term">Signifikan</h3>
-                        <div class="glos-def">Hasil uji statistik yang menolak hipotesis nol ($H_0$) pada tingkat kepercayaan 95%, artinya ada bukti kuat bahwa trend bukan sekadar variasi acak.</div>
+                        <div class="glos-def">Hasil uji statistik yang menolak hipotesis nol ($H_0$) pada tingkat kepercayaan 95%, artinya ada bukti kuat bahwa tren bukan sekadar variasi acak.</div>
                     </div>
                     <div class="glos-row">
                         <h3 class="glos-term"><i>Time series</i></h3>
@@ -1231,7 +1231,7 @@
                     </div>
                     <div class="glos-row">
                         <h3 class="glos-term">$Q_{\min}$, $Q_{\max}$</h3>
-                        <div class="glos-def">Batas bawah dan atas interval kepercayaan 95% dari Sen's Slope. Jika keduanya bertanda sama, trend dinyatakan signifikan.</div>
+                        <div class="glos-def">Batas bawah dan atas interval kepercayaan 95% dari Sen's Slope. Jika keduanya bertanda sama, tren dinyatakan signifikan.</div>
                     </div>
                     <div class="glos-row">
                         <h3 class="glos-term">Ketersediaan Data</h3>

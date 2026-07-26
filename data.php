@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Data — TrendHidro</title>
+    <title>Data – TrenHidro</title>
     <meta name="description"
         content="Jelajahi ketersediaan data hidrologi harian dan bulanan dari berbagai stasiun di Indonesia. Cek kelengkapan data dan temukan celah data dengan mudah.">
     <meta name="keywords"
-        content="data hidrologi, ketersediaan data, stasiun hujan, curah hujan harian, kelengkapan data, trendhidro">
+        content="data hidrologi, ketersediaan data, stasiun hujan, curah hujan harian, kelengkapan data, trenhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -503,7 +503,7 @@
 
                 const rowNumber = start + idx + 1;
 
-                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart}—${st.yearEnd}` : '—';
+                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart}–${st.yearEnd}` : '–';
 
                 tr.innerHTML = `
                     <td style="color: #6B7280; font-weight: 500;">${rowNumber}</td>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DPUPESDM Crawler — TrendHidro</title>
+    <title>DPUPESDM Crawler – TrenHidro</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,7 +129,7 @@
                 <path d="M9 10l3-3 3 3" />
                 <path d="M9 14l3 3 3-3" />
             </svg>
-            <span>TrendHidro</span>
+            <span>TrenHidro</span>
         </a>
         <ul class="navbar-nav">
             <li><a href="../">Beranda</a></li>

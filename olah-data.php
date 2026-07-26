@@ -13,11 +13,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Olah Data Anda — TrendHidro</title>
+    <title>Olah Data Anda – TrenHidro</title>
     <meta name="description"
-        content="Upload dan olah data deret waktu hidrologi Anda sendiri — Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di peramban.">
+        content="Upload dan olah data deret waktu hidrologi Anda sendiri – Mann-Kendall, Sen's Slope, dan Regresi Linear langsung di peramban.">
     <meta name="keywords"
-        content="upload data, olah data hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trendhidro">
+        content="upload data, olah data hidrologi, mann-kendall, sen's slope, regresi linear, olah data, trenhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -474,7 +474,7 @@
             <div>
                 <h1><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle; flex-shrink:0;"><path d="M3 20h18"/><path d="M6 16l4-6 4 4 6-8"/><circle cx="6" cy="16" r="1.5" fill="var(--color-primary)"/><circle cx="10" cy="10" r="1.5" fill="var(--color-primary)"/><circle cx="14" cy="14" r="1.5" fill="var(--color-primary)"/><circle cx="20" cy="6" r="1.5" fill="var(--color-primary)"/></svg>Olah
                     Data Anda</h1>
-                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung trend data deret waktu langsung di
+                <p>Upload file CSV atau Excel (.xls/.xlsx) dan hitung tren data deret waktu langsung di
                     peramban Anda.
                 </p>
             </div>
@@ -506,7 +506,7 @@
                             <path d="M3 9h18M9 3v18" />
                         </svg>
                         Pralihat Data <span id="previewCount"
-                            style="font-weight:400; font-size:0.8rem; color:#6B7280; margin-left:8px;">—</span>
+                            style="font-weight:400; font-size:0.8rem; color:#6B7280; margin-left:8px;">–</span>
                     </h4>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <button class="btn btn-secondary" style="padding:4px 12px; font-size:0.75rem;"
@@ -570,7 +570,7 @@
                         <button type="button" class="year-display" id="displayFrom">1980</button>
                         <div class="year-grid hidden" id="gridFrom"></div>
                     </div>
-                    <div class="year-sep">—</div>
+                    <div class="year-sep">–</div>
                     <div class="year-picker" id="pickerTo">
                         <button type="button" class="year-display" id="displayTo">2025</button>
                         <div class="year-grid hidden" id="gridTo"></div>
@@ -620,7 +620,7 @@
             </div>
 
             <!-- Dekomposisi STL & BEAST -->
-            <div class="result-card full" id="beastOlahCard" style="display:none; margin-bottom:24px; min-height:520px;">
+            <div class="result-card full" id="beastOlahCard" style="display:none; margin-bottom:24px; min-height:600px;">
                 <div class="card-loader-olah" id="beastOlahLoader">
                     <div class="spinner"></div>
                     <span class="loader-label">Menghitung Dekomposisi...</span>
@@ -638,17 +638,20 @@
                         <span style="display:flex; align-items:center; gap:4px;">
                             <span style="width:16px; height:3px; background:#00B300; border-radius:2px;"></span> Tren
                         </span>
+                        <span id="beastOlahCiLegend" style="display:none; align-items:center; gap:4px;">
+                            <span style="width:16px; height:12px; background:rgba(0,179,0,0.12); border:1px solid rgba(0,179,0,0.3); border-radius:2px;"></span> <i>Confidence Interval</i>
+                        </span>
                         <span id="beastOlahCpLegend" style="display:none; align-items:center; gap:4px;">
-                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> Titik Perubahan
+                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> <i>Changepoint</i>
                         </span>
                     </div>
                 </div>
                 <div id="beastOlahResultArea" style="display:none;">
                     <div style="margin-bottom:8px;">
-                        <div style="height:220px; position:relative;"><canvas id="beastOlahStlChart"></canvas></div>
+                        <div style="height:250px; position:relative;"><canvas id="beastOlahStlChart"></canvas></div>
                     </div>
                     <div style="margin-top:12px;">
-                        <div style="height:220px; position:relative;"><canvas id="beastOlahBeastChart"></canvas></div>
+                        <div style="height:250px; position:relative;"><canvas id="beastOlahBeastChart"></canvas></div>
                     </div>
                 </div>
                 <div id="beastOlahPlaceholder" style="text-align:center; padding:40px 0; color:#9CA3AF; font-size:0.9rem; min-height:480px; display:flex; align-items:center; justify-content:center;">
@@ -708,7 +711,7 @@
                     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <span id="olahAvailPct"
-                                style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
+                                style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">–</span>
                         </div>
                         <div style="height:6px; background:#F1F5F9; border-radius:100px; overflow:hidden; width:100%;">
                             <div id="olahAvailBar"
@@ -736,27 +739,27 @@
                         <tbody>
                             <tr>
                                 <td>Rerata</td>
-                                <td id="olahStatMean">—</td>
+                                <td id="olahStatMean">–</td>
                             </tr>
                             <tr>
                                 <td>Maksimum</td>
-                                <td id="olahStatMax">—</td>
+                                <td id="olahStatMax">–</td>
                             </tr>
                             <tr>
                                 <td>Minimum</td>
-                                <td id="olahStatMin">—</td>
+                                <td id="olahStatMin">–</td>
                             </tr>
                             <tr>
                                 <td>Simpangan Baku</td>
-                                <td id="olahStatStd">—</td>
+                                <td id="olahStatStd">–</td>
                             </tr>
                             <tr>
                                 <td>Koefisien Variansi</td>
-                                <td id="olahStatCv">—</td>
+                                <td id="olahStatCv">–</td>
                             </tr>
                             <tr>
                                 <td>Jumlah Data</td>
-                                <td id="olahStatLength">—</td>
+                                <td id="olahStatLength">–</td>
                             </tr>
                         </tbody>
                     </table>
@@ -774,19 +777,19 @@
                         <tbody>
                             <tr>
                                 <td>Batas Bawah</td>
-                                <td id="olahStatLb">—</td>
+                                <td id="olahStatLb">–</td>
                             </tr>
                             <tr>
                                 <td>Batas Atas</td>
-                                <td id="olahStatUb">—</td>
+                                <td id="olahStatUb">–</td>
                             </tr>
                             <tr>
                                 <td>Terdapat <i>Outlier</i>?</td>
-                                <td id="olahStatOutlier">—</td>
+                                <td id="olahStatOutlier">–</td>
                             </tr>
                             <tr>
                                 <td>Periode Data</td>
-                                <td id="olahStatRange">—</td>
+                                <td id="olahStatRange">–</td>
                             </tr>
                         </tbody>
                     </table>

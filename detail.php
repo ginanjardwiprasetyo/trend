@@ -1,6 +1,6 @@
 <?php
 /**
- * TrendHidro - Halaman Detail Stasiun
+ * TrenHidro - Halaman Detail Stasiun
  * Menampilkan grafik hujan, parameter statistik, ketersediaan data, dan peta lokasi
  */
 $stationId = isset($_GET['id']) ? htmlspecialchars(trim($_GET['id'])) : '';
@@ -18,11 +18,11 @@ if (empty($stationId)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Detail Stasiun <?php echo $stationId; ?> — TrendHidro</title>
+    <title>Detail Stasiun <?php echo $stationId; ?> – TrenHidro</title>
     <meta name="description"
-        content="Analisis detail trend hidrologi, grafik harian, parameter statistik, dan ketersediaan data untuk stasiun hidrologi ID: <?php echo $stationId; ?> di sistem TrendHidro.">
+        content="Analisis detail tren hidrologi, grafik harian, parameter statistik, dan ketersediaan data untuk stasiun hidrologi ID: <?php echo $stationId; ?> di sistem TrenHidro.">
     <meta name="keywords"
-        content="stasiun hidrologi, trend hidrologi, <?php echo $stationId; ?>, data hidrologi detail, statistik harian, trendhidro">
+        content="stasiun hidrologi, tren hidrologi, <?php echo $stationId; ?>, data hidrologi detail, statistik harian, trenhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -271,7 +271,7 @@ if (empty($stationId)) {
                         <button type="button" class="year-display" id="displayFrom">1980</button>
                         <div class="year-grid hidden" id="gridFrom"></div>
                     </div>
-                    <div class="year-sep">—</div>
+                    <div class="year-sep">–</div>
                     <div class="year-picker" id="pickerTo">
                         <button type="button" class="year-display" id="displayTo">2025</button>
                         <div class="year-grid hidden" id="gridTo"></div>
@@ -313,7 +313,7 @@ if (empty($stationId)) {
             </div>
 
             <!-- Dekomposisi STL & BEAST -->
-            <div class="detail-card" style="grid-column: 1 / -1; min-height:520px;">
+            <div class="detail-card" style="grid-column: 1 / -1; min-height:600px;">
                 <div class="card-loader" id="beastLoaderOverlay">
                     <div class="spinner"></div>
                     <span class="loader-label">Menghitung Dekomposisi...</span>
@@ -331,17 +331,20 @@ if (empty($stationId)) {
                         <span style="display:flex; align-items:center; gap:4px;">
                             <span style="width:16px; height:3px; background:#00B300; border-radius:2px;"></span> Tren
                         </span>
+                        <span id="beastCiLegend" style="display:none; align-items:center; gap:4px;">
+                            <span style="width:16px; height:12px; background:rgba(0,179,0,0.12); border:1px solid rgba(0,179,0,0.3); border-radius:2px;"></span> <i>Confidence Interval</i>
+                        </span>
                         <span id="beastCpLegend" style="display:none; align-items:center; gap:4px;">
-                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> Titik Perubahan
+                            <span style="width:16px; height:0; border-top:2px dashed #2563EB;"></span> <i>Changepoint</i>
                         </span>
                     </div>
                 </div>
                 <div id="beastResultArea" style="display:none;">
                     <div style="margin-bottom:8px;">
-                        <div style="height:220px; position:relative;"><canvas id="beastStlChart"></canvas></div>
+                        <div style="height:250px; position:relative;"><canvas id="beastStlChart"></canvas></div>
                     </div>
                     <div style="margin-top:12px;">
-                        <div style="height:220px; position:relative;"><canvas id="beastBeastChart"></canvas></div>
+                        <div style="height:250px; position:relative;"><canvas id="beastBeastChart"></canvas></div>
                     </div>
                 </div>
                 <div id="beastPlaceholder" style="text-align:center; padding:40px 0; color:#9CA3AF; font-size:0.9rem; min-height:480px; display:flex; align-items:center; justify-content:center;"></div>
@@ -403,7 +406,7 @@ if (empty($stationId)) {
                     <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             <span id="availPctValue"
-                                style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">—</span>
+                                style="font-size:2.5rem; font-weight:800; color:#1F2937; line-height:1;">–</span>
                         </div>
                         <div style="height:6px; background:#F1F5F9; border-radius:100px; overflow:hidden; width:100%;">
                             <div id="availBarFill"
@@ -610,8 +613,8 @@ if (empty($stationId)) {
         let maxAvailYear = currentAvailYear;
 
 
-        const fM = (val) => val === undefined || val === null || val === '—' ? '—' : String(val).replace('-', '−');
-    const fmt = (val, d) => val === undefined || val === null || val === '—' ? '—' : fM(Number(val).toFixed(d)).replace('.', ',');
+        const fM = (val) => val === undefined || val === null || val === '–' ? '–' : String(val).replace('-', '−');
+    const fmt = (val, d) => val === undefined || val === null || val === '–' ? '–' : fM(Number(val).toFixed(d)).replace('.', ',');
 
         function setCardLoading(loaderId, isLoading) {
             const loader = document.getElementById(loaderId);
@@ -657,7 +660,7 @@ if (empty($stationId)) {
                 stationMeta = stFeature.properties;
 
                 document.getElementById('stationName').textContent = "Pos " + (stationMeta.name || '');
-                document.title = `Pos ${stationMeta.name || ''} — TrendHidro`;
+                document.title = `Pos ${stationMeta.name || ''} – TrenHidro`;
 
                 minAvailYear = stationMeta.yearStart || 1980;
                 maxAvailYear = stationMeta.yearEnd || new Date().getFullYear();
@@ -698,7 +701,7 @@ if (empty($stationId)) {
                 L.marker([stationMeta.lat, stationMeta.lon]).addTo(miniMap);
                 setCardLoading('mapLoaderOverlay', false);
 
-                const locNames = (stationMeta.location || '—').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+                const locNames = (stationMeta.location || '–').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
                 document.getElementById('coordInfo').innerHTML =
                     `<strong>Lat:</strong> ${fmt(stationMeta.lat, 4)}° &nbsp; <strong>Lon:</strong> ${fmt(stationMeta.lon, 4)}°<br>` +
                     `<span style="color:#9CA3AF;">${locNames}</span>`;
@@ -979,9 +982,9 @@ if (empty($stationId)) {
                     scales: {
                         x: {
                             border: { display: true, width: 1.5, color: '#000' },
-                            title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } },
+                            title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 14, weight: 'bold' } },
                             ticks: {
-                                font: { family: 'Inter', size: 11 },
+                                font: { family: 'Inter', size: 13 },
                                 maxRotation: 0,
                                 autoSkip: true,
                                 maxTicksLimit: 15,
@@ -1000,8 +1003,8 @@ if (empty($stationId)) {
                         y: {
                             border: { display: true, width: 1.5, color: '#000' },
                             beginAtZero: true,
-                            title: { display: true, text: 'Curah Hujan (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } },
-                            ticks: { font: { family: 'Inter', size: 11 } }
+                            title: { display: true, text: 'Curah Hujan (mm)', font: { family: 'Inter', size: 14, weight: 'bold' } },
+                            ticks: { font: { family: 'Inter', size: 13 } }
                         }
                     }
                 }
@@ -1011,16 +1014,16 @@ if (empty($stationId)) {
 
             // Statistics (Math)
             if (values.length === 0) {
-                document.getElementById('statMean').textContent = "—";
-                document.getElementById('statMax').textContent = "—";
-                document.getElementById('statMin').textContent = "—";
-                document.getElementById('statStd').textContent = "—";
-                document.getElementById('statCv').textContent = "—";
-                document.getElementById('statLb').textContent = "—";
-                document.getElementById('statUb').textContent = "—";
-                document.getElementById('statOutlier').textContent = "—";
-                document.getElementById('statRange').textContent = "—";
-                document.getElementById('statLength').textContent = "—";
+                document.getElementById('statMean').textContent = "–";
+                document.getElementById('statMax').textContent = "–";
+                document.getElementById('statMin').textContent = "–";
+                document.getElementById('statStd').textContent = "–";
+                document.getElementById('statCv').textContent = "–";
+                document.getElementById('statLb').textContent = "–";
+                document.getElementById('statUb').textContent = "–";
+                document.getElementById('statOutlier').textContent = "–";
+                document.getElementById('statRange').textContent = "–";
+                document.getElementById('statLength').textContent = "–";
                 return;
             }
 
@@ -1038,7 +1041,7 @@ if (empty($stationId)) {
 
             const startYearData = Math.floor(tsData[0].year);
             const endYearData = Math.floor(tsData[tsData.length - 1].year);
-            document.getElementById('statRange').textContent = `${startYearData}—${endYearData}`;
+            document.getElementById('statRange').textContent = `${startYearData}–${endYearData}`;
             document.getElementById('statLength').textContent = `${values.length}`;
 
             // Outlier (Q1 - 1.5 IQR, Q3 + 1.5 IQR) - Linear Interpolation to match olah-data.js
@@ -1146,7 +1149,7 @@ if (empty($stationId)) {
             const iL = Math.max(0, Math.floor(M1)-1), iU = Math.min(sc-1, Math.floor(M2+1)-1);
             const Qmin = slopes[iL]||0, Qmax = slopes[iU]||0;
             const sig = (Qmin > 0) || (Qmax < 0);
-            let trend = 'Tidak Ada Trend';
+            let trend = 'Tidak Ada Tren';
             if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
             return { slope: senSlope, intercept: inter, S: mk.S, Z: mk.Z, pValue: mk.pValue, Qmin, Qmax, significant: sig, trend, n, slopeCount: sc };
         }
@@ -1168,7 +1171,7 @@ if (empty($stationId)) {
             if (n>2 && Sxx>0) { const MSE=SSres/df; const SE=Math.sqrt(MSE/Sxx); tStat = SE>0 ? slope/SE : 0; pVal = 2*(1-normalCDF(Math.abs(tStat))); }
             const tCrit = getCriticalT(df, 0.05);
             const sig = Math.abs(tStat) > tCrit;
-            let trend = 'Tidak Ada Trend';
+            let trend = 'Tidak Ada Tren';
             if (sig) { if (slope > 0) trend = 'Meningkat'; else if (slope < 0) trend = 'Menurun'; }
             const r = rSq >= 0 ? Math.sqrt(rSq) : 0;
             return { slope, intercept, rSquared: rSq, r: slope<0?-r:r, tStatistic: tStat, tCritical: tCrit, pValue: pVal, significant: sig, trend, n, meanX: mX, meanY: mY };
@@ -1197,7 +1200,7 @@ if (empty($stationId)) {
             else if (totalS < 0) Z = (totalS + 1) / Math.sqrt(totalVarS);
             const pVal = 2 * (1 - normalCDF(Math.abs(Z)));
             const sig = Math.abs(Z) > getCriticalZ(0.05);
-            let trend = 'Tidak Ada Trend';
+            let trend = 'Tidak Ada Tren';
             if (sig) trend = Z > 0 ? 'Meningkat' : 'Menurun';
             return { S: totalS, varS: totalVarS, Z, pValue: pVal, seasonCount, significant: sig, trend };
         }
@@ -1232,7 +1235,7 @@ if (empty($stationId)) {
             const iL = Math.max(0, Math.floor(M1)-1), iU = Math.min(sc-1, Math.floor(M2+1)-1);
             const Qmin = allSlopes[iL]||0, Qmax = allSlopes[iU]||0;
             const sig = (Qmin > 0) || (Qmax < 0);
-            let trend = 'Tidak Ada Trend';
+            let trend = 'Tidak Ada Tren';
             if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
             return { slope: senSlope, Qmin, Qmax, slopeCount: sc, seasonCount, significant: sig, trend };
         }
@@ -1278,8 +1281,8 @@ if (empty($stationId)) {
                     if (tTrendSS === 'Meningkat') ssColor = '#16A34A';
                     else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
                     const qmedVal = fmt(ss.slope, 3) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-                    const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '—';
-                    const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '—';
+                    const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '–';
+                    const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '–';
                     document.getElementById('ssResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
                     cachedRegularSS = document.getElementById('ssResult').innerHTML;
                 } else {
@@ -1298,9 +1301,9 @@ if (empty($stationId)) {
                     let lrColor = '#6B7280';
                     if (tTrendLR === 'Meningkat') lrColor = '#16A34A';
                     else if (tTrendLR === 'Menurun') lrColor = '#DC2626';
-                    const tUji = lr.tStatistic !== undefined ? fmt(lr.tStatistic, 3) : '—';
-                    const tKrit = lr.tCritical !== undefined ? `±${fmt(lr.tCritical, 3)}` : '—';
-                    const slopeLR = lr.slope !== undefined ? fmt(lr.slope, 3) : '—';
+                    const tUji = lr.tStatistic !== undefined ? fmt(lr.tStatistic, 3) : '–';
+                    const tKrit = lr.tCritical !== undefined ? `±${fmt(lr.tCritical, 3)}` : '–';
+                    const slopeLR = lr.slope !== undefined ? fmt(lr.slope, 3) : '–';
                     const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                     document.getElementById('lrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
                 } else {
@@ -1539,7 +1542,7 @@ if (empty($stationId)) {
                 const missingCount = expectedDataCount - actualDataCount;
                 const pct = ((actualDataCount / expectedDataCount) * 100).toFixed(2).replace('.', ',');
                 
-                document.getElementById('dailyPieSummary').innerHTML = `Dari rentang tahun <strong>${minAvailYear} — ${maxAvailYear}</strong>,<br>Data tersedia: <strong>${actualDataCount}</strong> hari (${pct}%)<br>Data hilang: <strong>${missingCount}</strong> hari`;
+                document.getElementById('dailyPieSummary').innerHTML = `Dari rentang tahun <strong>${minAvailYear} – ${maxAvailYear}</strong>,<br>Data tersedia: <strong>${actualDataCount}</strong> hari (${pct}%)<br>Data hilang: <strong>${missingCount}</strong> hari`;
                 
                 const ctx = document.getElementById('dailyPieChart').getContext('2d');
                 if (pieChartInstance) {
@@ -1638,7 +1641,7 @@ if (empty($stationId)) {
             grid.innerHTML = `
                 <div class="year-grid-header">
                     <button type="button" class="year-nav-btn" onclick="event.stopPropagation(); availViewedDecade -= 10; renderAvailDecadeGrid(availViewedDecade);">‹</button>
-                    <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+                    <span class="range-text">${decadeStart} – ${decadeEnd}</span>
                     <button type="button" class="year-nav-btn" onclick="event.stopPropagation(); availViewedDecade += 10; renderAvailDecadeGrid(availViewedDecade);">›</button>
                 </div>
                 <div class="year-grid-content p-2"><div class="decade-grid">${yearsHtml}</div></div>
@@ -1678,7 +1681,7 @@ if (empty($stationId)) {
             gridElem.innerHTML = `
                 <div class="year-grid-header">
                     <button type="button" class="year-nav-btn prev" data-target="${idSuffix}">‹</button>
-                    <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+                    <span class="range-text">${decadeStart} – ${decadeEnd}</span>
                     <button type="button" class="year-nav-btn next" data-target="${idSuffix}">›</button>
                 </div>
                 <div class="year-grid-content p-2"><div class="decade-grid">${yearsHtml}</div></div>
@@ -1997,8 +2000,8 @@ if (empty($stationId)) {
                     }
                 },
                 scales: {
-                    x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 11, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
-                    y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
+                    x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 14, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 13 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
+                    y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 14, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 13 } } }
                 }
             };
 
@@ -2017,7 +2020,9 @@ if (empty($stationId)) {
             document.getElementById('beastPlaceholder').style.display = 'none';
             document.getElementById('beastResultArea').style.display = 'block';
             const hasCp = data.change_points && data.change_points.length > 0;
+            const hasCi = data.ci_lower && data.ci_upper && data.ci_lower.length > 0;
             document.getElementById('beastLegend').style.display = 'flex';
+            document.getElementById('beastCiLegend').style.display = hasCi ? 'flex' : 'none';
             document.getElementById('beastCpLegend').style.display = hasCp ? 'flex' : 'none';
         }
 

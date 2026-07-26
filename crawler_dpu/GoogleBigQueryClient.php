@@ -1,6 +1,6 @@
 <?php
 /**
- * GoogleBigQueryClient — Koneksi ke BigQuery menggunakan REST API + JWT
+ * GoogleBigQueryClient – Koneksi ke BigQuery menggunakan REST API + JWT
  * Tidak memerlukan composer / library eksternal.
  * 
  * Membutuhkan:

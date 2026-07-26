@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TrenHidro Project Graph</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            padding: 2rem;
+            line-height: 1.8
+        }
+
+        h1 {
+            color: #00d4ff;
+            font-size: 1.1rem;
+            margin-bottom: 1rem
+        }
+
+        pre {
+            white-space: pre;
+            font-size: 13px
+        }
+
+        .d {
+            color: #00d4ff
+        }
+
+        .f {
+            color: #a0a0a0
+        }
+
+        .p {
+            color: #c084fc
+        }
+
+        .j {
+            color: #f97316
+        }
+
+        .c {
+            color: #22c55e
+        }
+
+        .h {
+            color: #fb923c
+        }
+
+        .m {
+            color: #38bdf8
+        }
+
+        .y {
+            color: #d946ef
+        }
+    </style>
+</head>
+
+<body>
+    <h1>TrenHidro Project Structure</h1>
+    <pre>
+<span class="d">project01/</span>
+├── <span class="f">AGENTS.md</span>
+├── <span class="f">Dockerfile</span>
+├── <span class="f">composer.json</span>
+├── <span class="f">composer.lock</span>
+├── <span class="f">favicon.svg</span>
+├── <span class="f">render.yaml</span>
+├── <span class="f">start.sh</span>
+├── <span class="h">backtest.php</span>
+├── <span class="h">crawler.html</span>
+├── <span class="h">data.php</span>
+├── <span class="h">detail.php</span>
+├── <span class="h">dok.php</span>
+├── <span class="h">error.html</span>
+├── <span class="h">footer.php</span>
+├── <span class="h">index.php</span>
+├── <span class="h">navbar.php</span>
+├── <span class="h">olah-data.php</span>
+├── <span class="h">peta.php</span>
+├── <span class="h">rekap.php</span>
+├── <span class="h">tentang.php</span>
+├── <span class="h">test_db.php</span>
+├── <span class="h">test_schema.php</span>
+├── <span class="f">test_python.py</span>
+├── <span class="h">scratch_analisa2.html</span>
+├── <span class="h">scratch_datapos.html</span>
+├── <span class="h">scratch_dpu_test.php</span>
+├── <span class="h">scratch_dpu_test2.php</span>
+├── <span class="h">scratch_dpu_test3.php</span>
+├── <span class="d">.agents/</span>
+│   └── <span class="d">rules/</span>
+│       └── <span class="m">antigravity-rtk-rules.md</span>
+├── <span class="d">.vscode/</span>
+│   └── <span class="f">settings.json</span>
+├── <span class="d">config/</span>
+│   ├── <span class="h">database.php</span>
+│   └── <span class="d">key/</span>
+│       └── <span class="f">seismic-vista-*.json</span>
+├── <span class="d">crawler_dpu/</span>
+│   ├── <span class="h">DpuScraper.php</span>
+│   ├── <span class="h">GoogleBigQueryClient.php</span>
+│   ├── <span class="h">check_web.php</span>
+│   ├── <span class="h">debug_capture.php</span>
+│   ├── <span class="h">debug_enrich.php</span>
+│   ├── <span class="h">debug_meta.php</span>
+│   ├── <span class="f">debug_analisa.html</span>
+│   ├── <span class="f">dpu_cookie.txt</span>
+│   ├── <span class="h">index.php</span>
+│   ├── <span class="h">run_dpu.php</span>
+│   ├── <span class="h">test_bq.php</span>
+│   └── <span class="h">test_meta.php</span>
+├── <span class="d">css/</span>
+│   ├── <span class="c">detail.css</span>
+│   └── <span class="c">style.css</span>
+├── <span class="d">geojson_data/</span>
+│   └── <span class="d">geojson/</span>
+│       └── <span class="f">bbwsbs.geojson</span>
+├── <span class="d">img/</span>
+│   ├── <span class="f">Logo-UGM.png</span>
+│   ├── <span class="f">Logo-UGM(2).png</span>
+│   └── <span class="f">Logo-UGM(3).png</span>
+├── <span class="d">js/</span>
+│   ├── <span class="j">app.js</span>
+│   ├── <span class="j">crawler.js</span>
+│   ├── <span class="j">lightbox.js</span>
+│   ├── <span class="j">markers.js</span>
+│   ├── <span class="j">olah-data.js</span>
+│   └── <span class="j">sidebar.js</span>
+├── <span class="d">php/</span>
+│   ├── <span class="d">lib/</span>
+│   │   └── <span class="h">stats.php</span>
+│   ├── <span class="h">analyze_all.php</span>
+│   ├── <span class="h">analyze_all_types.php</span>
+│   ├── <span class="h">backtest.php</span>
+│   ├── <span class="f">cache_stations.json</span>
+│   ├── <span class="h">crawler_daily_data.php</span>
+│   ├── <span class="h">crawler_station_meta.php</span>
+│   ├── <span class="h">crawler_stations.php</span>
+│   ├── <span class="h">cron_keep_alive.php</span>
+│   ├── <span class="h">db_fetch_timeseries.php</span>
+│   ├── <span class="h">export_csv.php</span>
+│   ├── <span class="h">get_crawled_stations.php</span>
+│   ├── <span class="h">get_stations.php</span>
+│   ├── <span class="h">get_timeseries.php</span>
+│   ├── <span class="h">mann_kendall.php</span>
+│   ├── <span class="h">proxy_maptiler.php</span>
+│   ├── <span class="h">proxy_maptiler_tiles.php</span>
+│   ├── <span class="h">regresi_linear.php</span>
+│   └── <span class="h">sens_slope.php</span>
+└── <span class="d">vendor/</span>
+    └── <span class="d">markrogoyski/math-php/</span>
+        └── <span class="h">src/Finance.php + exceptions</span>
+</pre>
+    <p style="color:#666;font-size:11px;margin-top:1rem">php=ungu, js=jingga, css=hijau, html=oranye, json=ungu-muda,
+        md=biru-muda, py=biru</p>
+</body>
+
+</html>

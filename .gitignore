@@ -1,5 +1,9 @@
 .env
 config/key/
 *.txt
+*.log
 .DS_Store
-php/php_error.log
+._*
+.vscode/
+vendor/
+out.json

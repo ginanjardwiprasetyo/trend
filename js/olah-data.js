@@ -9,15 +9,15 @@ let aggregatedData = []; // Aggregated for analysis: [{year: Number, value: Numb
 let olahChart = null;
 let beastOlahStlChart = null;
 let beastOlahBeastChart = null;
-let inputPeriod = 'harian'; // 'harian' | 'bulanan' | 'tahunan' — auto-detected after upload
+let inputPeriod = 'harian'; // 'harian' | 'bulanan' | 'tahunan' – auto-detected after upload
 let cachedRegularMK = null;
 let cachedRegularSS = null;
 let cachedSeasonalMK = null;
 let cachedSeasonalSS = null;
 let olahSatuan = 'mm';
 
-const fM = (val) => val === undefined || val === null || val === '—' ? '—' : String(val).replace('-', '−');
-const fmt = (val, d) => val === undefined || val === null || val === '—' ? '—' : fM(Number(val).toFixed(d)).replace('.', ',');
+const fM = (val) => val === undefined || val === null || val === '–' ? '–' : String(val).replace('-', '−');
+const fmt = (val, d) => val === undefined || val === null || val === '–' ? '–' : fM(Number(val).toFixed(d)).replace('.', ',');
 
 // ====== SATUAN (UNIT) HELPERS ======
 function getOlahSatuanWrapper() {
@@ -31,7 +31,7 @@ function toggleOlahSatuanManual() {
         olahSatuan = sel.value;
         return;
     }
-    // "Lainnya..." — replace trigger content with input, wrapper stays
+    // "Lainnya..." – replace trigger content with input, wrapper stays
     const wrapper = getOlahSatuanWrapper();
     if (!wrapper) return;
     const trigger = wrapper.querySelector('.custom-select-trigger');
@@ -47,7 +47,7 @@ function toggleOlahSatuanManual() {
     input.id = 'olahSatuanManual';
     input.placeholder = 'Ketik satuan…';
     input.style.cssText = 'border:none; outline:none; background:transparent; font-size:inherit; font-weight:inherit; color:inherit; padding:8px 14px; width:100%; min-width:80px; flex:1; box-sizing:border-box;';
-    input.oninput = function () { olahSatuan = this.value || '—'; };
+    input.oninput = function () { olahSatuan = this.value || '–'; };
     trigger.appendChild(input);
     input.focus();
     input.addEventListener('blur', function () {
@@ -93,7 +93,7 @@ function revertOlahSatuanToSelect() {
 }
 
 function getOlahSatuan() {
-    return olahSatuan || '—';
+    return olahSatuan || '–';
 }
 
 // ====== UI UTILS ======
@@ -526,7 +526,7 @@ function renderDecadeGrid(idSuffix, startYear) {
     gridElem.innerHTML = `
         <div class="year-grid-header">
             <button type="button" class="year-nav-btn prev" data-target="${idSuffix}">‹</button>
-            <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+            <span class="range-text">${decadeStart} – ${decadeEnd}</span>
             <button type="button" class="year-nav-btn next" data-target="${idSuffix}">›</button>
         </div>
         <div class="year-grid-content p-2"><div class="decade-grid">${yearsHtml}</div></div>
@@ -704,7 +704,7 @@ function calcLinearRegressionJS(dataArray) {
     }
 
     const significant = Math.abs(tStatistic) > tCritical;
-    let trend = 'Tidak Ada Trend';
+    let trend = 'Tidak Ada Tren';
     if (significant) trend = slope > 0 ? 'Meningkat' : 'Menurun';
 
     const r = (rSquared >= 0) ? Math.sqrt(rSquared) : 0;
@@ -779,7 +779,7 @@ async function runOlahAnalysis() {
     // Availability
     renderOlahAvailability(aggregatedData, dtType, yFrom, yTo, mo);
 
-    // Daily availability (per-year heatmap) — only for daily input
+    // Daily availability (per-year heatmap) – only for daily input
     const dailyCard2 = document.getElementById('olahDailyAvailCard');
     if (dailyCard2) dailyCard2.style.display = inputPeriod === 'harian' ? '' : 'none';
     if (inputPeriod === 'harian') {
@@ -815,7 +815,7 @@ async function runOlahAnalysis() {
 
             const zKritis = mk.zCritical !== undefined ? mk.zCritical : 1.96;
             const zVal = fmt(mk.Z, 3) + (mkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+            document.getElementById('olahMkResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${mkColor};">${tTrendMK}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S</td><td style="padding:3px 0;text-align:right;">${fM(mk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z</td><td style="padding:3px 0;text-align:right;">${zVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
             cachedRegularMK = document.getElementById('olahMkResult').innerHTML;
         } else {
             document.getElementById('olahMkResult').innerHTML = 'Gagal menghitung';
@@ -833,16 +833,16 @@ async function runOlahAnalysis() {
             else if (tTrendSS === 'Menurun') ssColor = '#DC2626';
 
             const qmedVal = fmt(ss.slope, 3) + (ssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '—';
-            const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '—';
-            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
+            const qminHtml = ss.Qmin !== undefined ? fmt(ss.Qmin, 3) : '–';
+            const qmaxHtml = ss.Qmax !== undefined ? fmt(ss.Qmax, 3) : '–';
+            document.getElementById('olahSsResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${ssColor};">${tTrendSS}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med</sub></td><td style="padding:3px 0;text-align:right;">${qmedVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${qminHtml}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>max</sub></td><td style="padding:3px 0;text-align:right;">${qmaxHtml}</td></tr></table>`;
             cachedRegularSS = document.getElementById('olahSsResult').innerHTML;
         } else {
             document.getElementById('olahSsResult').innerHTML = 'Gagal menghitung';
             cachedRegularSS = 'Gagal menghitung';
         }
 
-        // Linear Regression (client-side — no backend needed)
+        // Linear Regression (client-side – no backend needed)
         const lr = calcLinearRegressionJS(aggregatedData);
         if (!lr.error) {
             const lrSig = lr.significant;
@@ -855,7 +855,7 @@ async function runOlahAnalysis() {
             const tUji = fmt(lr.tStatistic, 3);
             const tKrit = `±${fmt(lr.tCritical, 3)}`;
             const tVal = tUji + (lrSig ? '<sup style="color:#DC2626;">*</sup>' : '');
-            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
+            document.getElementById('olahLrResult').innerHTML = `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${lrColor};">${tTrendLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Slope</td><td style="padding:3px 0;text-align:right;">${slopeLR}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t</td><td style="padding:3px 0;text-align:right;">${tVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">t<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">${tKrit}</td></tr></table>`;
 
         } else {
             document.getElementById('olahLrResult').innerHTML = 'Gagal menghitung';
@@ -876,7 +876,7 @@ async function runOlahAnalysis() {
                 const zGabVal = fmt(seasonalMk.Z, 3) + (smkSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                 const zKritis = 1.96;
                 cachedSeasonalMK =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${smkColor};">${smkDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">S<sub>gab</sub></td><td style="padding:3px 0;text-align:right;">${fM(seasonalMk.S)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>SMK</sub></td><td style="padding:3px 0;text-align:right;">${zGabVal}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Z<sub>kritis</sub></td><td style="padding:3px 0;text-align:right;">±${fmt(zKritis, 3)}</td></tr></table>`;
 
                 const sssSig = seasonalSs.significant;
                 const sssDir = sssSig ? (seasonalSs.slope > 0 ? 'Meningkat' : 'Menurun') : 'Tidak ada';
@@ -885,7 +885,7 @@ async function runOlahAnalysis() {
                 else if (sssDir === 'Menurun') sssColor = '#DC2626';
                 const qMedGab = fmt(seasonalSs.slope, 3) + (sssSig ? '<sup style="color:#DC2626;">*</sup>' : '');
                 cachedSeasonalSS =
-                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Tren</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
+                    `<table style="width:100%;border-collapse:collapse;"><tr><td style="padding:3px 0;color:#6B7280;">Trend</td><td style="padding:3px 0;text-align:right;font-weight:600;color:${sssColor};">${sssDir}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>med,gab</sub></td><td style="padding:3px 0;text-align:right;">${qMedGab}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>min</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmin, 3)}</td></tr><tr><td style="padding:3px 0;color:#6B7280;">Q<sub>maks</sub></td><td style="padding:3px 0;text-align:right;">${fmt(seasonalSs.Qmax, 3)}</td></tr></table>`;
 
                 const seasonalToggle = document.getElementById('olahSeasonalToggle');
                 if (seasonalToggle && seasonalToggle.checked) {
@@ -1023,7 +1023,7 @@ function calcSeasonalMannKendallJS(dataArray) {
     else if (totalS < 0) Z = (totalS + 1) / Math.sqrt(totalVarS);
     const pVal = 2 * (1 - normalCDF(Math.abs(Z)));
     const sig = Math.abs(Z) > getCriticalZ(0.05);
-    let trend = 'Tidak Ada Trend';
+    let trend = 'Tidak Ada Tren';
     if (sig) trend = Z > 0 ? 'Meningkat' : 'Menurun';
     return { S: totalS, varS: totalVarS, Z, pValue: pVal, seasonCount, significant: sig, trend };
 }
@@ -1058,7 +1058,7 @@ function calcSeasonalSenSlopeJS(dataArray, totalVarS) {
     const iL = Math.max(0, Math.floor(M1) - 1), iU = Math.min(sc - 1, Math.floor(M2 + 1) - 1);
     const Qmin = allSlopes[iL] || 0, Qmax = allSlopes[iU] || 0;
     const sig = (Qmin > 0) || (Qmax < 0);
-    let trend = 'Tidak Ada Trend';
+    let trend = 'Tidak Ada Tren';
     if (sig) { if (senSlope > 0) trend = 'Meningkat'; else if (senSlope < 0) trend = 'Menurun'; }
     return { slope: senSlope, Qmin, Qmax, slopeCount: sc, seasonCount, significant: sig, trend };
 }
@@ -1126,9 +1126,10 @@ function renderOlahChart(data, dtType) {
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } },
+                    border: { display: true, width: 1.5, color: '#000' },
+                    title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 14, weight: 'bold' } },
                     ticks: {
-                        font: { family: 'Inter', size: 11 },
+                        font: { family: 'Inter', size: 13 },
                         maxRotation: 0,
                         autoSkip: true,
                         maxTicksLimit: 15,
@@ -1145,9 +1146,10 @@ function renderOlahChart(data, dtType) {
                     grid: { display: false }
                 },
                 y: {
+                    border: { display: true, width: 1.5, color: '#000' },
                     beginAtZero: true,
-                    title: { display: true, text: 'Nilai Data (' + getOlahSatuan() + ')', font: { family: 'Inter', weight: 'bold' } },
-                    ticks: { font: { family: 'Inter', size: 11 } }
+                    title: { display: true, text: 'Nilai Data (' + getOlahSatuan() + ')', font: { family: 'Inter', size: 14, weight: 'bold' } },
+                    ticks: { font: { family: 'Inter', size: 13 } }
                 }
             }
         }
@@ -1171,7 +1173,7 @@ function renderOlahStats(data, dtType, yFrom, yTo, mo) {
     document.getElementById('olahStatStd').textContent = fM(std.toFixed(0)) + ' ' + getOlahSatuan();
     document.getElementById('olahStatCv').textContent = fmt(cv, 2);
     document.getElementById('olahStatLength').textContent = `${values.length}`;
-    document.getElementById('olahStatRange').textContent = `${yFrom}—${yTo}`;
+    document.getElementById('olahStatRange').textContent = `${yFrom}–${yTo}`;
 
     // Outlier
     const sorted = [...values].sort((a, b) => a - b);
@@ -1325,7 +1327,7 @@ function renderOlahAvailDecadeGrid(startYear) {
     grid.innerHTML =
         '<div class="year-grid-header">' +
         '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade -= 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">‹</button>' +
-        '<span class="range-text">' + decadeStart + ' — ' + decadeEnd + '</span>' +
+        '<span class="range-text">' + decadeStart + ' – ' + decadeEnd + '</span>' +
         '<button type="button" class="year-nav-btn" onclick="event.stopPropagation(); olahAvailViewedDecade += 10; renderOlahAvailDecadeGrid(olahAvailViewedDecade);">›</button>' +
         '</div>' +
         '<div class="year-grid-content p-2"><div class="decade-grid">' + yearsHtml + '</div></div>';
@@ -1371,7 +1373,7 @@ function toggleOlahPieChart() {
         const pct = totalExpected > 0 ? ((totalAvailable / totalExpected) * 100).toFixed(2).replace('.', ',') : '0,00';
 
         document.getElementById('olahDailyPieSummary').innerHTML =
-            'Dari rentang tahun <strong>' + olahAvailMinYear + ' — ' + olahAvailMaxYear + '</strong>,<br>' +
+            'Dari rentang tahun <strong>' + olahAvailMinYear + ' – ' + olahAvailMaxYear + '</strong>,<br>' +
             'Data tersedia: <strong>' + totalAvailable + '</strong> hari (' + pct + '%)<br>' +
             'Data hilang: <strong>' + missing + '</strong> hari';
 
@@ -1587,7 +1589,7 @@ async function runOlahBeast() {
     document.getElementById('beastOlahLoader').classList.add('active');
 
     const dtType = document.getElementById('olahDtType').value;
-    // ponytail: cap 500 data points — beast MCMC segfaults past ~512MB on Render free tier
+    // ponytail: cap 500 data points – beast MCMC segfaults past ~512MB on Render free tier
     const BEAST_MAX = 500;
     const beastData = aggregatedData.length > BEAST_MAX
         ? aggregatedData.filter((_, i, a) => i % Math.ceil(a.length / BEAST_MAX) === 0).slice(0, BEAST_MAX)
@@ -1719,8 +1721,8 @@ function renderOlahBeastCharts(data) {
             }
         },
         scales: {
-            x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
-            y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 12, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 11 } } }
+            x: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tahun', font: { family: 'Inter', size: 14, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 13 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 15, callback: function (value, index, ticks) { const label = this.getLabelForValue(value); if (index === 0 || index === ticks.length - 1) return label; if (index > 0) { const prevLabel = this.getLabelForValue(ticks[index - 1].value); if (label === prevLabel) return null; } return label; } }, grid: { display: false } },
+            y: { border: { display: true, width: 1.5, color: '#000' }, title: { display: true, text: 'Tren (mm)', font: { family: 'Inter', size: 14, weight: 'bold' } }, ticks: { font: { family: 'Inter', size: 13 } } }
         }
     };
 
@@ -1738,7 +1740,9 @@ function renderOlahBeastCharts(data) {
 
     document.getElementById('beastOlahResultArea').style.display = 'block';
     const hasCp = data.change_points && data.change_points.length > 0;
+    const hasCi = data.ci_lower && data.ci_upper && data.ci_lower.length > 0;
     document.getElementById('beastOlahLegend').style.display = 'flex';
+    document.getElementById('beastOlahCiLegend').style.display = hasCi ? 'flex' : 'none';
     document.getElementById('beastOlahCpLegend').style.display = hasCp ? 'flex' : 'none';
 }
 

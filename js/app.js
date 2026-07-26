@@ -81,7 +81,7 @@ async function loadDAS(dasName) {
         showLoading(true);
         clearDAS();
 
-        // 1. Muat batas DAS (Poligon) — file lokal, cepat
+        // 1. Muat batas DAS (Poligon) – file lokal, cepat
         const response = await fetch(`geojson_data/geojson/${dasName}.geojson`);
         if (!response.ok) throw new Error('Gagal memuat batas DAS');
         const boundaryData = await response.json();
@@ -129,11 +129,11 @@ async function loadDAS(dasName) {
 
         currentDASData = { features: stations };
 
-        // 3. Render Marker dan Dropdown — tampilan langsung muncul
+        // 3. Render Marker dan Dropdown – tampilan langsung muncul
         renderStationMarkers(stations);
         populateYearDropdowns(stations);
 
-        // 4. SEMBUNYIKAN LOADER — peta sudah siap digunakan
+        // 4. SEMBUNYIKAN LOADER – peta sudah siap digunakan
         showLoading(false);
 
         // 5. Jeda sedikit agar UI responsif sebelum proses background dimulai
@@ -276,7 +276,7 @@ function renderDecadeGrid(idSuffix, startYear) {
     gridElem.innerHTML = `
         <div class="year-grid-header">
             <button type="button" class="year-nav-btn prev" data-target="${idSuffix}" title="Dekade Sebelumnya">‹</button>
-            <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+            <span class="range-text">${decadeStart} – ${decadeEnd}</span>
             <button type="button" class="year-nav-btn next" data-target="${idSuffix}" title="Dekade Berikutnya">›</button>
         </div>
         <div class="year-grid-content p-2">
@@ -443,14 +443,14 @@ async function runAnalysis(method) {
         if (methodData) {
             results.push({
                 id: id,
-                trend: methodData.trend || 'Tidak Ada Trend',
+                trend: methodData.trend || 'Tidak Ada Tren',
                 details: methodData,
                 completeness: trendData.completeness_period !== undefined ? trendData.completeness_period : 0
             });
         } else {
             results.push({
                 id: id,
-                trend: 'Tidak Ada Trend',
+                trend: 'Tidak Ada Tren',
                 message: 'Data tidak tersedia',
                 completeness: 0
             });
@@ -500,7 +500,7 @@ function showLegend(method = null) {
     legendBox.innerHTML = `
         <div class="legend-item"><span class="legend-icon" style="color:#16A34A;">▲</span><span>Tren Meningkat</span></div>
         <div class="legend-item"><span class="legend-icon" style="color:#DC2626;">▼</span><span>Tren Menurun</span></div>
-        <div class="legend-item"><span class="legend-icon neutral">—</span><span>Tidak Ada Tren</span></div>
+        <div class="legend-item"><span class="legend-icon neutral">–</span><span>Tidak Ada Tren</span></div>
         ${qualityLegend}
     `;
 

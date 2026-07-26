@@ -5,26 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>TrendHidro — Peta Trend Curah Hujan Interaktif</title>
+    <title>TrenHidro – Peta Tren Curah Hujan Interaktif</title>
     <meta name="description"
-        content="Jelajahi peta trend curah hujan interaktif dari stasiun-stasiun di wilayah sungai Indonesia. Olah data runtut waktu dengan Mann-Kendall, Sen's Slope, dan Regresi Linear.">
+        content="Jelajahi peta tren curah hujan interaktif dari stasiun-stasiun di wilayah sungai Indonesia. Olah data runtut waktu dengan Mann-Kendall, Sen's Slope, dan Regresi Linear.">
     <meta name="keywords"
-        content="hidrologi, trend curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, data hidrologi indonesia, trendhidro">
+        content="hidrologi, tren curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, data hidrologi indonesia, trenhidro">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://app.rekayasa-sipil.my.id">
-    <meta property="og:title" content="TrendHidro — Peta Trend Curah Hujan Interaktif">
+    <meta property="og:title" content="TrenHidro – Peta Tren Curah Hujan Interaktif">
     <meta property="og:description"
-        content="Jelajahi peta trend curah hujan interaktif — olah data runtut waktu dengan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
+        content="Jelajahi peta tren curah hujan interaktif – olah data runtut waktu dengan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
     <meta property="og:image" content="https://app.rekayasa-sipil.my.id/favicon.svg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://app.rekayasa-sipil.my.id">
-    <meta property="twitter:title" content="TrendHidro — Peta Trend Curah Hujan Interaktif">
+    <meta property="twitter:title" content="TrenHidro – Peta Tren Curah Hujan Interaktif">
     <meta property="twitter:description"
-        content="Jelajahi peta trend curah hujan interaktif — olah data runtut waktu dengan metode statistik.">
+        content="Jelajahi peta tren curah hujan interaktif – olah data runtut waktu dengan metode statistik.">
     <meta property="twitter:image" content="https://app.rekayasa-sipil.my.id/favicon.svg">
 
     <!-- Google Fonts -->
@@ -47,7 +47,7 @@
     <!-- SEO H1 -->
     <h1
         style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
-        Peta Trend Curah Hujan Interaktif — TrendHidro</h1>
+        Peta Tren Curah Hujan Interaktif – TrenHidro</h1>
 
     <!-- ====== LOADER LAYAR PENUH ====== -->
     <div class="loader-overlay hidden" id="fullLoader">
@@ -124,7 +124,7 @@
                         <button type="button" class="year-display" id="displayFrom">1980</button>
                         <div class="year-grid hidden" id="gridFrom"></div>
                     </div>
-                    <div class="year-sep">—</div>
+                    <div class="year-sep">–</div>
                     <div class="year-picker" id="pickerTo">
                         <button type="button" class="year-display" id="displayTo">2025</button>
                         <div class="year-grid hidden" id="gridTo"></div>
@@ -213,11 +213,11 @@
             <div class="lightbox-body" id="lightboxBody">
                 <div class="lightbox-field">
                     <span class="field-label">Lokasi</span>
-                    <span class="field-value" id="lbLocation">—</span>
+                    <span class="field-value" id="lbLocation">–</span>
                 </div>
                 <div class="lightbox-field">
-                    <span class="field-label" id="lbTrendLabel">Nilai Trend</span>
-                    <span class="field-value" id="lbTrendValue">—</span>
+                    <span class="field-label" id="lbTrendLabel">Nilai Tren</span>
+                    <span class="field-value" id="lbTrendValue">–</span>
                 </div>
                 <div class="lightbox-field">
                     <span class="field-label">Elevasi</span>
@@ -225,19 +225,19 @@
                 </div>
                 <div class="lightbox-field">
                     <span class="field-label">Koordinat</span>
-                    <span class="field-value" id="lbCoords">—</span>
+                    <span class="field-value" id="lbCoords">–</span>
                 </div>
                 <div class="lightbox-field">
                     <span class="field-label">Pengelola</span>
-                    <span class="field-value" id="lbManager">—</span>
+                    <span class="field-value" id="lbManager">–</span>
                 </div>
                 <div class="lightbox-field">
                     <span class="field-label">Rentang Data</span>
-                    <span class="field-value" id="lbRange">—</span>
+                    <span class="field-value" id="lbRange">–</span>
                 </div>
                 <div class="lightbox-field">
                     <span class="field-label">Panjang Data</span>
-                    <span class="field-value" id="lbLength">—</span>
+                    <span class="field-value" id="lbLength">–</span>
                 </div>
                 <div id="confirmSection" style="display:none; padding: 24px 16px; grid-column: 1 / -1;">
                     <div style="display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;">

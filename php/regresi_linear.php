@@ -48,7 +48,7 @@ if ($n < 3) {
     echo json_encode([
         'error' => true,
         'message' => 'Minimal 3 data diperlukan',
-        'trend' => 'Tidak Ada Trend'
+        'trend' => 'Tidak Ada Tren'
     ]);
     exit;
 }
@@ -114,7 +114,7 @@ $tCritical = getCriticalT($df, $alpha);
 $significant = abs($tStat) > $tCritical;
 
 // ====== TENTUKAN TREND ======
-$trend = 'Tidak Ada Trend';
+$trend = 'Tidak Ada Tren';
 if ($significant) {
     if ($slope > 0) $trend = 'Meningkat';
     elseif ($slope < 0) $trend = 'Menurun';

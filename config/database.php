@@ -1,7 +1,7 @@
 <?php
 /**
  * Konfigurasi Koneksi Database PostgreSQL
- * TrendHidro - Aplikasi Pemetaan Tren Hidrologi
+ * TrenHidro - Aplikasi Pemetaan Tren Hidrologi
  */
 
 // Fungsi sederhana untuk membaca file .env

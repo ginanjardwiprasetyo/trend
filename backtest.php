@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Back Test — TrendHidro</title>
+    <title>Back Test – TrenHidro</title>
     <meta name="description" content="Lihat langkah perhitungan detail metode Mann-Kendall, Sen's Slope, dan Regresi Linear untuk olahan data hidrologi.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,8 +142,8 @@
 
     <div class="bt-container">
         <div class="bt-header">
-            <h1>🧪 Back Test — Langkah Perhitungan</h1>
-            <p>Pilih stasiun dan parameter, lalu lihat setiap tahapan perhitungan dari ketiga metode olahan trend.</p>
+            <h1>🧪 Back Test – Langkah Perhitungan</h1>
+            <p>Pilih stasiun dan parameter, lalu lihat setiap tahapan perhitungan dari ketiga metode olahan tren.</p>
         </div>
 
         <div class="bt-toolbar">
@@ -167,7 +167,7 @@
                     <button type="button" class="year-display" id="displayFrom">1980</button>
                     <div class="year-grid hidden" id="gridFrom"></div>
                 </div>
-                <div class="year-sep">—</div>
+                <div class="year-sep">–</div>
                 <div class="year-picker" id="pickerTo">
                     <button type="button" class="year-display" id="displayTo">2025</button>
                     <div class="year-grid hidden" id="gridTo"></div>
@@ -278,7 +278,7 @@
             gridElem.innerHTML = `
                 <div class="year-grid-header">
                     <button type="button" class="year-nav-btn prev" data-target="${idSuffix}">‹</button>
-                    <span class="range-text">${decadeStart} — ${decadeEnd}</span>
+                    <span class="range-text">${decadeStart} – ${decadeEnd}</span>
                     <button type="button" class="year-nav-btn next" data-target="${idSuffix}">›</button>
                 </div>
                 <div class="year-grid-content p-2"><div class="decade-grid">${yearsHtml}</div></div>
@@ -466,7 +466,7 @@
                 mk.tied_groups.forEach(t => { html += `<tr><td>${t.value}</td><td>${t.count}</td><td>${t.contribution}</td></tr>`; });
                 html += '</tbody></table></div>';
             } else {
-                html += `<div class="step-info"><span class="step-info-icon">✅</span><span>Tidak ada tied group — koreksi = 0</span></div>`;
+                html += `<div class="step-info"><span class="step-info-icon">✅</span><span>Tidak ada tied group – koreksi = 0</span></div>`;
             }
             html += `<div class="step-substitution">√Var(S) = √${mk.varS} = <strong>${mk.stdS}</strong></div></div>`;
 
@@ -568,7 +568,7 @@
 
             // Result
             const trendColor = ss.trend.includes('Meningkat') ? '#16A34A' : (ss.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
-            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Sen's Slope: Trend <span style="color:${trendColor}"><strong>${ss.trend}</strong></span> — ${ss.equation}</div>`;
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Sen's Slope: Tren <span style="color:${trendColor}"><strong>${ss.trend}</strong></span> – ${ss.equation}</div>`;
             el.innerHTML = html;
         }
 
@@ -667,7 +667,7 @@
 
             // Result
             const trendColor = lr.trend.includes('Meningkat') ? '#16A34A' : (lr.trend.includes('Menurun') ? '#DC2626' : '#6B7280');
-            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Regresi Linear: Trend <span style="color:${trendColor}"><strong>${lr.trend}</strong></span> — ${lr.equation}, R² = ${lr.rSquared}</div>`;
+            html += `<div class="step-result"><span class="step-result-icon">📋</span> Kesimpulan Regresi Linear: Tren <span style="color:${trendColor}"><strong>${lr.trend}</strong></span> – ${lr.equation}, R² = ${lr.rSquared}</div>`;
             el.innerHTML = html;
         }
     </script>

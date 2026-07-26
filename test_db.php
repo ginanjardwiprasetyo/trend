@@ -1,5 +1,11 @@
 <?php
-$dsn = "pgsql:host=aws-1-ap-southeast-1.pooler.supabase.com;port=6543;dbname=postgres;sslmode=prefer;";
-$user = "postgres.watukhizpufbukhfhpcl";
-$pass = getenv('DB_PASS') ?: 'dummy'; // Wait, I need the actual password.
-// I can just require config/database.php
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_POST = json_decode('{"pos_id":37,"dataType":"tahunan","aggregation":"sum","yearFrom":1980,"yearTo":2024,"month":"all"}', true);
+// But wait, get_timeseries.php uses file_get_contents('php://input') for JSON payload!
+// So we can't just set $_POST.
+// Let's just include the db fetch function directly!
+require 'config/database.php';
+require 'php/db_fetch_timeseries.php';
+
+$res = fetchTimeseries($pdo, 37, 'tahunan', 'sum', 1980, 2024, 'all');
+echo json_encode($res);

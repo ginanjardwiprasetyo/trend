@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>TrendHidro — Platform Olah Data Runtut Waktu</title>
+    <title>TrenHidro – Platform Olah Data Runtut Waktu</title>
     <meta name="description"
-        content="TrendHidro adalah platform olah data runtut waktu interaktif. Jelajahi peta curah hujan atau olah data Anda sendiri menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
+        content="TrenHidro adalah platform olah data runtut waktu interaktif. Jelajahi peta curah hujan atau olah data Anda sendiri menggunakan metode Mann-Kendall, Sen's Slope, dan Regresi Linear.">
     <meta name="keywords"
-        content="hidrologi, tren curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, olah data, trendhidro">
+        content="hidrologi, tren curah hujan, mann-kendall, sen's slope, regresi linear, pemetaan interaktif, olah data, trenhidro">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -415,7 +415,7 @@
                 </svg>
             </div>
             <h2>Peta Interaktif</h2>
-            <p>Lihat trend curah hujan di wilayah sungai Bengawan Solo dengan peta interaktif.</p>
+            <p>Lihat tren curah hujan di wilayah sungai Bengawan Solo dengan peta interaktif.</p>
             <span class="card-cta">
                 Buka Peta
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

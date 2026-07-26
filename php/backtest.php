@@ -1,7 +1,7 @@
 <?php
 /**
  * TrendHidro - Back Test API
- * Mengembalikan perhitungan step-by-step dari setiap metode analisis tren
+ * Mengembalikan perhitungan step-by-step dari setiap metode analisis trend
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -148,7 +148,7 @@ for ($k = 0; $k < $n - 1; $k++) {
     }
 }
 
-$mkTrend = 'Tidak Ada Trend';
+$mkTrend = 'Tidak Ada Tren';
 if ($Z > $zCrit) $mkTrend = 'Meningkat (Signifikan)';
 elseif ($Z < -$zCrit) $mkTrend = 'Menurun (Signifikan)';
 elseif ($Z > 0) $mkTrend = 'Meningkat (Tidak Signifikan)';
@@ -325,14 +325,14 @@ $Qmax = $slopes[$idxUpper] ?? 0;
 
 $ssSignificant = ($Qmin > 0) || ($Qmax < 0);
 
-$ssTrend = 'Tidak Ada Trend';
+$ssTrend = 'Tidak Ada Tren';
 if ($senSlope > 0) {
     $ssTrend = 'Meningkat';
 } elseif ($senSlope < 0) {
     $ssTrend = 'Menurun';
 }
 
-if ($ssTrend !== 'Tidak Ada Trend') {
+if ($ssTrend !== 'Tidak Ada Tren') {
     $ssTrend .= $ssSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 
@@ -443,14 +443,14 @@ if ($n > 2 && $Sxx > 0) {
 
 $tSignificant = abs($tStat) > $tCritical;
 
-$lrTrend = 'Tidak Ada Trend';
+$lrTrend = 'Tidak Ada Tren';
 if ($lrSlope > 0) {
     $lrTrend = 'Meningkat';
 } elseif ($lrSlope < 0) {
     $lrTrend = 'Menurun';
 }
 
-if ($lrTrend !== 'Tidak Ada Trend') {
+if ($lrTrend !== 'Tidak Ada Tren') {
     $lrTrend .= $tSignificant ? ' (Signifikan)' : ' (Tidak Signifikan)';
 }
 

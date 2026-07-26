@@ -969,14 +969,14 @@
 					const resp = await fetch(url, { credentials: 'same-origin' });
 
 					if (!resp.ok) {
-						console.warn(`[Week ${i + 1}] HTTP ${resp.status} — skip`);
+						console.warn(`[Week ${i + 1}] HTTP ${resp.status} – skip`);
 						continue;
 					}
 
 					const data = await resp.json();
 
 					if (data.status === 'error') {
-						console.warn(`[Week ${i + 1}] server error: ${data.message} — skip`);
+						console.warn(`[Week ${i + 1}] server error: ${data.message} – skip`);
 						continue;
 					}
 
@@ -985,7 +985,7 @@
 						console.log(`[Week ${i + 1}] +${data.rows.length} rows (total: ${allRows.length})`);
 					}
 				} catch (err) {
-					console.warn(`[Week ${i + 1}] fetch error: ${err.message} — skip`);
+					console.warn(`[Week ${i + 1}] fetch error: ${err.message} – skip`);
 				}
 			}
 
@@ -1058,7 +1058,7 @@
 				}
 
 				setPct(100);
-				setStatus('complete — ' + rows.length + ' baris');
+				setStatus('complete – ' + rows.length + ' baris');
 				lastRowsForExport = rows;
 
 				setTimeout(() => {
@@ -1318,7 +1318,7 @@ const generateResponse = (incomingChatLi) => {
 									+ '&awal=' + json.meta.awal + '&akhir=' + json.meta.akhir;
 								a.target = '_blank';
 								a.className = 'copilot-csv-link';
-								a.innerHTML = '⬇ Download CSV — ' + (json.meta.nama || json.meta.id_logger);
+								a.innerHTML = '⬇ Download CSV – ' + (json.meta.nama || json.meta.id_logger);
 								contentWrap.insertBefore(a, textP);
 							}
 							continue;

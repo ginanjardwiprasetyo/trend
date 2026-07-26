@@ -7,7 +7,7 @@
             <path d="M9 10l3-3 3 3" />
             <path d="M9 14l3 3 3-3" />
         </svg>
-        <span>TrendHidro</span>
+        <span>TrenHidro</span>
     </a>
     <ul class="navbar-nav">
         <li><a href="./" id="nav-beranda">Beranda</a></li>

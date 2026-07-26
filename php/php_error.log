@@ -35,3 +35,8 @@
 [01-Jun-2026 16:13:41 Europe/Berlin] PHP Warning:  file_put_contents(/Applications/XAMPP/xamppfiles/htdocs/project01/php/cache_stations.json): Failed to open stream: Permission denied in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 125
 [01-Jun-2026 16:29:48 Europe/Berlin] PHP Warning:  file_put_contents(/Applications/XAMPP/xamppfiles/htdocs/project01/php/cache_stations.json): Failed to open stream: Permission denied in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 125
 [01-Jun-2026 16:32:14 Europe/Berlin] PHP Warning:  file_put_contents(/Applications/XAMPP/xamppfiles/htdocs/project01/php/cache_stations.json): Failed to open stream: Permission denied in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 125
+[19-Jun-2026 09:12:21 Europe/Berlin] PHP Warning:  Undefined variable $nama in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 86
+[19-Jun-2026 09:13:46 Europe/Berlin] PHP Warning:  Undefined variable $nama in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 86
+[19-Jun-2026 09:13:51 Europe/Berlin] PHP Warning:  Undefined variable $nama in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 86
+[19-Jun-2026 09:14:15 Europe/Berlin] PHP Warning:  Undefined variable $nama in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 86
+[19-Jun-2026 09:14:31 Europe/Berlin] PHP Warning:  Undefined variable $nama in /Applications/XAMPP/xamppfiles/htdocs/project01/php/get_stations.php on line 86

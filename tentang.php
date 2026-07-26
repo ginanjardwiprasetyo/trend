@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Tentang — TrendHidro</title>
+    <title>Tentang – TrenHidro</title>
     <meta name="description"
-        content="Informasi profil peneliti dan institusi di balik pengembangan aplikasi TrendHidro.">
+        content="Informasi profil peneliti dan institusi di balik pengembangan aplikasi TrenHidro.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

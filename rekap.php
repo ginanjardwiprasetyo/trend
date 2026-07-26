@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Rekapitulasi Data & Olahan Trend — TrendHidro</title>
+    <title>Rekapitulasi Data & Olahan Tren – TrenHidro</title>
     <meta name="description"
-        content="Rekapitulasi ketersediaan data curah hujan dan ringkasan olahan trend untuk laporan hidrologi.">
+        content="Rekapitulasi ketersediaan data curah hujan dan ringkasan olahan tren untuk laporan hidrologi.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -430,7 +430,7 @@
         <!-- TABS HEADER -->
         <div class="tabs-header">
             <button class="tab-btn active" onclick="switchTab('tab-ringkasan', this)">Ringkasan & Basis Data</button>
-            <button class="tab-btn" onclick="switchTab('tab-tren', this)">Olahan Trend Curah Hujan</button>
+            <button class="tab-btn" onclick="switchTab('tab-tren', this)">Olahan Tren Curah Hujan</button>
             <button class="tab-btn" onclick="switchTab('tab-deskriptif', this)">Statistik Deskriptif</button>
             <button class="tab-btn" onclick="switchTab('tab-per-stasiun', this)">Olahan Per Stasiun</button>
         </div>
@@ -543,14 +543,14 @@
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    Olahan Trend Curah Hujan
+                    Olahan Tren Curah Hujan
                 </h2>
 
                 <!-- Filter Panel for Table 4.2 -->
                 <div class="filter-panel">
                     <div class="filter-group">
                         <label class="filter-label">Kelengkapan Data</label>
-                        <select class="form-select-premium" id="trenCompleteness" onchange="handleTrenDisplayChange()">
+                        <select class="form-select-premium" id="trendCompleteness" onchange="handleTrendDisplayChange()">
                             <option value="all">Semua Stasiun Data</option>
                             <option value="gt50">Kelengkapan > 50%</option>
                             <option value="ge30">Panjang Data &ge; 30 Tahun</option>
@@ -560,15 +560,15 @@
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Pilih Data</label>
-                        <select class="form-select-premium" id="trenDtType" onchange="toggleTrenMonth()">
+                        <select class="form-select-premium" id="trendDtType" onchange="toggleTrendMonth()">
                             <option value="bulanan">Bulanan</option>
                             <option value="tahunan" selected>Tahunan</option>
                             <option value="musiman">Musiman</option>
                         </select>
                     </div>
-                    <div class="filter-group" id="groupTrenMonth" style="display: none;">
-                        <label class="filter-label" id="labelTrenMonth">Pilih Bulan</label>
-                        <select class="form-select-premium" id="trenMonth" onchange="applyTrenFilters()">
+                    <div class="filter-group" id="groupTrendMonth" style="display: none;">
+                        <label class="filter-label" id="labelTrendMonth">Pilih Bulan</label>
+                        <select class="form-select-premium" id="trendMonth" onchange="applyTrendFilters()">
                             <option value="all">Semua Bulan</option>
                             <option value="1">Januari</option>
                             <option value="2">Februari</option>
@@ -586,31 +586,31 @@
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Tampilan Data</label>
-                        <select class="form-select-premium" id="trenDisplayStyle" onchange="handleTrenDisplayChange()">
+                        <select class="form-select-premium" id="trendDisplayStyle" onchange="handleTrendDisplayChange()">
                             <option value="sign">Tanda (+/−/*)</option>
                             <option value="icon">Ikon Panah (▲/▼)</option>
                             <option value="iconOnly">Ikon Saja (Export)</option>
                         </select>
                         <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:6px; font-size:0.82rem; color:#475569;">
-                            <input type="checkbox" id="trenShowSig" checked onchange="renderTrendTable()" style="accent-color:#2563EB; width:15px; height:15px;">
+                            <input type="checkbox" id="trendShowSig" checked onchange="renderTrendTable()" style="accent-color:#2563EB; width:15px; height:15px;">
                             Tampilkan tanda * (signifikan)
                         </label>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Tahun Mulai</label>
-                        <select class="form-select-premium" id="trenYearFrom" onchange="applyTrenFilters()">
+                        <select class="form-select-premium" id="trendYearFrom" onchange="applyTrendFilters()">
                             <!-- JS populated -->
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Tahun Selesai</label>
-                        <select class="form-select-premium" id="trenYearTo" onchange="applyTrenFilters()">
+                        <select class="form-select-premium" id="trendYearTo" onchange="applyTrendFilters()">
                             <!-- JS populated -->
                         </select>
                     </div>
                     <div class="filter-group" style="justify-content: flex-end; align-items: flex-end;">
                         <button class="export-btn"
-                            onclick="exportToExcel('tren-table', 'Tabel_4_2_Olahan_Trend_Curah_Hujan')"
+                            onclick="exportToExcel('trend-table', 'Tabel_4_2_Olahan_Tren_Curah_Hujan')"
                             style="width: 100%;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -622,7 +622,7 @@
                 </div>
 
                 <div class="table-wrap">
-                    <table class="premium-table" id="tren-table">
+                    <table class="premium-table" id="trend-table">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -634,7 +634,7 @@
                                 <th id="th-lr">t</th>
                             </tr>
                         </thead>
-                        <tbody id="trenTableBody">
+                        <tbody id="trendTableBody">
                             <tr>
                                 <td colspan="8" class="table-loading">
                                     <div class="spinner-rekap"></div>
@@ -646,7 +646,7 @@
                 </div>
 
                 <!-- Legenda dinamis di bawah tabel -->
-                <div id="trenLegendContainer" style="margin-top: 16px;"></div>
+                <div id="trendLegendContainer" style="margin-top: 16px;"></div>
             </div>
         </div>
 
@@ -657,7 +657,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                     </svg>
-                    Olahan Trend Per Stasiun — Semua Tipe Data
+                    Olahan Tren Per Stasiun – Semua Tipe Data
                 </h2>
 
                 <div class="filter-panel">
@@ -695,7 +695,7 @@
                     </div>
                     <div class="filter-group" style="justify-content: flex-end; align-items: flex-end;">
                         <button class="export-btn"
-                            onclick="exportToExcel('per-stasiun-table', 'Tabel_Per_Stasiun_Olahan_Trend')"
+                            onclick="exportToExcel('per-stasiun-table', 'Tabel_Per_Stasiun_Olahan_Tren')"
                             style="width: 100%;">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
@@ -808,7 +808,7 @@
         // Years populated dynamically
         let minYearGlobal = 1980;
         let maxYearGlobal = 2025;
-        let activeTrenResults = null;
+        let activeTrendResults = null;
         let activePerStasiunResults = null;
         let perStasiunTypes = ['Kumulatif Bulanan', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'JFM', 'AMJ', 'JAS', 'OND', 'Tahunan'];
 
@@ -820,7 +820,7 @@
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
 
-            if (tabId === 'tab-tren' && !activeTrenResults) {
+            if (tabId === 'tab-tren' && !activeTrendResults) {
                 loadTrendAnalysis();
             }
         }
@@ -857,8 +857,8 @@
 
         // Populate dynamic years filter dropdowns
         function populateYearSelects() {
-            const fromSelect = document.getElementById('trenYearFrom');
-            const toSelect = document.getElementById('trenYearTo');
+            const fromSelect = document.getElementById('trendYearFrom');
+            const toSelect = document.getElementById('trendYearTo');
 
             fromSelect.innerHTML = '';
             toSelect.innerHTML = '';
@@ -985,8 +985,8 @@
                 const tr = document.createElement('tr');
                 const rowNo = start + idx + 1;
 
-                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart} — ${st.yearEnd}` : '—';
-                const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '—';
+                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart} – ${st.yearEnd}` : '–';
+                const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '–';
 
                 const pct = st.completeness || 0;
                 const pctDisplay = pct.toFixed(2).replace('.', ',') + '%';
@@ -1062,10 +1062,10 @@
 
                 const tr = document.createElement('tr');
 
-                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart} — ${st.yearEnd}` : '—';
-                const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '—';
-                const maxRainDisplay = st.maxRain !== null ? `${st.maxRain.toFixed(1).replace('.', ',')} mm` : '—';
-                const avgAnnualDisplay = st.avgAnnualRain !== null ? `${st.avgAnnualRain.toFixed(1).replace('.', ',')} mm/tahun` : '—';
+                const yearRange = (st.yearStart && st.yearEnd) ? `${st.yearStart} – ${st.yearEnd}` : '–';
+                const lengthDisplay = (st.yearStart && st.yearEnd) ? `${st.yearEnd - st.yearStart + 1} Tahun` : '–';
+                const maxRainDisplay = st.maxRain !== null ? `${st.maxRain.toFixed(1).replace('.', ',')} mm` : '–';
+                const avgAnnualDisplay = st.avgAnnualRain !== null ? `${st.avgAnnualRain.toFixed(1).replace('.', ',')} mm/tahun` : '–';
 
                 tr.innerHTML = `
                     <td style="color:#64748B; font-weight:600;">${counter++}</td>
@@ -1086,10 +1086,10 @@
         }
 
         // Toggle month/season selects based on dataType (same as olah-data.html)
-        function toggleTrenMonth() {
-            const dtType = document.getElementById('trenDtType').value;
-            const group = document.getElementById('groupTrenMonth');
-            const mo = document.getElementById('trenMonth');
+        function toggleTrendMonth() {
+            const dtType = document.getElementById('trendDtType').value;
+            const group = document.getElementById('groupTrendMonth');
+            const mo = document.getElementById('trendMonth');
 
             if (dtType === 'tahunan') {
                 group.style.display = 'none';
@@ -1119,18 +1119,18 @@
                     <option value="12">Desember</option>
                 `;
             }
-            applyTrenFilters();
+            applyTrendFilters();
         }
 
         // Load or Re-load Trend Analysis with filters (Tabel 4.2)
         async function loadTrendAnalysis() {
-            const tbody = document.getElementById('trenTableBody');
+            const tbody = document.getElementById('trendTableBody');
             tbody.innerHTML = '<tr><td colspan="7" class="table-loading"><div class="spinner-rekap"></div>Melakukan analisis komputasi statistik runtut waktu...</td></tr>';
 
-            const yrFrom = parseInt(document.getElementById('trenYearFrom').value) || minYearGlobal;
-            const yrTo = parseInt(document.getElementById('trenYearTo').value) || maxYearGlobal;
-            const dtType = document.getElementById('trenDtType') ? document.getElementById('trenDtType').value : 'tahunan';
-            let mo = document.getElementById('trenMonth') ? document.getElementById('trenMonth').value : 'all';
+            const yrFrom = parseInt(document.getElementById('trendYearFrom').value) || minYearGlobal;
+            const yrTo = parseInt(document.getElementById('trendYearTo').value) || maxYearGlobal;
+            const dtType = document.getElementById('trendDtType') ? document.getElementById('trendDtType').value : 'tahunan';
+            let mo = document.getElementById('trendMonth') ? document.getElementById('trendMonth').value : 'all';
             if (dtType === 'tahunan') mo = 'all';
 
             try {
@@ -1149,19 +1149,19 @@
                 const resData = await response.json();
                 if (!resData.success) throw new Error(resData.message);
 
-                activeTrenResults = resData.results;
+                activeTrendResults = resData.results;
                 renderTrendTable();
 
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="7" style="color:red; padding:20px;">Gagal memuat olahan trend curah hujan. Silakan sesuaikan filter atau segarkan halaman.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="color:red; padding:20px;">Gagal memuat olahan tren curah hujan. Silakan sesuaikan filter atau segarkan halaman.</td></tr>';
             }
         }
 
         // Helper: get slope unit label based on aggregation (always kumulatif) and dataType
         function getSlopeUnit() {
-            const dtType = document.getElementById('trenDtType') ? document.getElementById('trenDtType').value : 'tahunan';
-            const mo = document.getElementById('trenMonth') ? document.getElementById('trenMonth').value : 'all';
+            const dtType = document.getElementById('trendDtType') ? document.getElementById('trendDtType').value : 'tahunan';
+            const mo = document.getElementById('trendMonth') ? document.getElementById('trendMonth').value : 'all';
 
             if (dtType === 'tahunan') {
                 return '(mm/th)';
@@ -1179,13 +1179,13 @@
 
         // Helper: format numeric value with sign/icon based on display style
         function formatTrendVal(val, trendStr, displayStyle, isMk) {
-            if (val === undefined || val === null) return '<span style="color:#94A3B8;">—</span>';
+            if (val === undefined || val === null) return '<span style="color:#94A3B8;">–</span>';
             const num = parseFloat(val);
             if (isNaN(num)) return val;
             const formatted = Math.abs(num).toFixed(3).replace('.', ',');
             const trend = (trendStr || '').trim();
             const isSig = isMk && (trend === 'Meningkat' || trend === 'Menurun');
-            const showSig = document.getElementById('trenShowSig') ? document.getElementById('trenShowSig').checked : true;
+            const showSig = document.getElementById('trendShowSig') ? document.getElementById('trendShowSig').checked : true;
             if (displayStyle === 'iconOnly') {
                 if (!isSig) return '\u2013';
                 return num > 0 ? '▲' : num < 0 ? '▼' : '\u2013';
@@ -1205,20 +1205,20 @@
 
         // Filter and Render Trend Table (Tabel 4.2)
         function renderTrendTable() {
-            const tbody = document.getElementById('trenTableBody');
+            const tbody = document.getElementById('trendTableBody');
             tbody.innerHTML = '';
 
-            const completenessFilter = document.getElementById('trenCompleteness').value;
-            const displayStyle = document.getElementById('trenDisplayStyle') ? document.getElementById('trenDisplayStyle').value : 'sign';
+            const completenessFilter = document.getElementById('trendCompleteness').value;
+            const displayStyle = document.getElementById('trendDisplayStyle') ? document.getElementById('trendDisplayStyle').value : 'sign';
             let counter = 1;
 
             stationsData.forEach(st => {
-                const trenResult = activeTrenResults[st.id];
-                if (!trenResult) return;
+                const trendResult = activeTrendResults[st.id];
+                if (!trendResult) return;
 
-                const mk = trenResult['mann-kendall'];
-                const ss = trenResult['sens-slope'];
-                const lr = trenResult['regresi-linear'];
+                const mk = trendResult['mann-kendall'];
+                const ss = trendResult['sens-slope'];
+                const lr = trendResult['regresi-linear'];
 
                 if (mk.trend === 'too_large') return;
 
@@ -1229,8 +1229,8 @@
                 if (completenessFilter === 'ge16' && len < 16) return;
                 if (completenessFilter === 'lt16' && (len >= 16 || len === 0)) return;
 
-                const smk = trenResult['seasonal-mann-kendall'] || {};
-                const sss = trenResult['seasonal-sens-slope'] || {};
+                const smk = trendResult['seasonal-mann-kendall'] || {};
+                const sss = trendResult['seasonal-sens-slope'] || {};
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1249,14 +1249,14 @@
                 tbody.innerHTML = '<tr><td colspan="7" style="padding:20px; color:#6B7280;">Tidak ada stasiun yang memenuhi filter kelengkapan data periode ini.</td></tr>';
             }
 
-            updateTrenLegend();
+            updateTrendLegend();
         }
 
         // Update legend below table
-        function updateTrenLegend() {
-            const container = document.getElementById('trenLegendContainer');
+        function updateTrendLegend() {
+            const container = document.getElementById('trendLegendContainer');
             if (!container) return;
-            const displayStyle = document.getElementById('trenDisplayStyle') ? document.getElementById('trenDisplayStyle').value : 'sign';
+            const displayStyle = document.getElementById('trendDisplayStyle') ? document.getElementById('trendDisplayStyle').value : 'sign';
             if (displayStyle === 'sign') {
                 container.innerHTML = `
                     <div style="display:flex; flex-wrap:wrap; gap:12px; padding:14px 18px; background:linear-gradient(135deg,#F8FAFC,#EFF6FF); border:1px solid #E2E8F0; border-radius:10px; font-size:0.84rem; color:#475569; align-items:center;">
@@ -1418,7 +1418,7 @@
 
         async function loadPerStasiunAnalysis() {
             const tbody = document.getElementById('perStasiunTableBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="table-loading"><div class="spinner-rekap"></div>Menghitung trend untuk seluruh tipe data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="table-loading"><div class="spinner-rekap"></div>Menghitung tren untuk seluruh tipe data...</td></tr>';
 
             const yrFrom = parseInt(document.getElementById('psYearFrom').value) || minYearGlobal;
             const yrTo = parseInt(document.getElementById('psYearTo').value) || maxYearGlobal;
@@ -1492,7 +1492,7 @@
         function updatePerStasiunLegend() {
             const container = document.getElementById('psLegendContainer');
             if (!container) return;
-            container.innerHTML = document.getElementById('trenLegendContainer').innerHTML;
+            container.innerHTML = document.getElementById('trendLegendContainer').innerHTML;
         }
 
         function handlePerStasiunDisplayChange() {
@@ -1523,15 +1523,15 @@
             }
         }
 
-        // Handle display-only filter changes (completeness, display style) — no re-fetch needed
-        function handleTrenDisplayChange() {
-            if (activeTrenResults) renderTrendTable();
+        // Handle display-only filter changes (completeness, display style) – no re-fetch needed
+        function handleTrendDisplayChange() {
+            if (activeTrendResults) renderTrendTable();
         }
 
-        // Apply Tren Filters (period or aggregation changed — requires re-fetch)
-        function applyTrenFilters() {
-            const yrFrom = parseInt(document.getElementById('trenYearFrom').value);
-            const yrTo = parseInt(document.getElementById('trenYearTo').value);
+        // Apply Trend Filters (period or aggregation changed – requires re-fetch)
+        function applyTrendFilters() {
+            const yrFrom = parseInt(document.getElementById('trendYearFrom').value);
+            const yrTo = parseInt(document.getElementById('trendYearTo').value);
 
             if (yrFrom > yrTo) {
                 alert("Tahun Mulai tidak boleh lebih besar dari Tahun Selesai!");
@@ -1551,7 +1551,7 @@
             const table = document.getElementById(tableId);
             if (!table) return;
 
-            const showSig = (tableId === 'tren-table' || tableId === 'per-stasiun-table') && document.getElementById('trenShowSig') && document.getElementById('trenShowSig').checked;
+            const showSig = (tableId === 'trend-table' || tableId === 'per-stasiun-table') && document.getElementById('trendShowSig') && document.getElementById('trendShowSig').checked;
 
             const clone = table.cloneNode(true);
             const rows = clone.getElementsByTagName('tr');

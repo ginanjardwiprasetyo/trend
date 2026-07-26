@@ -118,7 +118,7 @@ try {
 // Fungsi-fungsi Hitung
 function calcMannKendall($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'S' => 0, 'Z' => 0, 'pValue' => 1];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'S' => 0, 'Z' => 0, 'pValue' => 1];
     
     $values = array_column($data, 'value');
     $S = 0;
@@ -146,7 +146,7 @@ function calcMannKendall($data) {
     
     $pValue = 2 * (1 - normalCDF(abs($Z)));
     
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     $significant = false;
     $zCrit = getCriticalZ(0.05);
     if ($Z > $zCrit) {
@@ -169,7 +169,7 @@ function calcMannKendall($data) {
 
 function calcSensSlope($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0];
     
     $slopes = [];
     for ($i = 0; $i < $n - 1; $i++) {
@@ -181,7 +181,7 @@ function calcSensSlope($data) {
         }
     }
     
-    if (empty($slopes)) return ['trend' => 'Tidak Ada Trend', 'slope' => 0];
+    if (empty($slopes)) return ['trend' => 'Tidak Ada Tren', 'slope' => 0];
     
     sort($slopes);
     $count = count($slopes);
@@ -211,7 +211,7 @@ function calcSensSlope($data) {
     // Signifikan jika nol TIDAK berada di dalam rentang (Qmin, Qmax)
     $significant = ($Qmin > 0) || ($Qmax < 0);
     
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     if ($significant) {
         if ($medianSlope > 0) $trend = 'Meningkat';
         elseif ($medianSlope < 0) $trend = 'Menurun';
@@ -228,7 +228,7 @@ function calcSensSlope($data) {
 
 function calcLinearRegression($data) {
     $n = count($data);
-    if ($n < 3) return ['trend' => 'Tidak Ada Trend', 'slope' => 0, 'rSquared' => 0];
+    if ($n < 3) return ['trend' => 'Tidak Ada Tren', 'slope' => 0, 'rSquared' => 0];
     
     $x = range(0, $n - 1);
     $y = array_column($data, 'value');
@@ -276,7 +276,7 @@ function calcLinearRegression($data) {
         $significant = abs($tStat) > $tCritical;
     }
     
-    $trend = 'Tidak Ada Trend';
+    $trend = 'Tidak Ada Tren';
     if ($significant) {
         if ($slope > 0) $trend = 'Meningkat';
         elseif ($slope < 0) $trend = 'Menurun';
@@ -349,7 +349,7 @@ foreach ($stationsData as $pos_id => $data) {
 
                 $zCrit = getCriticalZ(0.05);
                 $smkSig = abs($smk['Z']) > $zCrit;
-                $smkTrend = 'Tidak Ada Trend';
+                $smkTrend = 'Tidak Ada Tren';
                 if ($smk['Z'] > $zCrit) $smkTrend = 'Meningkat';
                 elseif ($smk['Z'] < -$zCrit) $smkTrend = 'Menurun';
 
@@ -364,7 +364,7 @@ foreach ($stationsData as $pos_id => $data) {
 
                 // Trend berdasarkan signifikansi Qmin/Qmax (sesuai alur detail.php)
                 $sssSig = $sss['significant'] ?? false;
-                $sssTrend = 'Tidak Ada Trend';
+                $sssTrend = 'Tidak Ada Tren';
                 if ($sssSig) {
                     if ($sss['slope'] > 0) $sssTrend = 'Meningkat';
                     elseif ($sss['slope'] < 0) $sssTrend = 'Menurun';

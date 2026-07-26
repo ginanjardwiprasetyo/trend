@@ -1,6 +1,6 @@
 /**
  * TrendHidro - markers.js
- * Render marker stasiun dan perbarui ikon panah tren
+ * Render marker stasiun dan perbarui ikon panah trend
  */
 
 // ====== TOGGLE LABEL NAMA POS ======
@@ -55,7 +55,7 @@ function createTrendIcon(trend, completeness = 1.0) {
         symbol = '▼';
     } else {
         color = '#6B7280';
-        symbol = '—';
+        symbol = '–';
     }
 
     // Indikator peringatan jika data < 16 tahun

@@ -1,6 +1,6 @@
 <?php
 /**
- * DpuScraper — Scraper untuk situs DPUPESDM monitoring4system.com
+ * DpuScraper – Scraper untuk situs DPUPESDM monitoring4system.com
  * 
  * Menangani:
  *  - Login sebagai tamu
@@ -19,10 +19,10 @@ class DpuScraper
     private string $cookieFile;
     private bool $loggedIn = false;
 
-    /** @var array Cached metadata dari /analisa — keyed by id_logger */
+    /** @var array Cached metadata dari /analisa – keyed by id_logger */
     private array $stationMeta = [];
 
-    /** @var array Cached station list dari /datapos — [['id_logger'=>..., 'nama_pos'=>..., 'type'=>...], ...] */
+    /** @var array Cached station list dari /datapos – [['id_logger'=>..., 'nama_pos'=>..., 'type'=>...], ...] */
     private array $stationList = [];
 
     public function __construct(?string $cookieFile = null)
