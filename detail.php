@@ -1876,6 +1876,8 @@ if (empty($stationId)) {
         async function runBeastAnalysis() {
             if (!stationMeta) return;
 
+            setCardLoading('beastLoaderOverlay', true);
+
             const beastParams = mapToolbarToBeast();
             const { metode, bulan, musim } = beastParams;
             const yFrom = parseInt(document.getElementById('yFrom').value);
