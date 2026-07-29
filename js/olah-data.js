@@ -252,7 +252,7 @@ function parseCSV(file) {
         });
 
         if (rawData.length === 0) {
-            alert('Tidak ada data valid yang berhasil di-parse dari file CSV.');
+            alert('Data tidak berhasil dibaca, periksa kembali format dan isi data.');
             return;
         }
 
