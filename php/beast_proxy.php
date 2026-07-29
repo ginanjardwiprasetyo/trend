@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 ini_set('max_execution_time', 120);
 ini_set('default_socket_timeout', 90);
 
-$BEAST_API_BASE = 'https://beast-stl.onrender.com/gradio_api/api';
+$BEAST_API_BASE = 'https://beast-stl.rekayasa-sipil.my.id/gradio_api/api';
 
 $input = json_decode(file_get_contents('php://input'), true);
 
